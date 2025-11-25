@@ -8,5 +8,5 @@ venv/
 .git
 .gitignore
 .github
-Dockerfile
+
 README.md
