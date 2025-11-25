@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: boardgame-system
+    env: docker
+    plan: free
+    branch: master
+    envVars:
+      - key: ADMIN_PASSWORD
+        value: admin123

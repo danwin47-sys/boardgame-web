@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>瑞昱桌遊社 - 管理者系統</title>
+    <!-- 引入 CSS 樣式表 -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 登入介面樣式 */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-box h2 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        .login-box p {
+            color: #718096;
+            margin-bottom: 30px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 14px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: all 0.2s ease;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .login-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-error {
+            color: #e53e3e;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .main-content {
+            display: none;
+        }
+
+        .main-content.unlocked {
+            display: block;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .logout-btn:hover {
+            background: #c53030;
+        }
+    </style>
+</head>
+
+<body class="admin-page">
+    <!-- 登入介面 -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-box">
+            <h2>🔐 管理者驗證</h2>
+            <p>請輸入通行密碼以繼續</p>
+            <input type="password" id="passwordInput" class="login-input" placeholder="請輸入密碼" autofocus>
+            <button onclick="checkPassword()" class="login-btn">進入管理系統</button>
+            <div id="loginError" class="login-error">密碼錯誤，請重試</div>
+            <div style="margin-top: 20px;">
+                <a href="index.html" style="color: #667eea; text-decoration: none;">← 返回首頁</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要內容 -->
+    <div id="mainContent" class="main-content">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>瑞昱桌遊社 - 管理者系統</h1>
+            <div>
+                <a href="index.html" class="btn"
+                    style="padding: 8px 16px; font-size: 14px; background: #718096; color: white;">回首頁</a>
+                <button onclick="logout()" class="logout-btn">登出</button>
+            </div>
+        </div>
+
+        <!-- 統計資訊 -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-value" id="totalCount">0</div>
+                <div class="stat-label">總數</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="availableCount">0</div>
+                <div class="stat-label">在庫</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="borrowedCount">0</div>
+                <div class="stat-label">借出</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="unstockedCount">0</div>
+                <div class="stat-label">未入庫</div>
+            </div>
+        </div>
+
+        <!-- 資訊列 -->
+        <div class="info-bar">
+            <span id="resultCount">顯示 0 / 總共 0 款桌遊</span>
+            <span id="lastUpdateTime">最後更新：--:--</span>
+        </div>
+
+        <!-- 搜尋和篩選 -->
+        <div class="search-filter-container">
+            <input type="text" id="searchBox" class="search" placeholder="搜尋名稱、人員、分機、狀態...">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">全部</button>
+                <button class="filter-btn" data-filter="借出">借出</button>
+                <button class="player-btn" data-players="1">1人</button>
+                <button class="player-btn" data-players="2">2人</button>
+                <button class="player-btn" data-players="3">3人</button>
+                <button class="player-btn" data-players="4">4人</button>
+                <button class="player-btn" data-players="5">5人</button>
+                <button class="player-btn" data-players="6">6人</button>
+                <button class="player-btn" data-players="7">7人</button>
+                <button class="player-btn" data-players="8">8人</button>
+                <button class="player-btn" data-players="9">9人</button>
+                <button class="player-btn" data-players="10+">10人以上</button>
+                <button class="clear-btn" id="clearFiltersBtn">清除篩選</button>
+            </div>
+        </div>
+
+        <table id="gameTable">
+            <thead>
+                <tr>
+                    <!-- Admin 頁面有 Checkbox -->
+                    <th><input type="checkbox" id="selectAll"></th>
+                    <th data-col="name">桌遊名稱</th>
+                    <th data-col="status">狀態</th>
+                    <th data-col="borrower">借閱人 / 目前持有者</th>
+                    <th data-col="borrower_id">工號</th>
+                    <th data-col="custodian">保管人</th>
+                    <th data-col="mdate">修改日期</th>
+                    <th data-col="location">位置</th>
+                    <th data-col="diff">難度</th>
+                    <th data-col="players">遊玩人數</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <!-- Admin 頁面有操作按鈕 -->
+        <div class="action-buttons">
+            <a href="#" class="btn admin" id="batchBorrowBtn">批次借出</a>
+            <a href="#" class="btn admin" id="batchReturnBtn">批次歸還</a>
+        </div>
+    </div>
+
+    <!-- Toast 通知容器 -->
+    <div id="toast" class="toast"></div>
+
+    <!-- 密碼驗證腳本 -->
+    <script>
+        // 簡單的密碼（實際使用時應該更安全）
+        const ADMIN_PASSWORD = '1234';
+
+        // 檢查是否已登入
+        function checkAuth() {
+            const isAuthenticated = sessionStorage.getItem('adminAuth') === 'true';
+            if (isAuthenticated) {
+                showMainContent();
+            }
+        }
+
+        // 檢查密碼
+        function checkPassword() {
+            const input = document.getElementById('passwordInput');
+            const error = document.getElementById('loginError');
+
+            if (input.value === ADMIN_PASSWORD) {
+                sessionStorage.setItem('adminAuth', 'true');
+                showMainContent();
+            } else {
+                error.style.display = 'block';
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        // 顯示主要內容
+        function showMainContent() {
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('mainContent').classList.add('unlocked');
+        }
+
+        // 登出
+        function logout() {
+            sessionStorage.removeItem('adminAuth');
+            location.reload();
+        }
+
+        // Enter 鍵登入
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+
+            const passwordInput = document.getElementById('passwordInput');
+            if (passwordInput) {
+                passwordInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        checkPassword();
+                    }
+                });
+            }
+        });
+    </script>
+
+    <!-- 引入 JavaScript 邏輯 -->
+    <script src="script.js"></script>
+</body>
+
+</html>
