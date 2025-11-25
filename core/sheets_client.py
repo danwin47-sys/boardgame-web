@@ -161,3 +161,55 @@ class SheetsClient:
             'range': rowcol_to_a1(row, col_idx + 1),
             'values': [[value]]
         }
+    
+    def update_game_bgg_id(self, game_name: str, bgg_id: Optional[int]) -> bool:
+        """
+        更新指定桌遊的 BGG ID
+        
+        Args:
+            game_name: 桌遊名稱
+            bgg_id: BGG 遊戲 ID (None 表示取消連結)
+            
+        Returns:
+            bool: 是否更新成功
+        """
+        if not self.valid:
+            return False
+            
+        try:
+            ws = self.get_games_worksheet()
+            all_records = ws.get_all_records()
+            
+            # 找到對應的桌遊
+            for idx, game in enumerate(all_records):
+                if game.get('桌遊名稱') == game_name:
+                    # 找到 bgg_id 欄位的索引
+                    headers = ws.row_values(1)
+                    
+                    # 如果 bgg_id 欄位不存在，需要先新增
+                    if 'bgg_id' not in headers:
+                        # 在最後一欄新增 bgg_id
+                        col_idx = len(headers)
+                        ws.update_cell(1, col_idx + 1, 'bgg_id')
+                        print(f"[Info] 已新增 bgg_id 欄位到 Google Sheets")
+                    else:
+                        col_idx = headers.index('bgg_id')
+                    
+                    # 更新該桌遊的 bgg_id (idx + 2 因為：0-based -> 1-based，且跳過 header row)
+                    row_num = idx + 2
+                    value = bgg_id if bgg_id is not None else ""
+                    ws.update_cell(row_num, col_idx + 1, value)
+                    
+                    # 使快取失效
+                    self.invalidate_games_cache()
+                    
+                    print(f"[Info] 已更新 '{game_name}' 的 BGG ID 為: {bgg_id}")
+                    return True
+            
+            print(f"[Warning] 找不到桌遊: {game_name}")
+            return False
+            
+        except Exception as e:
+            print(f"[Error] 更新 BGG ID 失敗: {e}")
+            return False
+

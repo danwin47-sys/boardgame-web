@@ -84,9 +84,14 @@ function renderTable(games) {
         const statusText = game.status === '借出' ? '借出' : '在庫';
         const statusClass = game.status === '借出' ? 'status-borrowed' : 'status-available';
 
+        // BGG 連結圖示
+        const bggIcon = game.bgg_id
+            ? `<span class="bgg-linked" title="已連結到 BGG (ID: ${game.bgg_id})" onclick="viewBGGGameDetails(${game.bgg_id})">🔗</span>`
+            : `<span class="bgg-not-linked" title="連結到 BGG" onclick="openBGGLinkModal('${game.name}')">➕</span>`;
+
         tr.innerHTML = `
             ${checkboxHtml}
-            <td>${game.name}</td>
+            <td>${game.name} ${bggIcon}</td>
             <td><span class="status-badge ${statusClass}"><span class="status-dot"></span>${statusText}</span></td>
             <td>${borrowerDisplay}</td>
             <td>${game.borrower_id || ''}</td>
@@ -404,3 +409,101 @@ document.addEventListener('DOMContentLoaded', () => {
     // 定期更新 (30分鐘)
     setInterval(loadGames, 1800000);
 });
+
+// ============ BGG 連結功能 ============
+
+function openBGGLinkModal(gameName) {
+    // 建立 Modal HTML
+    const modal = document.createElement('div');
+    modal.className = 'bgg-modal';
+    modal.id = 'bggLinkModal';
+    modal.innerHTML = `
+        <div class="bgg-modal-content">
+            <span class="bgg-modal-close" onclick="closeBGGLinkModal()">&times;</span>
+            <h2>連結「${gameName}」到 BGG</h2>
+            <div class="bgg-link-search">
+                <p>正在搜尋 BoardGameGeek...</p>
+                <div id="bggLinkResults"></div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // 自動搜尋
+    searchAndLinkBGG(gameName);
+}
+
+function closeBGGLinkModal() {
+    const modal = document.getElementById('bggLinkModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+async function searchAndLinkBGG(gameName) {
+    try {
+        const response = await fetch(`/api/bgg/games/link/search/${encodeURIComponent(gameName)}`);
+        const data = await response.json();
+
+        if (data.success && data.results && data.results.length > 0) {
+            displayBGGLinkResults(gameName, data.results);
+        } else {
+            document.getElementById('bggLinkResults').innerHTML =
+                '<p class="no-results">找不到相關的 BGG 桌遊。請確認名稱是否正確。</p>';
+        }
+    } catch (error) {
+        console.error('BGG search error:', error);
+        document.getElementById('bggLinkResults').innerHTML =
+            '<p class="error">搜尋時發生錯誤，請稍後再試。</p>';
+    }
+}
+
+function displayBGGLinkResults(gameName, results) {
+    const resultsDiv = document.getElementById('bggLinkResults');
+    resultsDiv.innerHTML = '<h3>選擇要連結的桌遊：</h3>';
+
+    results.forEach(game => {
+        const card = document.createElement('div');
+        card.className = 'bgg-link-card';
+        card.innerHTML = `
+            <div class="bgg-link-info">
+                <h4>${game.name}</h4>
+                <p>年份: ${game.year || 'N/A'} | ID: ${game.id}</p>
+            </div>
+            <button class="btn small primary" onclick="linkGameToBGG('${gameName}', ${game.id}, '${game.name}')">
+                選擇此遊戲
+            </button>
+        `;
+        resultsDiv.appendChild(card);
+    });
+}
+
+async function linkGameToBGG(gameName, bggId, bggName) {
+    if (!confirm(`確定要將「${gameName}」連結到 BGG 的「${bggName}」(ID: ${bggId}) 嗎？`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/bgg/games/link/${encodeURIComponent(gameName)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bgg_id: bggId })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('✅ 連結成功！');
+            closeBGGLinkModal();
+            loadGames(); // 重新載入遊戲列表
+        } else {
+            showToast(data.error || '連結失敗', 'error');
+        }
+    } catch (error) {
+        console.error('Link error:', error);
+        showToast('連結時發生錯誤', 'error');
+    }
+}
+
+// viewBGGGameDetails 已在 bgg.js 中定義，這裡不需要重複

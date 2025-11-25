@@ -5,6 +5,7 @@
 """
 import time
 from typing import Any, Optional
+from functools import wraps
 
 
 class SimpleCache:
@@ -59,3 +60,52 @@ class SimpleCache:
             bool: 快取是否仍在有效期內
         """
         return self._data is not None and (time.time() - self._timestamp < self.ttl)
+
+
+# 全局快取字典用於裝飾器
+_decorator_caches = {}
+
+
+def cache_with_timeout(seconds: int):
+    """
+    函式快取裝飾器，使用 TTL 機制
+    
+    Args:
+        seconds: 快取過期時間（秒）
+        
+    Returns:
+        裝飾器函式
+    """
+    def decorator(func):
+        cache_key = f"{func.__module__}.{func.__qualname__}"
+        
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # 建立快取鍵（包含實例 hash 以區分不同實例）
+            if args and hasattr(args[0], '__class__'):
+                instance_key = f"{cache_key}_{id(args[0])}"
+            else:
+                instance_key = cache_key
+            
+            # 加入參數到快取鍵
+            params_key = str(args[1:]) + str(sorted(kwargs.items()))
+            full_key = f"{instance_key}_{params_key}"
+            
+            # 檢查快取
+            if full_key not in _decorator_caches:
+                _decorator_caches[full_key] = SimpleCache(seconds)
+            
+            cache = _decorator_caches[full_key]
+            cached_result = cache.get()
+            
+            if cached_result is not None:
+                return cached_result
+            
+            # 執行函式並快取結果
+            result = func(*args, **kwargs)
+            cache.set(result)
+            return result
+        
+        return wrapper
+    return decorator
+
