@@ -20,6 +20,8 @@ class Config:
     HOST = os.environ.get("HOST", "0.0.0.0")
     
     # ===== BGG API 設定 =====
+    # BGG_API_TOKEN: Bearer Token for BGG XML API v2 authentication
+    BGG_API_TOKEN = os.environ.get("BGG_API_TOKEN", "")
     # DEMO_MODE: True = 使用演示數據, False = 使用真實 BGG API
     DEMO_MODE = os.environ.get("DEMO_MODE", "True").lower() in ('true', '1', 'yes')
     BGG_TIMEOUT = int(os.environ.get("BGG_TIMEOUT", 15))

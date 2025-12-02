@@ -156,7 +156,7 @@ def link_game(game_name):
             mgr = BoardGameManager()
         
         all_games = mgr.load_data()
-        all_game_names = [g.get('桌遊名稱', '') for g in all_games]
+        all_game_names = [g.get('name', '') for g in all_games]
         logger.debug(f"Available games: {all_game_names}")
         logger.debug(f"Looking for: '{decoded_game_name}'")
         

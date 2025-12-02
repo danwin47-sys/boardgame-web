@@ -4,6 +4,7 @@ import time
 import gspread
 from typing import List, Dict, Any, Optional
 from gspread.utils import rowcol_to_a1
+import logging
 
 from .constants import (
     GAMES_CACHE_TTL,
@@ -12,6 +13,8 @@ from .constants import (
     WORKSHEET_MEMBERS
 )
 from .exceptions import SheetConnectionError
+
+logger = logging.getLogger(__name__)
 
 class SheetsClient:
     """
@@ -43,24 +46,29 @@ class SheetsClient:
         
         # 2. 本地開發 Fallback
         if not creds_json:
-            local_creds_path = 'boardgame-bot-5f6751855184.json'
+            # 使用相對於專案根目錄的路徑
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            local_creds_path = os.path.join(base_dir, 'boardgame-bot-5f6751855184.json')
+            
             if os.path.exists(local_creds_path):
-                print(f"[Info] Loading credentials from local file: {local_creds_path}")
+                logger.info(f"Loading credentials from local file: {local_creds_path}")
                 try:
                     self.gc = gspread.service_account(filename=local_creds_path)
                     
                     if not sheet_url:
                         # 本地測試用的 Hardcoded URL
                         sheet_url = "https://docs.google.com/spreadsheets/d/1n2cCI1glkErCq835kNJD5hXyk1iR7IptPlnKKPm0_0Y/edit?gid=0#gid=0"
-                        print(f"[Info] Using hardcoded Sheet URL: {sheet_url}")
+                        logger.info(f"Using hardcoded Sheet URL: {sheet_url}")
                     
                     if sheet_url:
                         self.sh = self.gc.open_by_url(sheet_url)
                         self.valid = True
-                        print("[Info] Google Sheet connected! (Local)")
+                        logger.info("Google Sheet connected! (Local)")
                         return
                 except Exception as e:
-                    print(f"[Error] Local credential load failed: {e}")
+                    logger.error(f"Local credential load failed: {e}")
+            else:
+                logger.warning(f"Local credentials not found at: {local_creds_path}")
 
         # 3. 使用環境變數連線
         if not self.valid and sheet_url and creds_json:
@@ -69,13 +77,13 @@ class SheetsClient:
                 self.gc = gspread.service_account_from_dict(creds_dict)
                 self.sh = self.gc.open_by_url(sheet_url)
                 self.valid = True
-                print("[Info] Google Sheet connected! (Env)")
+                logger.info("Google Sheet connected! (Env)")
             except Exception as e:
-                print(f"[Error] Google Sheet connection failed: {e}")
+                logger.error(f"Google Sheet connection failed: {e}")
                 self.valid = False
         
         if not self.valid:
-            print("[Error] Failed to initialize Google Sheet connection.")
+            logger.error("Failed to initialize Google Sheet connection.")
 
     def get_games_worksheet(self):
         """取得 games 工作表物件"""
@@ -105,6 +113,11 @@ class SheetsClient:
         """
         讀取所有桌遊資料 (含快取)
         """
+        # 如果未連線，嘗試重新連線
+        if not self.valid:
+            logger.info("SheetsClient not valid, attempting to reconnect...")
+            self._connect()
+            
         if not self.valid:
             return []
         
@@ -119,13 +132,29 @@ class SheetsClient:
             self._games_cache_time = current_time
             return self._games_cache
         except Exception as e:
-            print(f"[Error] 讀取 games 失敗: {e}")
+            logger.error(f"讀取 games 失敗: {e}")
+            # 如果讀取失敗，可能是 token 過期，嘗試重連一次
+            logger.info("Attempting to reconnect and retry...")
+            self._connect()
+            if self.valid:
+                try:
+                    ws = self.get_games_worksheet()
+                    self._games_cache = ws.get_all_records()
+                    self._games_cache_time = current_time
+                    return self._games_cache
+                except Exception as retry_e:
+                    logger.error(f"重試讀取 games 失敗: {retry_e}")
             return []
 
     def load_members(self) -> List[Dict[str, Any]]:
         """
         讀取所有社員資料 (含快取)
         """
+        # 如果未連線，嘗試重新連線
+        if not self.valid:
+            logger.info("SheetsClient not valid, attempting to reconnect...")
+            self._connect()
+
         if not self.valid:
             return []
         
@@ -140,7 +169,18 @@ class SheetsClient:
             self._members_cache_time = current_time
             return self._members_cache
         except Exception as e:
-            print(f"[Error] 讀取 members 失敗: {e}")
+            logger.error(f"讀取 members 失敗: {e}")
+            # 如果讀取失敗，可能是 token 過期，嘗試重連一次
+            logger.info("Attempting to reconnect and retry...")
+            self._connect()
+            if self.valid:
+                try:
+                    ws = self.get_members_worksheet()
+                    self._members_cache = ws.get_all_records()
+                    self._members_cache_time = current_time
+                    return self._members_cache
+                except Exception as retry_e:
+                    logger.error(f"重試讀取 members 失敗: {retry_e}")
             return []
 
     def invalidate_games_cache(self):
@@ -167,7 +207,7 @@ class SheetsClient:
         更新指定桌遊的 BGG ID
         
         Args:
-            game_name: 桌遊名稱
+            game_name: 桌遊名稱 (使用 'name' 欄位)
             bgg_id: BGG 遊戲 ID (None 表示取消連結)
             
         Returns:
@@ -182,7 +222,7 @@ class SheetsClient:
             
             # 找到對應的桌遊
             for idx, game in enumerate(all_records):
-                if game.get('桌遊名稱') == game_name:
+                if game.get('name') == game_name:
                     # 找到 bgg_id 欄位的索引
                     headers = ws.row_values(1)
                     
@@ -191,7 +231,7 @@ class SheetsClient:
                         # 在最後一欄新增 bgg_id
                         col_idx = len(headers)
                         ws.update_cell(1, col_idx + 1, 'bgg_id')
-                        print(f"[Info] 已新增 bgg_id 欄位到 Google Sheets")
+                        logger.info("已新增 bgg_id 欄位到 Google Sheets")
                     else:
                         col_idx = headers.index('bgg_id')
                     
@@ -203,13 +243,12 @@ class SheetsClient:
                     # 使快取失效
                     self.invalidate_games_cache()
                     
-                    print(f"[Info] 已更新 '{game_name}' 的 BGG ID 為: {bgg_id}")
+                    logger.info(f"已更新 '{game_name}' 的 BGG ID 為: {bgg_id}")
                     return True
             
-            print(f"[Warning] 找不到桌遊: {game_name}")
+            logger.warning(f"找不到桌遊: {game_name}")
             return False
             
         except Exception as e:
-            print(f"[Error] 更新 BGG ID 失敗: {e}")
+            logger.error(f"更新 BGG ID 失敗: {e}")
             return False
-

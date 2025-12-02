@@ -3,9 +3,9 @@ BoardGameGeek API Service
 提供桌遊搜尋、詳細資訊查詢等功能
 """
 from typing import List, Dict, Any, Optional
-from boardgamegeek import BGGClient
 import logging
 
+from .bgg_api_client import BGGApiClient
 from .cache import cache_with_timeout
 from .demo_data import DEMO_GAMES, DEMO_GAME_DETAILS
 from config import Config
@@ -19,9 +19,13 @@ class BGGService:
     def __init__(self):
         """初始化 BGG 客戶端"""
         if not Config.DEMO_MODE:
-            # 使用配置初始化
-            self.client = BGGClient(timeout=Config.BGG_TIMEOUT, retries=Config.BGG_RETRIES)
-            logger.info("BGG Service initialized (Live mode)")
+            # 使用新的 BGGApiClient，支援 Bearer Token
+            self.client = BGGApiClient(
+                api_token=Config.BGG_API_TOKEN,
+                timeout=Config.BGG_TIMEOUT,
+                retries=Config.BGG_RETRIES
+            )
+            logger.info("BGG Service initialized (Live mode with Bearer Token)")
         else:
             self.client = None
             logger.info("BGG Service initialized (Demo mode)")

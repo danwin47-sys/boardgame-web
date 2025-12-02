@@ -57,6 +57,48 @@ def health_check():
     }), 200
 
 
+
+@app.route('/api/sys_info')
+def sys_info():
+    """系統狀態診斷"""
+    info = {}
+    try:
+        from boardgame_system import BoardGameManager
+        import os
+        
+        info['cwd'] = os.getcwd()
+        
+        if 'boardgame_manager' not in app.config:
+            app.config['boardgame_manager'] = BoardGameManager()
+            info['manager_initialized'] = 'Just Now'
+        else:
+            info['manager_initialized'] = 'Already Existed'
+            
+        mgr = app.config['boardgame_manager']
+        info['manager_valid'] = mgr.valid
+        info['client_valid'] = mgr.client.valid
+        
+        # Try to load games
+        try:
+            games = mgr.load_data()
+            info['games_count'] = len(games)
+            if len(games) > 0:
+                info['first_game'] = games[0].get('name', 'N/A')
+        except Exception as e:
+            info['load_error'] = str(e)
+            
+        # Check credentials file
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        json_path = os.path.join(base_dir, 'boardgame-bot-5f6751855184.json')
+        info['creds_path'] = json_path
+        info['creds_exists'] = os.path.exists(json_path)
+        
+    except Exception as e:
+        info['error'] = str(e)
+        
+    return jsonify(info)
+
+
 if __name__ == '__main__':
     from config import Config
     logger.info(f"啟動 Flask 應用於 {Config.HOST}:{Config.PORT}")
