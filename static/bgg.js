@@ -5,57 +5,138 @@
 
 let bggSearchTimeout = null;
 
+// 預加載的分類數據緩存
+const bggCategoryCache = {
+    party: null,
+    strategy: null,
+    family: null,
+    children: null
+};
+
 // 初始化 BGG 功能
 function initBGG() {
-    const bggSearchBox = document.getElementById('bggSearchBox');
     const bggSearchBtn = document.getElementById('bggSearchBtn');
 
-    if (bggSearchBox && bggSearchBtn) {
-        // 搜尋按鈕點擊
-        bggSearchBtn.addEventListener('click', () => searchBGG());
+    if (bggSearchBtn) {
+        // 搜尋按鈕點擊 - 開啟 modal
+        bggSearchBtn.addEventListener('click', () => openBGGSearchModal());
+    }
 
+    // 方案1：預加載所有分類數據
+    preloadAllCategories();
+}
+
+// 預加載所有分類的數據
+function preloadAllCategories() {
+    const categories = ['party', 'strategy', 'family', 'children'];
+
+    categories.forEach(category => {
+        fetch(`/data/bgg-${category}.json`)
+            .then(r => r.json())
+            .then(data => {
+                // 將數據存入緩存
+                bggCategoryCache[category] = data.games || [];
+                console.log(`✅ BGG ${category} 分類數據已預加載 (${bggCategoryCache[category].length} 個遊戲)`);
+            })
+            .catch(error => {
+                console.error(`預加載 ${category} 分類失敗:`, error);
+                bggCategoryCache[category] = [];
+            });
+    });
+}
+
+// 開啟 BGG 搜尋 Modal
+function openBGGSearchModal() {
+    // 建立 Modal HTML
+    const modal = document.createElement('div');
+    modal.className = 'bgg-modal';
+    modal.id = 'bggSearchModal';
+    modal.innerHTML = `
+        <div class="bgg-modal-content bgg-search-modal-content">
+            <span class="bgg-modal-close" onclick="closeBGGSearchModal()">&times;</span>
+            <h2>🔍 搜尋 BoardGameGeek 桌遊</h2>
+            <div class="bgg-search-box">
+                <div class="search-input-group">
+                    <input type="text" id="bggSearchBoxModal" class="search" placeholder="輸入桌遊名稱（中文或英文）...">
+                    <button class="btn primary" onclick="searchBGGInModal()">搜尋</button>
+                </div>
+                <p class="search-hint">💡 提示：輸入至少 3 個字元會自動搜尋</p>
+            </div>
+            <div class="bgg-search-results">
+                <div id="bggSearchResultsModal" class="bgg-results-list"></div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // 設定搜尋框事件監聽
+    const searchBox = document.getElementById('bggSearchBoxModal');
+    if (searchBox) {
         // Enter 鍵搜尋
-        bggSearchBox.addEventListener('keypress', (e) => {
+        searchBox.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                searchBGG();
+                searchBGGInModal();
             }
         });
 
         // 即時搜尋 (debounce 500ms)
-        bggSearchBox.addEventListener('input', () => {
+        searchBox.addEventListener('input', () => {
             clearTimeout(bggSearchTimeout);
-            const query = bggSearchBox.value.trim();
+            const query = searchBox.value.trim();
             if (query.length >= 3) {
-                bggSearchTimeout = setTimeout(() => searchBGG(), 500);
+                bggSearchTimeout = setTimeout(() => searchBGGInModal(), 500);
             }
         });
 
-        // 載入熱門桌遊
-        loadHotGames();
+        // 自動 focus
+        searchBox.focus();
     }
 }
 
-// 搜尋 BGG 桌遊
-async function searchBGG() {
-    const query = document.getElementById('bggSearchBox').value.trim();
+// 關閉 BGG 搜尋 Modal
+function closeBGGSearchModal() {
+    const modal = document.getElementById('bggSearchModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// 在 Modal 中搜尋 BGG 桌遊
+async function searchBGGInModal() {
+    const query = document.getElementById('bggSearchBoxModal').value.trim();
     if (!query) {
         showToast('請輸入搜尋關鍵字', 'error');
         return;
     }
 
+    const resultsDiv = document.getElementById('bggSearchResultsModal');
+    resultsDiv.innerHTML = '<p class="loading">正在搜尋...</p>';
+
     try {
         const response = await fetch(`/api/bgg/search?q=${encodeURIComponent(query)}`);
         const data = await response.json();
 
-        if (data.success) {
-            displayBGGResults(data.results);
+        if (data.success && data.results && data.results.length > 0) {
+            displayBGGResultsInModal(data.results);
         } else {
-            showToast(data.error || '搜尋失敗', 'error');
+            resultsDiv.innerHTML = '<p class="no-results">找不到相關桌遊，請嘗試其他關鍵字</p>';
         }
     } catch (error) {
         console.error('BGG search error:', error);
-        showToast('搜尋時發生錯誤', 'error');
+        resultsDiv.innerHTML = '<p class="error">搜尋時發生錯誤，請稍後再試</p>';
     }
+}
+
+// 在 Modal 中顯示 BGG 搜尋結果
+function displayBGGResultsInModal(results) {
+    const resultsDiv = document.getElementById('bggSearchResultsModal');
+    resultsDiv.innerHTML = '<h3>搜尋結果</h3>';
+
+    results.forEach(game => {
+        const card = createBGGGameCard(game);
+        resultsDiv.appendChild(card);
+    });
 }
 
 // 顯示 BGG 搜尋結果
@@ -96,12 +177,12 @@ function createBGGGameCard(game) {
 }
 
 // 查看 BGG 遊戲詳情
-function viewBGGGameDetails(gameId) {
+function viewBGGGameDetails(gameId, gameName = null) {
     fetch(`/api/bgg/games/${gameId}`)
         .then(r => r.json())
         .then(data => {
             if (data.success) {
-                showBGGGameModal(data.game);
+                showBGGGameModal(data.game, gameName);  // 傳遞 gameName 參數
             } else {
                 alert('無法載入遊戲詳情');
             }
@@ -113,7 +194,14 @@ function viewBGGGameDetails(gameId) {
 }
 
 // 顯示遊戲詳情 Modal
-function showBGGGameModal(game) {
+function showBGGGameModal(game, linkedGameName = null) {
+    // 根據是否為已連結遊戲顯示不同按鈕
+    const footerButtons = linkedGameName
+        ? `<button class="btn" onclick="closeBGGModal()">關閉</button>
+           <button class="btn danger" onclick="unlinkGameFromBGG('${linkedGameName.replace(/'/g, "\\'")}')">斷開連結</button>`
+        : `<button class="btn" onclick="closeBGGModal()">關閉</button>
+           <button class="btn primary" onclick="addBGGGameToCollection(${game.id}, '${game.name.replace(/'/g, "\\'")}')">加入館藏</button>`;
+
     // 建立 Modal
     const modal = document.createElement('div');
     modal.className = 'bgg-modal';
@@ -141,8 +229,7 @@ function showBGGGameModal(game) {
                 ${game.mechanics && game.mechanics.length > 0 ? `<div class="bgg-game-mechanics"><strong>機制:</strong> ${game.mechanics.join(', ')}</div>` : ''}
             </div>
             <div class="bgg-modal-footer">
-                <button class="btn" onclick="closeBGGModal()">關閉</button>
-                <button class="btn primary" onclick="addBGGGameToCollection(${game.id}, '${game.name}')">加入館藏</button>
+                ${footerButtons}
             </div>
         </div>
     `;
@@ -188,39 +275,132 @@ function addBGGGameToCollection(gameId, gameName) {
         });
 }
 
-// 載入熱門桌遊
-async function loadHotGames() {
-    try {
-        const response = await fetch('/api/bgg/hot?limit=10');
-        const data = await response.json();
+// 斷開桌遊與 BGG 的連結
+function unlinkGameFromBGG(gameName) {
+    if (!confirm(`確定要將「${gameName}」與 BGG 斷開連結嗎？`)) {
+        return;
+    }
 
-        if (data.success) {
-            displayHotGames(data.games);
-        }
-    } catch (error) {
-        console.error('Error loading hot games:', error);
+    fetch(`/api/bgg/games/link/${encodeURIComponent(gameName)}`, {
+        method: 'DELETE'
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                showToast('✅ 已成功斷開連結');
+                closeBGGModal();
+                if (typeof loadGames === 'function') {
+                    loadGames(); // 重新載入遊戲列表
+                }
+            } else {
+                showToast(data.error || '斷開連結失敗', 'error');
+            }
+        })
+        .catch(err => {
+            console.error('Error unlinking game:', err);
+            showToast('斷開連結失敗', 'error');
+        });
+}
+
+
+// ============ BGG 推薦區塊功能 ============
+
+function toggleBGGRecommendations() {
+    const content = document.getElementById('bggRecContent');
+    const btn = document.getElementById('bggRecommendationsBtn');
+
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        btn.innerHTML = '🔥 BGG 熱門桌遊 <span style="font-size: 0.85em; opacity: 0.9;">(點此收起)</span>';
+    } else {
+        content.style.display = 'none';
+        btn.innerHTML = '🔥 BGG 熱門桌遊 <span style="font-size: 0.85em; opacity: 0.9;">(請點開)</span>';
     }
 }
 
-// 顯示熱門桌遊
-function displayHotGames(games) {
-    const hotList = document.getElementById('bggHotList');
-    if (!hotList) return;
+// 当前选中的分类
+let currentBGGCategory = null;
 
-    hotList.innerHTML = '';
+// 加载指定分类的游戏（使用預加載數據）
+function loadBGGCategory(category) {
+    const listDiv = document.getElementById('bggCategoryList');
+
+    // 如果點擊的是當前分類，則收回
+    if (currentBGGCategory === category && listDiv.innerHTML !== '') {
+        listDiv.innerHTML = '';
+        document.querySelectorAll('.bgg-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        currentBGGCategory = null;
+        return;
+    }
+
+    currentBGGCategory = category;
+
+    // 更新标签样式
+    document.querySelectorAll('.bgg-tab').forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.textContent.includes(getCategoryIcon(category))) {
+            tab.classList.add('active');
+        }
+    });
+
+    // 方案1：直接使用預加載的數據，立即顯示
+    const games = bggCategoryCache[category];
+
+    if (games === null) {
+        // 數據尚未載入完成
+        listDiv.innerHTML = '<p class="loading" style="text-align: center; padding: 20px; color: #718096;">正在加載...</p>';
+        // 等待數據載入完成後再次嘗試
+        setTimeout(() => loadBGGCategory(category), 500);
+    } else if (games.length > 0) {
+        // 立即顯示預加載的數據
+        displayCategoryGames(games);
+    } else {
+        listDiv.innerHTML = '<p style="text-align: center; padding: 20px; color: #718096;">無法加載遊戲列表</p>';
+    }
+}
+
+// 获取分类图标（用于匹配标签）
+function getCategoryIcon(category) {
+    const icons = {
+        'party': '🎉',
+        'strategy': '🧠',
+        'family': '👨\u200d👩\u200d👧',
+        'children': '🧸'
+    };
+    return icons[category] || '';
+}
+
+// 显示分类游戏
+function displayCategoryGames(games) {
+    const listDiv = document.getElementById('bggCategoryList');
+    listDiv.innerHTML = '';
+
+    if (!games || games.length === 0) {
+        listDiv.innerHTML = '<p style="text-align: center; padding: 20px; color: #718096;">暂无游戏</p>';
+        return;
+    }
+
     games.forEach((game, index) => {
         const card = document.createElement('div');
-        card.className = 'bgg-hot-card';
+        card.className = 'bgg-category-card';
+
+        // 判斷是否有中文名稱
+        const displayName = game.chinese_name || game.name;
+        const hasChineseName = !!game.chinese_name;
+
         card.innerHTML = `
-            <div class="bgg-hot-rank">#${index + 1}</div>
-            ${game.thumbnail ? `<img src="${game.thumbnail}\" alt="${game.name}" class="bgg-hot-thumbnail">` : ''}
-            <div class="bgg-hot-info">
-                <h4>${game.name}</h4>
-                <p>${game.year || ''}</p>
+            <div class="bgg-card-rank">#${index + 1}</div>
+            ${game.thumbnail ? `<img src="${game.thumbnail}" alt="${displayName}" class="bgg-card-thumbnail">` : '<div class="bgg-card-no-image">无图片</div>'}
+            <div class="bgg-card-info">
+                <h4>${displayName}</h4>
+                ${hasChineseName ? `<p class="bgg-card-english-name" style="font-size: 0.85em; color: #718096; margin-top: 2px;">${game.name}</p>` : ''}
+                <p class="bgg-card-year">${game.year || 'N/A'}</p>
                 <button class="btn small" onclick="viewBGGGameDetails(${game.id})">查看</button>
             </div>
         `;
-        hotList.appendChild(card);
+        listDiv.appendChild(card);
     });
 }
 

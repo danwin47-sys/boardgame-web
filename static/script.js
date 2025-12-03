@@ -1,7 +1,9 @@
 const apiBase = '/api';
 let allGames = [];
+let allMembers = []; // 儲存所有會員資料
+let memberNameToId = {}; // 姓名到工號的映射表
 let currentStatusFilter = 'all';
-let currentPlayerFilter = 'all';
+let currentPlayerFilters = new Set(); // 使用 Set 儲存多個人數條件
 
 // Toast 通知系統
 function showToast(message, type = 'success') {
@@ -22,9 +24,26 @@ function updateStats() {
 // 載入桌遊資料
 async function loadGames() {
     try {
-        const resp = await fetch(`${apiBase}/games`);
-        if (!resp.ok) throw new Error('Server error');
-        allGames = await resp.json();
+        // 同時載入遊戲和會員資料
+        const [gamesResp, membersResp] = await Promise.all([
+            fetch(`${apiBase}/games`),
+            fetch(`${apiBase}/members`)
+        ]);
+
+        if (!gamesResp.ok || !membersResp.ok) throw new Error('Server error');
+
+        allGames = await gamesResp.json();
+        allMembers = await membersResp.json();
+
+        // 建立姓名到工號的映射表
+        memberNameToId = {};
+        allMembers.forEach(member => {
+            const name = String(member.name || '').trim();
+            const id = String(member.id || '').trim();
+            if (name && id) {
+                memberNameToId[name] = id;
+            }
+        });
 
         updateStats();
         applyCurrentFilter();
@@ -85,16 +104,36 @@ function renderTable(games) {
         const statusClass = game.status === '借出' ? 'status-borrowed' : 'status-available';
 
         // BGG 連結圖示
+        const escapedName = String(game.name || '').replace(/`/g, '\\`');
         const bggIcon = game.bgg_id
-            ? `<span class="bgg-linked" title="已連結到 BGG (ID: ${game.bgg_id})" onclick="viewBGGGameDetails(${game.bgg_id})">🔗</span>`
-            : `<span class="bgg-not-linked" title="連結到 BGG" onclick="openBGGLinkModal('${game.name}')">➕</span>`;
+            ? `<span class="bgg-linked" title="已連結到 BGG (ID: ${game.bgg_id})" onclick="viewBGGGameDetails(${game.bgg_id}, \`${escapedName}\`)">🔗</span>`
+            : `<span class="bgg-not-linked" title="連結到 BGG" onclick="openBGGLinkModal(\`${escapedName}\`)">➕</span>`;
+
+        // BGG 縮圖
+        const thumbnailHtml = game.bgg_thumbnail
+            ? `<img src="${game.bgg_thumbnail}" class="game-thumbnail" alt="縮圖" onclick="viewBGGGameDetails(${game.bgg_id}, \`${escapedName}\`)">`
+            : '';
 
         tr.innerHTML = `
             ${checkboxHtml}
-            <td>${game.name} ${bggIcon}</td>
+            <td class="game-name-cell">
+                <div class="game-name-wrapper">
+                    ${thumbnailHtml}
+                    <span>${game.name}</span>
+                    ${bggIcon}
+                </div>
+            </td>
             <td><span class="status-badge ${statusClass}"><span class="status-dot"></span>${statusText}</span></td>
             <td>${borrowerDisplay}</td>
-            <td>${game.borrower_id || ''}</td>
+            <td>${(() => {
+                // 自動根據借閱人顯示工號
+                let displayBorrowerId = game.borrower_id || '';
+                if (!displayBorrowerId && game.borrower) {
+                    const borrowerName = String(game.borrower).trim();
+                    displayBorrowerId = memberNameToId[borrowerName] || '';
+                }
+                return displayBorrowerId;
+            })()}</td>
             <td>${game.custodian || ''}</td>
             <td>${formatDate(game.mdate)}</td>
             <td>${game.location || ''}</td>
@@ -188,18 +227,25 @@ function filterByStatus(status) {
 }
 
 function filterByPlayers(players) {
-    currentPlayerFilter = players;
-    document.querySelectorAll('.player-btn').forEach(btn => {
-        if (btn.dataset.players === players) btn.classList.add('active');
-        else btn.classList.remove('active');
-    });
+    const btn = document.querySelector(`.player-btn[data-players="${players}"]`);
+
+    if (currentPlayerFilters.has(players)) {
+        // 如果已選中，則取消選中
+        currentPlayerFilters.delete(players);
+        btn.classList.remove('active');
+    } else {
+        // 如果未選中，則選中
+        currentPlayerFilters.add(players);
+        btn.classList.add('active');
+    }
+
     applyCurrentFilter();
 }
 
 // 清除篩選
 function clearFilters() {
     currentStatusFilter = 'all';
-    currentPlayerFilter = 'all';
+    currentPlayerFilters.clear(); // 清空 Set
 
     document.querySelectorAll('.filter-btn').forEach(btn => {
         if (btn.dataset.filter === 'all') btn.classList.add('active');
@@ -216,7 +262,12 @@ function clearFilters() {
 function applyCurrentFilter() {
     const filteredGames = allGames.filter(game => {
         const statusMatch = currentStatusFilter === 'all' || game.status === currentStatusFilter;
-        const playerMatch = currentPlayerFilter === 'all' || matchesPlayerCount(game.players, currentPlayerFilter);
+
+        // 人數篩選：如果沒有選擇任何人數（Set 為空），則顯示全部
+        // AND 邏輯：遊戲必須同時符合所有選中的人數條件
+        const playerMatch = currentPlayerFilters.size === 0 ||
+            Array.from(currentPlayerFilters).every(filter => matchesPlayerCount(game.players, filter));
+
         return statusMatch && playerMatch;
     });
     renderTable(filteredGames);
@@ -246,16 +297,19 @@ function debounce(func, wait) {
     };
 }
 
-// 搜尋功能 (使用防抖)
+// 搜尋功能 (使用防抖) - 只搜尋桌遊名稱、借閱人、工號
 document.getElementById('searchBox').addEventListener('input', debounce((e) => {
     const term = e.target.value.toLowerCase();
-    const filtered = allGames.filter(game =>
-        Object.values(game).some(val =>
-            String(val).toLowerCase().includes(term)
-        )
-    );
+    const filtered = allGames.filter(game => {
+        // 只搜尋特定欄位：桌遊名稱、借閱人、工號
+        const nameMatch = String(game.name || '').toLowerCase().includes(term);
+        const borrowerMatch = String(game.borrower || '').toLowerCase().includes(term);
+        const borrowerIdMatch = String(game.borrower_id || '').toLowerCase().includes(term);
+
+        return nameMatch || borrowerMatch || borrowerIdMatch;
+    });
     renderTable(filtered);
-}, 300));
+}, 50)); // 縮短延遲至 50ms，提供即時搜尋體驗
 
 // 排序功能
 document.querySelectorAll('th[data-col]').forEach(th => {
@@ -412,7 +466,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ============ BGG 連結功能 ============
 
+/**
+ * 智慧清理遊戲名稱，移除常見後綴以提高 BGG 搜尋成功率
+ * @param {string} gameName - 原始遊戲名稱
+ * @returns {string} 清理後的遊戲名稱
+ */
+function cleanGameNameForBGGSearch(gameName) {
+    let cleaned = gameName.trim();
+
+    // 移除末尾的單一字母後綴（空格或無空格）如：超級犀牛A, 超級犀牛 A
+    cleaned = cleaned.replace(/[\s-_]*[A-Za-z]$/, '');
+
+    // 移除末尾的數字（空格或無空格）如：卡坦島2, 卡坦島 2
+    cleaned = cleaned.replace(/[\s-_]*\d+$/, '');
+
+    // 移除破折號後的內容（常用於版本標註）如：璀璨寶石-豪華版
+    cleaned = cleaned.split(/[-_]/)[0].trim();
+
+    return cleaned;
+}
+
 function openBGGLinkModal(gameName) {
+    const cleanedName = cleanGameNameForBGGSearch(gameName);
+
     // 建立 Modal HTML
     const modal = document.createElement('div');
     modal.className = 'bgg-modal';
@@ -421,6 +497,14 @@ function openBGGLinkModal(gameName) {
         <div class="bgg-modal-content">
             <span class="bgg-modal-close" onclick="closeBGGLinkModal()">&times;</span>
             <h2>連結「${gameName}」到 BGG</h2>
+            <div class="bgg-search-box">
+                <label>搜尋關鍵字：</label>
+                <div class="search-input-group">
+                    <input type="text" id="bggSearchInput" value="${cleanedName}" placeholder="輸入搜尋關鍵字">
+                    <button class="btn small primary" onclick="manualSearchBGG('${gameName}')">搜尋</button>
+                </div>
+                <p class="search-hint">💡 提示：如找不到，請嘗試英文原名或簡化名稱</p>
+            </div>
             <div class="bgg-link-search">
                 <p>正在搜尋 BoardGameGeek...</p>
                 <div id="bggLinkResults"></div>
@@ -430,8 +514,8 @@ function openBGGLinkModal(gameName) {
 
     document.body.appendChild(modal);
 
-    // 自動搜尋
-    searchAndLinkBGG(gameName);
+    // 自動搜尋（使用清理後的名稱）
+    searchAndLinkBGG(gameName, cleanedName);
 }
 
 function closeBGGLinkModal() {
@@ -441,16 +525,17 @@ function closeBGGLinkModal() {
     }
 }
 
-async function searchAndLinkBGG(gameName) {
+async function searchAndLinkBGG(originalGameName, searchQuery = null) {
     try {
-        const response = await fetch(`/api/bgg/games/link/search/${encodeURIComponent(gameName)}`);
+        const query = searchQuery || cleanGameNameForBGGSearch(originalGameName);
+        const response = await fetch(`/api/bgg/games/link/search/${encodeURIComponent(query)}`);
         const data = await response.json();
 
         if (data.success && data.results && data.results.length > 0) {
-            displayBGGLinkResults(gameName, data.results);
+            displayBGGLinkResults(originalGameName, data.results);
         } else {
             document.getElementById('bggLinkResults').innerHTML =
-                '<p class="no-results">找不到相關的 BGG 桌遊。請確認名稱是否正確。</p>';
+                `<p class="no-results">找不到「${query}」相關的 BGG 桌遊。<br>請嘗試修改搜尋關鍵字或使用英文名稱。</p>`;
         }
     } catch (error) {
         console.error('BGG search error:', error);
@@ -477,6 +562,19 @@ function displayBGGLinkResults(gameName, results) {
         `;
         resultsDiv.appendChild(card);
     });
+}
+
+function manualSearchBGG(originalGameName) {
+    const searchInput = document.getElementById('bggSearchInput');
+    const searchQuery = searchInput.value.trim();
+
+    if (!searchQuery) {
+        alert('請輸入搜尋關鍵字');
+        return;
+    }
+
+    document.getElementById('bggLinkResults').innerHTML = '<p>正在搜尋...</p>';
+    searchAndLinkBGG(originalGameName, searchQuery);
 }
 
 async function linkGameToBGG(gameName, bggId, bggName) {

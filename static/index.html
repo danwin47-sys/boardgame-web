@@ -8,28 +8,32 @@
     <!-- 引入 CSS 樣式表 -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="bgg-style.css">
+    <link rel="stylesheet" href="bgg-recommendations.css">
 </head>
 
 <body>
-    <h1>瑞昱桌遊社 - 桌遊管理系統</h1>
+    <!-- 標題和統計資訊容器 -->
+    <div class="header-stats-wrapper">
+        <h1>瑞昱桌遊社 - 桌遊管理系統</h1>
 
-    <!-- 統計資訊 -->
-    <div class="stats-container">
-        <div class="stat-card">
-            <div class="stat-value" id="totalCount">0</div>
-            <div class="stat-label">總數</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" id="availableCount">0</div>
-            <div class="stat-label">在庫</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" id="borrowedCount">0</div>
-            <div class="stat-label">借出</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" id="unstockedCount">0</div>
-            <div class="stat-label">未入庫</div>
+        <!-- 統計資訊 -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-value" id="totalCount">0</div>
+                <div class="stat-label">總數</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="availableCount">0</div>
+                <div class="stat-label">在庫</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="borrowedCount">0</div>
+                <div class="stat-label">借出</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="unstockedCount">0</div>
+                <div class="stat-label">未入庫</div>
+            </div>
         </div>
     </div>
 
@@ -62,27 +66,35 @@
     <!-- BGG BoardGameGeek 搜尋功能 -->
     <div class="bgg-section">
         <div class="bgg-header">
-            <h2>🔍 從 BoardGameGeek 搜尋桌遊</h2>
+            <h2>功能清單</h2>
             <a href="https://boardgamegeek.com" target="_blank" rel="noopener noreferrer" class="bgg-attribution">
                 <img src="powered-by-bgg.png" alt="Powered by BoardGameGeek" class="bgg-logo">
             </a>
         </div>
 
         <div class="bgg-search-container">
-            <input type="text" id="bggSearchBox" class="search" placeholder="搜尋 BGG 桌遊名稱...">
-            <button id="bggSearchBtn" class="btn primary">搜尋</button>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button id="bggSearchBtn" class="btn primary large"
+                    style="flex: 1; min-width: 200px; text-align: center;">🔍 BGG桌遊搜尋</button>
+                <button id="bggRecommendationsBtn" class="btn primary large" onclick="toggleBGGRecommendations()"
+                    style="flex: 1; min-width: 200px; white-space: nowrap; text-align: center;">
+                    🔥 BGG 熱門桌遊 <span style="font-size: 0.85em; opacity: 0.9;">(請點開)</span>
+                </button>
+            </div>
         </div>
 
-        <!-- BGG 搜尋結果 -->
-        <div id="bggResults" class="bgg-results" style="display: none;">
-            <h3>搜尋結果</h3>
-            <div id="bggResultsList" class="bgg-results-list"></div>
-        </div>
+        <!-- BGG 熱門桌遊推薦內容 -->
+        <div class="bgg-rec-content" id="bggRecContent" style="display: none;">
+            <!-- 分類標籤 -->
+            <div class="bgg-category-tabs">
+                <button class="bgg-tab" onclick="loadBGGCategory('party')">🎉 派對桌遊</button>
+                <button class="bgg-tab" onclick="loadBGGCategory('strategy')">🧠 策略桌遊</button>
+                <button class="bgg-tab" onclick="loadBGGCategory('family')">👨‍👩‍👧 家庭桌遊</button>
+                <button class="bgg-tab" onclick="loadBGGCategory('children')">🧸 兒童桌遊</button>
+            </div>
 
-        <!-- 熱門桌遊推薦 -->
-        <div class="bgg-hot-games">
-            <h3>🔥 BGG 熱門桌遊</h3>
-            <div id="bggHotList" class="bgg-hot-list"></div>
+            <!-- 遊戲列表 -->
+            <div id="bggCategoryList" class="bgg-category-list"></div>
         </div>
 
         <!-- BGG 使用說明 -->

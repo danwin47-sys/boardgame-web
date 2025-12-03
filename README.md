@@ -186,47 +186,65 @@ Render 會自動偵測 `Dockerfile` 並部署
 
 ```
 boardgame-web/
-├── flask_app.py            # Flask 應用程式
-├── boardgame_system.py     # 業務邏輯 (Facade)
-├── core/                   # 核心模組
+├── app/                    # 應用程式主目錄 (v2.0+)
+│   ├── __init__.py         # 應用程式工廠
+│   ├── config/             # 多環境配置
+│   ├── blueprints/         # Flask Blueprints
+│   │   ├── main/           # 主要路由
+│   │   ├── api/            # API 端點
+│   │   └── admin/          # 管理員功能
+│   ├── middleware/         # 錯誤處理器
+│   └── extensions.py       # Flask 擴展
+├── core/                   # 核心業務邏輯
 │   ├── constants.py        # 常量定義
 │   ├── utils.py            # 工具函數
 │   ├── exceptions.py       # 自定義異常
 │   ├── cache.py            # 快取機制
-│   ├── decorators.py       # Flask 裝飾器
 │   ├── sheets_client.py    # Google Sheets 客戶端
 │   ├── game_service.py     # 桌遊業務邏輯
 │   └── member_service.py   # 社員業務邏輯
+├── tests/                  # 測試套件 (v2.0+)
+│   ├── conftest.py         # pytest 配置
+│   ├── unit/               # 單元測試
+│   └── integration/        # 整合測試
 ├── static/                 # 前端資源
 │   ├── index.html          # 使用者介面
 │   ├── admin.html          # 管理員介面
 │   ├── script.js           # JavaScript
 │   └── style.css           # 樣式表
-├── Dockerfile             # Docker 配置
-├── requirements.txt       # Python 依賴
-└── README.md             # 本文件
+├── flask_app.py            # Flask 應用程式入口
+├── serve.py                # 生產環境伺服器
+├── pytest.ini              # pytest 配置
+├── requirements.txt        # 生產依賴
+├── requirements-dev.txt    # 開發依賴
+└── README.md               # 本文件
 ```
 
-## 技術亮點
+## 測試
 
-### 後端優化
+### 安裝測試依賴
 
-- **模組化架構**: 採用 Service 模式拆分業務邏輯
-- **快取機制**: 減少 API 呼叫，提升效能
-- **批次更新**: 優化 Google Sheets API 使用
-- **向後相容**: Facade 模式確保平滑升級
+```bash
+pip install -r requirements-dev.txt
+```
 
-### 前端特色
+### 執行測試
 
-- **響應式設計**: 適配各種螢幕尺寸
-- **即時反饋**: 操作結果即時顯示
-- **搜尋過濾**: 快速找到目標桌遊
+```bash
+# 執行所有測試
+pytest
 
-## 安全性
+# 執行測試並顯示覆蓋率
+pytest --cov=app --cov=core
 
-- Admin 密碼保護
-- 環境變數管理敏感資訊
-- CORS 配置
+# 查看 HTML 覆蓋率報告
+pytest --cov=app --cov=core --cov-report=html
+start htmlcov/index.html  # Windows
+```
+
+### 測試結構
+
+- **單元測試**: 測試核心模組（utils, cache, exceptions, config）
 - 服務帳戶權限最小化
 
 ## 效能優化
@@ -258,6 +276,30 @@ A: 目前僅支援繁體中文
 ### Q: 可以離線使用嗎？
 
 A: 不行，需要網路連線存取 Google Sheets
+
+## 版本資訊
+
+### v2.0.0 (2025-12-03)
+
+- ✨ 企業級 Flask Blueprint 架構
+- ✨ 應用程式工廠模式
+- ✨ 多環境配置系統
+- ✨ 完整測試套件（pytest）
+- ✨ 統一錯誤處理
+- 📝 完整架構文檔
+
+### v1.0.0
+
+- 基本桌遊借還功能
+- Google Sheets 整合
+- 簡單 Web UI
+
+## 文檔
+
+- [架構說明](docs/ARCHITECTURE.md) - 企業級架構詳細說明
+- [遷移指南](docs/MIGRATION_GUIDE.md) - v1.0 到 v2.0 升級指南
+- [測試文檔](docs/TESTING.md) - 測試框架使用說明
+- [BGG 整合](BGG_INTEGRATION.md) - BoardGameGeek API 整合
 
 ## 授權
 

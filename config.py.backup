@@ -21,9 +21,9 @@ class Config:
     
     # ===== BGG API 設定 =====
     # BGG_API_TOKEN: Bearer Token for BGG XML API v2 authentication
-    BGG_API_TOKEN = os.environ.get("BGG_API_TOKEN", "")
+    BGG_API_TOKEN = os.environ.get("BGG_API_TOKEN", "cfebcba0-a1a7-4792-a6a6-d8514ecdc8c7")
     # DEMO_MODE: True = 使用演示數據, False = 使用真實 BGG API
-    DEMO_MODE = os.environ.get("DEMO_MODE", "True").lower() in ('true', '1', 'yes')
+    DEMO_MODE = os.environ.get("DEMO_MODE", "False").lower() in ('true', '1', 'yes')
     BGG_TIMEOUT = int(os.environ.get("BGG_TIMEOUT", 15))
     BGG_RETRIES = int(os.environ.get("BGG_RETRIES", 2))
     
