@@ -6,12 +6,7 @@
 let bggSearchTimeout = null;
 
 // 預加載的分類數據緩存
-const bggCategoryCache = {
-    party: null,
-    strategy: null,
-    family: null,
-    children: null
-};
+const bggCategoryCache = {};
 
 // 初始化 BGG 功能
 function initBGG() {
@@ -22,34 +17,8 @@ function initBGG() {
         bggSearchBtn.addEventListener('click', () => openBGGSearchModal());
     }
 
-    // 方案1：預加載所有分類數據
-    preloadAllCategories();
-}
-
-// 預加載所有分類的數據
-function preloadAllCategories() {
-    const categories = ['party', 'strategy', 'family', 'children'];
-
-    categories.forEach(category => {
-        // 使用相對路徑，避免在非根目錄部署時出錯
-        fetch(`data/bgg-${category}.json`)
-            .then(r => {
-                if (!r.ok) {
-                    throw new Error(`HTTP error! status: ${r.status}`);
-                }
-                return r.json();
-            })
-            .then(data => {
-                // 將數據存入緩存
-                bggCategoryCache[category] = data.games || [];
-                console.log(`✅ BGG ${category} 分類數據已預加載 (${bggCategoryCache[category].length} 個遊戲)`);
-            })
-            .catch(error => {
-                console.error(`預加載 ${category} 分類失敗:`, error);
-                // 存儲錯誤訊息以便顯示
-                bggCategoryCache[category] = { error: error.message };
-            });
-    });
+    // 方案1：預加載所有分類數據 - 已移除，改為按需加載
+    // preloadAllCategories();
 }
 
 // 開啟 BGG 搜尋 Modal
@@ -349,11 +318,11 @@ function toggleBGGRecommendations() {
 // 当前选中的分类
 let currentBGGCategory = null;
 
-// 加载指定分类的游戏（使用預加載數據）
+// 加载指定分类的游戏（使用 API）
 function loadBGGCategory(category) {
     const listDiv = document.getElementById('bggCategoryList');
 
-    // 如果點擊的是當前分類，且列表不為空，則不動作（或者可以選擇收起，但這裡我們保持顯示）
+    // 如果點擊的是當前分類，且列表不為空，則不動作
     if (currentBGGCategory === category && listDiv.innerHTML !== '') {
         return;
     }
@@ -370,23 +339,30 @@ function loadBGGCategory(category) {
 
     listDiv.innerHTML = '<p class="loading" style="text-align: center; padding: 20px; color: #718096;">正在加載...</p>';
 
-    // 構建檔案路徑
-    const filename = currentBGGSource === 'club' ? `club-${category}.json` : `bgg-${category}.json`;
+    // 檢查緩存
+    const cacheKey = `${currentBGGSource}-${category}`;
+    if (bggCategoryCache[cacheKey]) {
+        console.log(`從緩存加載 ${cacheKey}`);
+        displayCategoryGames(bggCategoryCache[cacheKey]);
+        return;
+    }
 
-    // 這裡不使用預加載緩存，因為有兩個來源，簡單起見直接 fetch
-    // 如果需要優化，可以為 club 也建立緩存
-
-    fetch(`data/${filename}`)
-        .then(r => {
-            if (!r.ok) throw new Error(r.statusText);
-            return r.json();
-        })
+    // 呼叫 API
+    fetch(`/api/bgg/recommendations?source=${currentBGGSource}&category=${category}`)
+        .then(r => r.json())
         .then(data => {
-            const games = data.games || [];
-            if (games.length > 0) {
-                displayCategoryGames(games);
+            if (data.success) {
+                const games = data.games || [];
+                // 存入緩存
+                bggCategoryCache[cacheKey] = games;
+
+                if (games.length > 0) {
+                    displayCategoryGames(games);
+                } else {
+                    listDiv.innerHTML = '<p style="text-align: center; padding: 20px; color: #718096;">此分類暫無遊戲</p>';
+                }
             } else {
-                listDiv.innerHTML = '<p style="text-align: center; padding: 20px; color: #718096;">此分類暫無遊戲</p>';
+                throw new Error(data.error || 'Unknown error');
             }
         })
         .catch(err => {
