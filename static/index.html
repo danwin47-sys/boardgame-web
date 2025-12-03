@@ -76,9 +76,13 @@
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <button id="bggSearchBtn" class="btn primary large"
                     style="flex: 1; min-width: 200px; text-align: center;">🔍 BGG桌遊搜尋</button>
-                <button id="bggRecommendationsBtn" class="btn primary large" onclick="toggleBGGRecommendations()"
+                <button id="bggRecommendationsBtn" class="btn primary large" onclick="toggleRecommendations('bgg')"
                     style="flex: 1; min-width: 200px; white-space: nowrap; text-align: center;">
-                    🔥 BGG 熱門桌遊 <span style="font-size: 0.85em; opacity: 0.9;">(請點開)</span>
+                    🔥 BGG 熱門桌遊
+                </button>
+                <button id="clubRecommendationsBtn" class="btn primary large" onclick="toggleRecommendations('club')"
+                    style="flex: 1; min-width: 200px; white-space: nowrap; text-align: center; background-color: #38a169;">
+                    🏆 桌遊社熱門桌遊
                 </button>
             </div>
         </div>

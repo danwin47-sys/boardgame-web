@@ -224,25 +224,30 @@ class BGGService:
     def get_party_games(self, limit: int = 10) -> List[Dict[str, Any]]:
         """取得派对桌游（使用精选游戏 ID）"""
         # 派对游戏: Codenames, Dixit, Spyfall, Wavelength, Just One等
-        party_game_ids = [178900, 39856, 166384, 262543, 254640, 181304, 124742, 139030, 131835]
+        # Added: The Resistance (41114), Decrypto (225694), Secret Hitler (188834), Love Letter (129622)
+        party_game_ids = [178900, 39856, 166384, 262543, 254640, 181304, 124742, 139030, 131835, 41114, 225694, 188834, 129622]
         return self._get_games_by_ids(party_game_ids[:limit])
     
     def get_strategy_games(self, limit: int = 10) -> List[Dict[str, Any]]:
         """取得策略桌游（使用精选游戏 ID）"""
         # 策略游戏: Gloomhaven, Brass Birmingham, Terraforming Mars, Wingspan等
-        strategy_game_ids = [174430, 224517, 167791, 266192, 233078, 161936, 220308, 182028, 173346]
+        # Added: Scythe (169786), Spirit Island (162886), Ark Nova (342942), Dune: Imperium (316554)
+        strategy_game_ids = [174430, 224517, 167791, 266192, 233078, 161936, 220308, 182028, 173346, 169786, 162886, 342942, 316554]
         return self._get_games_by_ids(strategy_game_ids[:limit])
     
     def get_family_games(self, limit: int = 10) -> List[Dict[str, Any]]:
         """取得家庭桌游（使用精选游戏 ID）"""
         # 家庭游戏: Catan, Ticket to Ride, Splendor, Azul, Carcassonne等
-        family_game_ids = [13, 9209, 148228, 230802, 822, 30549, 31260, 68448, 84876]
+        # Added: Kingdomino (204583), 7 Wonders Duel (173346 - wait, duplicate in strategy? let's use 7 Wonders 68448 is already there?), 
+        # Let's add: The Crew (324856), Cascadia (295947), Isle of Cats (281259)
+        family_game_ids = [13, 9209, 148228, 230802, 822, 30549, 31260, 68448, 84876, 204583, 324856, 295947, 281259]
         return self._get_games_by_ids(family_game_ids[:limit])
     
     def get_children_games(self, limit: int = 10) -> List[Dict[str, Any]]:
         """取得儿童桌游（使用精选游戏 ID）"""
         # 儿童游戏: King of Tokyo, Zombie Kidz Evolution, My First Carcassonne等
-        children_game_ids = [70323, 256952, 41010, 163412, 42215, 244521, 244522, 123540, 193621]
+        # Added: Rhino Hero (91514), Ice Cool (177524), Outfoxed! (150484), Catan Junior (125921)
+        children_game_ids = [70323, 256952, 41010, 163412, 42215, 244521, 244522, 123540, 193621, 91514, 177524, 150484, 125921]
         return self._get_games_by_ids(children_game_ids[:limit])
     
     def _get_games_by_ids(self, game_ids: List[int]) -> List[Dict[str, Any]]:

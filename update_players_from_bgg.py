@@ -25,6 +25,7 @@ def update_players_for_linked_games():
     
     # 初始化服務
     logger.info("初始化服務...")
+    logger.info("[UPDATE] Starting players update for linked games")
     mgr = BoardGameManager()
     bgg = BGGService()
     

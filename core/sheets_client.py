@@ -220,6 +220,7 @@ class SheetsClient:
         Returns:
             bool: 是否更新成功
         """
+        logger.info(f"[UPDATE] Updating game BGG ID for {game_name}")
         if not self.valid:
             return False
             
@@ -321,6 +322,7 @@ class SheetsClient:
         Returns:
             bool: 是否成功
         """
+        logger.info(f"[UPDATE] Saving BGG recommendations for {category}")
         if not self.valid:
             return False
         

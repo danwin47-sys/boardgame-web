@@ -31,8 +31,14 @@ function preloadAllCategories() {
     const categories = ['party', 'strategy', 'family', 'children'];
 
     categories.forEach(category => {
-        fetch(`/data/bgg-${category}.json`)
-            .then(r => r.json())
+        // 使用相對路徑，避免在非根目錄部署時出錯
+        fetch(`data/bgg-${category}.json`)
+            .then(r => {
+                if (!r.ok) {
+                    throw new Error(`HTTP error! status: ${r.status}`);
+                }
+                return r.json();
+            })
             .then(data => {
                 // 將數據存入緩存
                 bggCategoryCache[category] = data.games || [];
@@ -40,7 +46,8 @@ function preloadAllCategories() {
             })
             .catch(error => {
                 console.error(`預加載 ${category} 分類失敗:`, error);
-                bggCategoryCache[category] = [];
+                // 存儲錯誤訊息以便顯示
+                bggCategoryCache[category] = { error: error.message };
             });
     });
 }
@@ -305,17 +312,38 @@ function unlinkGameFromBGG(gameName) {
 
 // ============ BGG 推薦區塊功能 ============
 
-function toggleBGGRecommendations() {
-    const content = document.getElementById('bggRecContent');
-    const btn = document.getElementById('bggRecommendationsBtn');
+// ============ BGG 推薦區塊功能 ============
 
-    if (content.style.display === 'none') {
-        content.style.display = 'block';
-        btn.innerHTML = '🔥 BGG 熱門桌遊 <span style="font-size: 0.85em; opacity: 0.9;">(點此收起)</span>';
-    } else {
+let currentBGGSource = 'bgg'; // 'bgg' or 'club'
+
+function toggleRecommendations(source) {
+    const content = document.getElementById('bggRecContent');
+    const bggBtn = document.getElementById('bggRecommendationsBtn');
+    const clubBtn = document.getElementById('clubRecommendationsBtn');
+
+    // 如果點擊的是當前已開啟的來源，則關閉
+    if (content.style.display === 'block' && currentBGGSource === source) {
         content.style.display = 'none';
-        btn.innerHTML = '🔥 BGG 熱門桌遊 <span style="font-size: 0.85em; opacity: 0.9;">(請點開)</span>';
+        return;
     }
+
+    // 切換來源
+    currentBGGSource = source;
+    content.style.display = 'block';
+
+    // 重置分類顯示
+    const listDiv = document.getElementById('bggCategoryList');
+    listDiv.innerHTML = '';
+    document.querySelectorAll('.bgg-tab').forEach(tab => tab.classList.remove('active'));
+    currentBGGCategory = null;
+
+    // 自動加載第一個分類
+    loadBGGCategory('party');
+}
+
+// 保留舊函數以兼容（如果有其他地方調用）
+function toggleBGGRecommendations() {
+    toggleRecommendations('bgg');
 }
 
 // 当前选中的分类
@@ -325,13 +353,8 @@ let currentBGGCategory = null;
 function loadBGGCategory(category) {
     const listDiv = document.getElementById('bggCategoryList');
 
-    // 如果點擊的是當前分類，則收回
+    // 如果點擊的是當前分類，且列表不為空，則不動作（或者可以選擇收起，但這裡我們保持顯示）
     if (currentBGGCategory === category && listDiv.innerHTML !== '') {
-        listDiv.innerHTML = '';
-        document.querySelectorAll('.bgg-tab').forEach(tab => {
-            tab.classList.remove('active');
-        });
-        currentBGGCategory = null;
         return;
     }
 
@@ -345,20 +368,34 @@ function loadBGGCategory(category) {
         }
     });
 
-    // 方案1：直接使用預加載的數據，立即顯示
-    const games = bggCategoryCache[category];
+    listDiv.innerHTML = '<p class="loading" style="text-align: center; padding: 20px; color: #718096;">正在加載...</p>';
 
-    if (games === null) {
-        // 數據尚未載入完成
-        listDiv.innerHTML = '<p class="loading" style="text-align: center; padding: 20px; color: #718096;">正在加載...</p>';
-        // 等待數據載入完成後再次嘗試
-        setTimeout(() => loadBGGCategory(category), 500);
-    } else if (games.length > 0) {
-        // 立即顯示預加載的數據
-        displayCategoryGames(games);
-    } else {
-        listDiv.innerHTML = '<p style="text-align: center; padding: 20px; color: #718096;">無法加載遊戲列表</p>';
-    }
+    // 構建檔案路徑
+    const filename = currentBGGSource === 'club' ? `club-${category}.json` : `bgg-${category}.json`;
+
+    // 這裡不使用預加載緩存，因為有兩個來源，簡單起見直接 fetch
+    // 如果需要優化，可以為 club 也建立緩存
+
+    fetch(`data/${filename}`)
+        .then(r => {
+            if (!r.ok) throw new Error(r.statusText);
+            return r.json();
+        })
+        .then(data => {
+            const games = data.games || [];
+            if (games.length > 0) {
+                displayCategoryGames(games);
+            } else {
+                listDiv.innerHTML = '<p style="text-align: center; padding: 20px; color: #718096;">此分類暫無遊戲</p>';
+            }
+        })
+        .catch(err => {
+            console.error('Load category error:', err);
+            listDiv.innerHTML = `<div style="text-align: center; padding: 20px; color: #e53e3e;">
+                <p>無法加載遊戲列表</p>
+                <p style="font-size: 0.85em; margin-top: 5px;">錯誤: ${err.message}</p>
+            </div>`;
+        });
 }
 
 // 获取分类图标（用于匹配标签）
