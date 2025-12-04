@@ -17,7 +17,7 @@ class BaseConfig:
     GOOGLE_CREDENTIALS = os.environ.get("GOOGLE_CREDENTIALS", "")
     
     # ===== 管理員設定 =====
-    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
+    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "RTKBG")
     
     # ===== 伺服器設定 =====
     PORT = int(os.environ.get("PORT", 5000))

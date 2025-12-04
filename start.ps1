@@ -9,7 +9,7 @@ $env:BGG_API_TOKEN = "cfebcba0-a1a7-4792-a6a6-d8514ecdc8c7"
 $env:DEMO_MODE = "False"
 
 # 管理員密碼
-$env:ADMIN_PASSWORD = "admin123"
+$env:ADMIN_PASSWORD = "RTKBG"
 
 # 伺服器設定
 $env:PORT = "5000"
