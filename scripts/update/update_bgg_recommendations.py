@@ -78,8 +78,8 @@ def update_club_recommendations(sheets_client):
                     matched_ids.append(game_id)
                     logger.info(f"  找到匹配: BGG ID {game_id} ({game['name']})")
                     
-                    if len(matched_ids) >= 10:
-                        logger.info(f"  已找到 10 款遊戲，停止搜尋")
+                    if len(matched_ids) >= 50:
+                        logger.info(f"  已找到 50 款遊戲，停止搜尋")
                         break
         
         logger.info(f"  累計找到 {len(matched_ids)} 款社團擁有的遊戲")
@@ -106,7 +106,7 @@ def update_bgg_recommendations(sheets_client):
         logger.info(f"正在從本地資料庫獲取 {category} 分類...")
         
         # 從本地資料庫查詢該分類的排名資料
-        games = ranks_service.get_by_category_rank(category, limit=10)
+        games = ranks_service.get_by_category_rank(category, limit=50)
         
         if not games:
             logger.warning(f"{category} 分類未找到遊戲資料")

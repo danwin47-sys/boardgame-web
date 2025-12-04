@@ -298,13 +298,15 @@ class SheetsClient:
             except gspread.exceptions.WorksheetNotFound:
                 # 工作表不存在，創建新的
                 logger.info("建立 BGG推薦快取 工作表")
-                ws = self.sh.add_worksheet(title='BGG推薦快取', rows=100, cols=10)
+                ws = self.sh.add_worksheet(title='BGG推薦快取', rows=100, cols=52)
                 
-                # 設定標題列
-                headers = ['分類', 'BGG_ID_1', 'BGG_ID_2', 'BGG_ID_3', 'BGG_ID_4', 
-                          'BGG_ID_5', 'BGG_ID_6', 'BGG_ID_7', 'BGG_ID_8', 'BGG_ID_9', 
-                          'BGG_ID_10', '更新時間']
-                ws.update('A1:L1', [headers])
+                # 設定標題列 - 擴展到50個遊戲ID
+                headers = ['分類']
+                for i in range(1, 51):
+                    headers.append(f'BGG_ID_{i}')
+                headers.append('更新時間')
+                
+                ws.update('A1:AZ1', [headers])
                 
                 return ws
         except Exception as e:
@@ -317,7 +319,7 @@ class SheetsClient:
         
         Args:
             category: 分類名稱 (party/strategy/family/children)
-            game_ids: BGG ID 列表（最多10個）
+            game_ids: BGG ID 列表（最多50個）
             
         Returns:
             bool: 是否成功
@@ -334,8 +336,8 @@ class SheetsClient:
             # 取得所有記錄
             records = ws.get_all_records()
             
-            # 準備資料（補齊到10個ID）
-            padded_ids = (game_ids + [0] * 10)[:10]
+            # 準備資料（補齊到50個ID）
+            padded_ids = (game_ids + [0] * 50)[:50]
             from datetime import datetime
             update_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
@@ -350,7 +352,7 @@ class SheetsClient:
             
             if row_num:
                 # 更新現有記錄
-                ws.update(f'A{row_num}:L{row_num}', [row_data])
+                ws.update(f'A{row_num}:AZ{row_num}', [row_data])
             else:
                 # 新增記錄
                 ws.append_row(row_data)
@@ -384,9 +386,9 @@ class SheetsClient:
             
             for record in records:
                 if record.get('分類') == category:
-                    # 提取所有 BGG ID（排除 0）
+                    # 提取所有 BGG ID（排除 0，擴展到50）
                     game_ids = []
-                    for i in range(1, 11):
+                    for i in range(1, 51):
                         game_id = record.get(f'BGG_ID_{i}', 0)
                         if game_id and int(game_id) > 0:
                             game_ids.append(int(game_id))

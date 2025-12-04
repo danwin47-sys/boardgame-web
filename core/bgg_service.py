@@ -399,6 +399,8 @@ class BGGService:
             266810,  # Barrage
             276025,  # Res Arcana
             177736,  # A Feast for Odin
+            115746,  # War of the Ring: Second Edition
+            246900,  # Eclipse: Second Dawn for the Galaxy
         ]
         return strategy_game_ids[:limit]
     
@@ -515,6 +517,9 @@ class BGGService:
             169786,  # Scythe (family-weight for experienced)
             110308,  # Forbidden Island
             254640,  # Just One
+            201808,  # Clank! A Deck-Building Adventure
+            192458,  # Century: Spice Road
+            263918,  # Cartographers
         ]
         return family_game_ids[:limit]
     
@@ -629,6 +634,10 @@ class BGGService:
             40692,   # Sushi Go! Party
             36218,   # Dominion
             68448,   # 7 Wonders (family)
+            314491,  # Dragomino
+            150484,  # Outfoxed! (duplicate for emphasis)
+            312883,  # Sleeping Queens
+            94483,   # Hoot Owl Hoot!
         ]
         return children_game_ids[:limit]
     
