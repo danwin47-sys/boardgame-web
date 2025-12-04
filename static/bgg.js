@@ -459,6 +459,7 @@ function displayCategoryGames(games) {
     games.forEach((game, index) => {
         const card = document.createElement('div');
         card.className = 'bgg-category-card';
+        card.style.cursor = 'pointer';
 
         // 判斷是否有中文名稱
         const displayName = game.chinese_name || game.name;
@@ -471,9 +472,14 @@ function displayCategoryGames(games) {
                 <h4>${displayName}</h4>
                 ${hasChineseName ? `<p class="bgg-card-english-name" style="font-size: 0.85em; color: #718096; margin-top: 2px;">${game.name}</p>` : ''}
                 <p class="bgg-card-year">${game.year || 'N/A'}</p>
-                <button class="btn small" onclick="viewBGGGameDetails(${game.id})">查看</button>
             </div>
         `;
+
+        // 點擊卡片查看詳情
+        card.addEventListener('click', () => {
+            viewBGGGameDetails(game.id);
+        });
+
         listDiv.appendChild(card);
     });
 }

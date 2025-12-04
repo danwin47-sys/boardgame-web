@@ -14,6 +14,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from boardgame_system import BoardGameManager
 from core.bgg_service import BGGService
 from core.sheets_client import SheetsClient
+from scripts.update.update_static_cache import update_static_cache
 
 logging.basicConfig(
     level=logging.INFO,
@@ -154,6 +155,19 @@ def main():
     logger.info(f"BGG 全球熱門更新: {bgg_success}/{len(CATEGORIES)}")
     logger.info(f"社團熱門更新: {club_success}/{len(CLUB_CATEGORIES)}")
     logger.info("=" * 60)
+    
+    # 自動更新靜態緩存
+    logger.info("")
+    logger.info("=" * 60)
+    logger.info("自動更新靜態緩存...")
+    logger.info("=" * 60)
+    
+    try:
+        update_static_cache()
+        logger.info("✅ 靜態緩存更新成功")
+    except Exception as e:
+        logger.error(f"❌ 靜態緩存更新失敗: {e}")
+        logger.warning("建議手動運行 update_static_cache.py")
     
     return 0
 
