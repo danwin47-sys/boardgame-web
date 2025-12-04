@@ -97,7 +97,7 @@ def get_recommendations():
         sheet_category = f"{source}-{category}"
         
         # 初始化 BoardGameManager
-        from boardgame_system import BoardGameManager
+        from core.facade import BoardGameManager
         from flask import current_app
         mgr = current_app.config.get('boardgame_manager')
         if not mgr:
@@ -205,7 +205,7 @@ def search_for_linking(game_name):
 def link_game(game_name):
     """連結桌遊到 BGG"""
     try:
-        from boardgame_system import BoardGameManager
+        from core.facade import BoardGameManager
         
         decoded_game_name = unquote(game_name)
         logger.debug(f"link_game - Original: {game_name}")
@@ -264,7 +264,7 @@ def link_game(game_name):
 def unlink_game(game_name):
     """取消桌遊與 BGG 的連結"""
     try:
-        from boardgame_system import BoardGameManager
+        from core.facade import BoardGameManager
         
         decoded_game_name = unquote(game_name)
         logger.debug(f"unlink_game - Original: {game_name}, Decoded: {decoded_game_name}")

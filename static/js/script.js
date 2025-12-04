@@ -103,8 +103,12 @@ function renderTable(games) {
         const statusText = game.status === '借出' ? '借出' : '在庫';
         const statusClass = game.status === '借出' ? 'status-borrowed' : 'status-available';
 
-        // BGG 連結圖示
-        const escapedName = String(game.name || '').replace(/`/g, '\\`');
+        // BGG 連結圖示 - 改進字串跳脫以處理特殊字元
+        const escapedName = String(game.name || '')
+            .replace(/\\/g, '\\\\')   // 反斜線
+            .replace(/'/g, "\\'")     // 單引號
+            .replace(/"/g, '&quot;')  // 雙引號
+            .replace(/`/g, '\\`');    // 反引號
         const bggIcon = game.bgg_id
             ? `<span class="bgg-linked" title="已連結到 BGG (ID: ${game.bgg_id})" onclick="viewBGGGameDetails(${game.bgg_id}, \`${escapedName}\`)">🔗</span>`
             : `<span class="bgg-not-linked" title="連結到 BGG" onclick="openBGGLinkModal(\`${escapedName}\`)">➕</span>`;
@@ -119,8 +123,8 @@ function renderTable(games) {
             <td class="game-name-cell">
                 <div class="game-name-wrapper">
                     ${thumbnailHtml}
-                    <span>${game.name}</span>
                     ${bggIcon}
+                    <span>${game.name}</span>
                 </div>
             </td>
             <td><span class="status-badge ${statusClass}"><span class="status-dot"></span>${statusText}</span></td>
@@ -551,12 +555,17 @@ function displayBGGLinkResults(gameName, results) {
     results.forEach(game => {
         const card = document.createElement('div');
         card.className = 'bgg-link-card';
+        
+        // 跳脫遊戲名稱中的特殊字元以避免破壞 onclick 屬性
+        const escapedGameName = gameName.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const escapedBggName = game.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        
         card.innerHTML = `
             <div class="bgg-link-info">
                 <h4>${game.name}</h4>
                 <p>年份: ${game.year || 'N/A'} | ID: ${game.id}</p>
             </div>
-            <button class="btn small primary" onclick="linkGameToBGG('${gameName}', ${game.id}, '${game.name}')">
+            <button class="btn small primary" onclick="linkGameToBGG('${escapedGameName}', ${game.id}, '${escapedBggName}')">
                 選擇此遊戲
             </button>
         `;

@@ -180,7 +180,10 @@ function renderGames() {
                          alt="${escapeHtml(game.name)}"
                          loading="lazy"
                          onerror="this.src='https://via.placeholder.com/300x420/667eea/ffffff?text=No+Image'">
-                    ${game.label ? `<span class="game-label">${escapeHtml(game.label)}</span>` : ''}
+                    <div class="game-top-labels">
+                        ${game.label ? `<span class="game-label">${escapeHtml(game.label)}</span>` : ''}
+                        ${(game.minPlayers && game.maxPlayers) ? `<span class="game-players-badge">${game.minPlayers == game.maxPlayers ? game.minPlayers + '人' : game.minPlayers + '-' + game.maxPlayers + '人'}</span>` : ''}
+                    </div>
                     <span class="game-status-badge ${statusClass}">${statusText}</span>
                     <div class="game-card-title">${escapeHtml(game.name)}</div>
                 </div>
