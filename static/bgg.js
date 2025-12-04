@@ -17,8 +17,8 @@ function initBGG() {
         bggSearchBtn.addEventListener('click', () => openBGGSearchModal());
     }
 
-    // 方案1：預加載所有分類數據 - 已移除，改為按需加載
-    // preloadAllCategories();
+    // 預加載所有分類數據
+    preloadAllData();
 }
 
 // 開啟 BGG 搜尋 Modal
@@ -285,6 +285,80 @@ function unlinkGameFromBGG(gameName) {
 
 let currentBGGSource = 'bgg'; // 'bgg' or 'club'
 
+// 預加載的分類數據 Promise 快取
+// Key: `${source}-${category}`
+// Value: Promise<Array>
+const bggCategoryPromises = {};
+
+// 全局靜態快取數據
+let staticRecommendationsCache = null;
+
+// 獲取分類數據 (返回 Promise)
+function fetchCategoryData(source, category) {
+    const cacheKey = `${source}-${category}`;
+
+    // 1. 如果靜態快取已載入，直接從靜態快取返回
+    if (staticRecommendationsCache && staticRecommendationsCache[cacheKey]) {
+        console.log(`[Static Cache] Hit for ${cacheKey}`);
+        return Promise.resolve(staticRecommendationsCache[cacheKey]);
+    }
+
+    // 2. 如果已經有請求正在進行或已完成，直接返回該 Promise
+    if (bggCategoryPromises[cacheKey]) {
+        return bggCategoryPromises[cacheKey];
+    }
+
+    // 3. 建立新的請求 Promise (Fallback to API)
+    console.log(`[API Fallback] Fetching ${cacheKey}`);
+    const promise = fetch(`/api/bgg/recommendations?source=${source}&category=${category}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                return data.games || [];
+            } else {
+                throw new Error(data.error || 'Unknown error');
+            }
+        })
+        .catch(err => {
+            console.error(`Error fetching ${cacheKey}:`, err);
+            // 失敗時移除快取，讓下次可以重試
+            delete bggCategoryPromises[cacheKey];
+            throw err;
+        });
+
+    // 存入快取
+    bggCategoryPromises[cacheKey] = promise;
+    return promise;
+}
+
+// 預加載所有數據 (優先嘗試載入靜態 JSON)
+function preloadAllData() {
+    console.log('開始預加載 BGG 與社團熱門遊戲...');
+
+    // 嘗試載入靜態快取檔案
+    fetch('/data/recommendations.json')
+        .then(r => {
+            if (!r.ok) throw new Error('Static cache not found');
+            return r.json();
+        })
+        .then(data => {
+            console.log(`[Static Cache] Loaded successfully (Updated: ${data.updated_at})`);
+            staticRecommendationsCache = data.data;
+        })
+        .catch(err => {
+            console.warn('[Static Cache] Load failed, falling back to API pre-loading:', err);
+            // 如果靜態檔案載入失敗，回退到 API 預加載
+            const sources = ['bgg', 'club'];
+            const categories = ['party', 'strategy', 'family', 'children'];
+
+            sources.forEach(source => {
+                categories.forEach(category => {
+                    fetchCategoryData(source, category);
+                });
+            });
+        });
+}
+
 function toggleRecommendations(source) {
     const content = document.getElementById('bggRecContent');
     const bggBtn = document.getElementById('bggRecommendationsBtn');
@@ -339,38 +413,25 @@ function loadBGGCategory(category) {
 
     listDiv.innerHTML = '<p class="loading" style="text-align: center; padding: 20px; color: #718096;">正在加載...</p>';
 
-    // 檢查緩存
-    const cacheKey = `${currentBGGSource}-${category}`;
-    if (bggCategoryCache[cacheKey]) {
-        console.log(`從緩存加載 ${cacheKey}`);
-        displayCategoryGames(bggCategoryCache[cacheKey]);
-        return;
-    }
-
-    // 呼叫 API
-    fetch(`/api/bgg/recommendations?source=${currentBGGSource}&category=${category}`)
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                const games = data.games || [];
-                // 存入緩存
-                bggCategoryCache[cacheKey] = games;
-
+    // 使用 fetchCategoryData 獲取數據 (可能是快取的 Promise)
+    fetchCategoryData(currentBGGSource, category)
+        .then(games => {
+            // 確保數據回來時，使用者還停留在同一個分類
+            if (currentBGGCategory === category) {
                 if (games.length > 0) {
                     displayCategoryGames(games);
                 } else {
                     listDiv.innerHTML = '<p style="text-align: center; padding: 20px; color: #718096;">此分類暫無遊戲</p>';
                 }
-            } else {
-                throw new Error(data.error || 'Unknown error');
             }
         })
         .catch(err => {
-            console.error('Load category error:', err);
-            listDiv.innerHTML = `<div style="text-align: center; padding: 20px; color: #e53e3e;">
-                <p>無法加載遊戲列表</p>
-                <p style="font-size: 0.85em; margin-top: 5px;">錯誤: ${err.message}</p>
-            </div>`;
+            if (currentBGGCategory === category) {
+                listDiv.innerHTML = `<div style="text-align: center; padding: 20px; color: #e53e3e;">
+                    <p>無法加載遊戲列表</p>
+                    <p style="font-size: 0.85em; margin-top: 5px;">錯誤: ${err.message}</p>
+                </div>`;
+            }
         });
 }
 
@@ -391,7 +452,7 @@ function displayCategoryGames(games) {
     listDiv.innerHTML = '';
 
     if (!games || games.length === 0) {
-        listDiv.innerHTML = '<p style="text-align: center; padding: 20px; color: #718096;">暂无游戏</p>';
+        listDiv.innerHTML = '<p style="text-align: center; padding: 20px; color: #718096;">暫無遊戲</p>';
         return;
     }
 
@@ -405,7 +466,7 @@ function displayCategoryGames(games) {
 
         card.innerHTML = `
             <div class="bgg-card-rank">#${index + 1}</div>
-            ${game.thumbnail ? `<img src="${game.thumbnail}" alt="${displayName}" class="bgg-card-thumbnail">` : '<div class="bgg-card-no-image">无图片</div>'}
+            ${game.thumbnail ? `<img src="${game.thumbnail}" alt="${displayName}" class="bgg-card-thumbnail">` : '<div class="bgg-card-no-image">無圖片</div>'}
             <div class="bgg-card-info">
                 <h4>${displayName}</h4>
                 ${hasChineseName ? `<p class="bgg-card-english-name" style="font-size: 0.85em; color: #718096; margin-top: 2px;">${game.name}</p>` : ''}

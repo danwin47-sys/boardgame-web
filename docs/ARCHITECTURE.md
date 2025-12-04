@@ -36,7 +36,7 @@ boardgame-web/
 │
 ├── config.py                  # 統一配置 (54 lines)
 ├── core/                      # 核心業務邏輯
-│   ├── demo_data.py          # 演示數據 (99 lines)
+│   ├── demo_data.py          # 演示資料 (99 lines)
 │   ├── bgg_service.py        # BGG 服務
 │   ├── sheets_client.py      # Google Sheets 客戶端
 │   └── ...
@@ -379,7 +379,7 @@ app.register_blueprint(analytics_bp)
 ✅ CORS 配置
 ✅ Token 驗證
 ✅ 輸入驗證
-✅ 錯誤信息不洩露細節
+✅ 錯誤資訊不洩露細節
 ```
 
 ---

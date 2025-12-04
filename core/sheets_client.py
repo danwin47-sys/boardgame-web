@@ -283,22 +283,22 @@ class SheetsClient:
             logger.error(f"更新 BGG 資料失敗: {e}")
             return False
 
-    # ============ BGG 推薦緩存功能 ============
+    # ============ BGG 推薦快取功能 ============
     
     def get_bgg_cache_worksheet(self):
-        """取得 BGG 推薦緩存工作表"""
+        """取得 BGG 推薦快取工作表"""
         if not self.valid:
             return None
         
         try:
             # 嘗試取得現有工作表
             try:
-                ws = self.sh.worksheet('BGG推薦緩存')
+                ws = self.sh.worksheet('BGG推薦快取')
                 return ws
             except gspread.exceptions.WorksheetNotFound:
                 # 工作表不存在，創建新的
-                logger.info("創建 BGG推薦緩存 工作表")
-                ws = self.sh.add_worksheet(title='BGG推薦緩存', rows=100, cols=10)
+                logger.info("建立 BGG推薦快取 工作表")
+                ws = self.sh.add_worksheet(title='BGG推薦快取', rows=100, cols=10)
                 
                 # 設定標題列
                 headers = ['分類', 'BGG_ID_1', 'BGG_ID_2', 'BGG_ID_3', 'BGG_ID_4', 
@@ -308,12 +308,12 @@ class SheetsClient:
                 
                 return ws
         except Exception as e:
-            logger.error(f"取得 BGG 緩存工作表失敗: {e}")
+            logger.error(f"取得 BGG 快取工作表失敗: {e}")
             return None
     
     def save_bgg_recommendations(self, category: str, game_ids: List[int]) -> bool:
         """
-        儲存 BGG 推薦緩存
+        儲存 BGG 推薦快取
         
         Args:
             category: 分類名稱 (party/strategy/family/children)
@@ -355,22 +355,22 @@ class SheetsClient:
                 # 新增記錄
                 ws.append_row(row_data)
             
-            logger.info(f"已儲存 {category} 的推薦緩存，共 {len(game_ids)} 個遊戲")
+            logger.info(f"已儲存 {category} 的推薦快取，共 {len(game_ids)} 個遊戲")
             return True
             
         except Exception as e:
-            logger.error(f"儲存 BGG 推薦緩存失敗: {e}")
+            logger.error(f"儲存 BGG 推薦快取失敗: {e}")
             return False
     
     def load_bgg_recommendations(self, category: str) -> Optional[List[int]]:
         """
-        讀取 BGG 推薦緩存
+        讀取 BGG 推薦快取
         
         Args:
             category: 分類名稱
             
         Returns:
-            BGG ID 列表，如果沒有緩存則返回 None
+            BGG ID 列表，如果沒有快取則返回 None
         """
         if not self.valid:
             return None
@@ -391,13 +391,13 @@ class SheetsClient:
                         if game_id and int(game_id) > 0:
                             game_ids.append(int(game_id))
                     
-                    logger.info(f"從緩存讀取 {category}，共 {len(game_ids)} 個遊戲")
+                    logger.info(f"從快取讀取 {category}，共 {len(game_ids)} 個遊戲")
                     return game_ids if game_ids else None
             
             return None
             
         except Exception as e:
-            logger.error(f"讀取 BGG 推薦緩存失敗: {e}")
+            logger.error(f"讀取 BGG 推薦快取失敗: {e}")
             return None
     
     def get_bgg_recommendations_update_time(self, category: str) -> Optional[str]:

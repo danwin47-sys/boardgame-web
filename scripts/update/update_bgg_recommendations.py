@@ -6,6 +6,11 @@ import os
 import logging
 import time
 from datetime import datetime
+import sys
+
+# Add project root to path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 from boardgame_system import BoardGameManager
 from core.bgg_service import BGGService
 from core.sheets_client import SheetsClient
