@@ -28,7 +28,7 @@ class BGGService:
             # 如果不在 app context 中，使用環境變數
             import os
             demo_mode = os.environ.get("DEMO_MODE", "False").lower() in ('true', '1', 'yes')
-            bgg_token = os.environ.get("BGG_API_TOKEN", "cfebcba0-a1a7-4792-a6a6-d8514ecdc8c7")
+            bgg_token = os.environ.get("BGG_API_TOKEN", "")
             bgg_timeout = int(os.environ.get("BGG_TIMEOUT", 15))
             bgg_retries = int(os.environ.get("BGG_RETRIES", 2))
         
