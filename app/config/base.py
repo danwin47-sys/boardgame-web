@@ -17,14 +17,16 @@ class BaseConfig:
     GOOGLE_CREDENTIALS = os.environ.get("GOOGLE_CREDENTIALS", "")
     
     # ===== 管理員設定 =====
-    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "RTKBG")
+    # 注意：必須從環境變數設定，不提供預設密碼
+    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
     
     # ===== 伺服器設定 =====
     PORT = int(os.environ.get("PORT", 5000))
     HOST = os.environ.get("HOST", "0.0.0.0")
     
     # ===== BGG API 設定 =====
-    BGG_API_TOKEN = os.environ.get("BGG_API_TOKEN", "cfebcba0-a1a7-4792-a6a6-d8514ecdc8c7")
+    # 注意：BGG_API_TOKEN 必須從環境變數設定
+    BGG_API_TOKEN = os.environ.get("BGG_API_TOKEN")
     DEMO_MODE = os.environ.get("DEMO_MODE", "False").lower() in ('true', '1', 'yes')
     BGG_TIMEOUT = int(os.environ.get("BGG_TIMEOUT", 15))
     BGG_RETRIES = int(os.environ.get("BGG_RETRIES", 2))

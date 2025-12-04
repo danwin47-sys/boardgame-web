@@ -29,8 +29,11 @@ def admin_login():
         data = request.get_json()
         password = data.get('password')
         
-        # 從配置讀取管理員密碼
-        admin_password = current_app.config.get('ADMIN_PASSWORD', 'admin123')
+        # 從環境變數讀取管理員密碼（必須設定）
+        admin_password = os.environ.get('ADMIN_PASSWORD')
+        if not admin_password:
+            logger.error("ADMIN_PASSWORD 環境變數未設定")
+            return jsonify({'success': False, 'error': '伺服器設定錯誤'}), 500
         
         if password == admin_password:
             # 簡單的 token（實際應用應使用 JWT 或更安全的方式）
@@ -42,6 +45,30 @@ def admin_login():
             return jsonify({'success': False, 'message': '密碼錯誤'}), 401
     except Exception as e:
         logger.error(f"管理員登入異常: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@admin_bp.route('/admin/verify', methods=['POST'])
+def admin_verify():
+    """管理員密碼驗證（前端使用）"""
+    try:
+        data = request.get_json()
+        password = data.get('password', '')
+        
+        # 從環境變數讀取管理員密碼
+        admin_password = os.environ.get('ADMIN_PASSWORD')
+        if not admin_password:
+            logger.error("ADMIN_PASSWORD 環境變數未設定")
+            return jsonify({'success': False, 'error': '伺服器設定錯誤'}), 500
+        
+        if password == admin_password:
+            logger.info("管理員驗證成功")
+            return jsonify({'success': True}), 200
+        else:
+            logger.warning("管理員驗證失敗：密碼錯誤")
+            return jsonify({'success': False}), 200
+    except Exception as e:
+        logger.error(f"管理員驗證異常: {e}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
 
 

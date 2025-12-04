@@ -4,12 +4,16 @@
 # 注意：不設定 GOOGLE_CREDENTIALS，讓程式自動使用本地憑證檔案
 $env:SHEET_URL = "https://docs.google.com/spreadsheets/d/1n2cCI1glkErCq835kNJD5hXyk1iR7IptPlnKKPm0_0Y/edit?gid=0#gid=0"
 
-# BGG API 設定
-$env:BGG_API_TOKEN = "cfebcba0-a1a7-4792-a6a6-d8514ecdc8c7"
-$env:DEMO_MODE = "False"
+# 機密資訊：請從 .env 檔案讀取或手動設定
+if (-not $env:BGG_API_TOKEN) {
+    Write-Host "警告: BGG_API_TOKEN 未設定，BGG 功能可能無法使用" -ForegroundColor Yellow
+}
+if (-not $env:ADMIN_PASSWORD) {
+    Write-Host "警告: ADMIN_PASSWORD 未設定，管理員登入將無法使用" -ForegroundColor Yellow
+    Write-Host "請設定: `$env:ADMIN_PASSWORD = 'your_password'" -ForegroundColor Yellow
+}
 
-# 管理員密碼
-$env:ADMIN_PASSWORD = "RTKBG"
+$env:DEMO_MODE = "False"
 
 # 伺服器設定
 $env:PORT = "5000"
