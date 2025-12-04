@@ -110,7 +110,11 @@ requests
 ### 本地執行
 
 ```bash
-python flask_app.py
+# 開發模式（debug 啟用）
+$env:FLASK_ENV="development"; python serve.py
+
+# 生產模式（預設）
+python serve.py
 ```
 
 應用程式將在 `http://localhost:5000` 啟動
@@ -212,8 +216,7 @@ boardgame-web/
 │   ├── admin.html          # 管理員介面
 │   ├── script.js           # JavaScript
 │   └── style.css           # 樣式表
-├── flask_app.py            # Flask 應用程式入口
-├── serve.py                # 生產環境伺服器
+├── serve.py                # 應用程式入口（開發/生產）
 ├── pytest.ini              # pytest 配置
 ├── requirements.txt        # 生產依賴
 ├── requirements-dev.txt    # 開發依賴

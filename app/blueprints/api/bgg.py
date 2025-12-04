@@ -217,7 +217,7 @@ def link_game(game_name):
         if not bgg_id:
             return jsonify({'success': False, 'error': '缺少 bgg_id'}), 400
         
-        # 使用全局 manager（與 flask_app.py 共享）
+        # 使用全局 manager
         from flask import current_app
         mgr = current_app.config.get('boardgame_manager')
         if not mgr:

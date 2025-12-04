@@ -1,19 +1,5 @@
 # 桌遊館藏系統啟動腳本（修正版）
 # 設定所有必要的環境變數並啟動應用程式
-
-Write-Host "正在啟動桌遊館藏系統..." -ForegroundColor Cyan
-
-# 自動清理舊的伺服器程序 (Zombie Processes)
-Write-Host "檢查並清理舊的伺服器程序..." -ForegroundColor Yellow
-Get-CimInstance Win32_Process | Where-Object { 
-    ($_.Name -eq "python.exe" -or $_.Name -eq "pythonw.exe") -and 
-    ($_.CommandLine -like "*serve.py*" -or $_.CommandLine -like "*flask_app.py*") 
-} | ForEach-Object { 
-    Write-Host "  - 停止程序 ID: $($_.ProcessId)" -ForegroundColor Red
-    Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue 
-}
-Write-Host "清理完成。" -ForegroundColor Green
-
 # Google Sheets 設定
 # 注意：不設定 GOOGLE_CREDENTIALS，讓程式自動使用本地憑證檔案
 $env:SHEET_URL = "https://docs.google.com/spreadsheets/d/1n2cCI1glkErCq835kNJD5hXyk1iR7IptPlnKKPm0_0Y/edit?gid=0#gid=0"

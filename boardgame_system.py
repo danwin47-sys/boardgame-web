@@ -14,7 +14,7 @@ class BoardGameManager:
         self.member_service = MemberService(self.client)
         self.game_service = GameService(self.client, self.member_service)
         
-        # 用於相容 flask_app.py 中的 mgr.games = ...
+        # 用於相容應用程式中的 mgr.games = ...
         self.games = []
 
     @property
