@@ -293,6 +293,14 @@ const bggCategoryPromises = {};
 // 全局靜態快取數據
 let staticRecommendationsCache = null;
 
+// 追蹤每個分類目前顯示的遊戲數量
+// Key: `${source}-${category}`
+// Value: number (當前顯示數量)
+const categoryDisplayState = {};
+
+// 儲存當前分類的完整遊戲列表
+let currentCategoryGames = [];
+
 // 獲取分類數據 (返回 Promise)
 function fetchCategoryData(source, category) {
     const cacheKey = `${source}-${category}`;
@@ -403,6 +411,10 @@ function loadBGGCategory(category) {
 
     currentBGGCategory = category;
 
+    // 重置該分類的顯示狀態
+    const categoryKey = `${currentBGGSource}-${category}`;
+    categoryDisplayState[categoryKey] = 10;
+
     // 更新标签样式
     document.querySelectorAll('.bgg-tab').forEach(tab => {
         tab.classList.remove('active');
@@ -446,17 +458,35 @@ function getCategoryIcon(category) {
     return icons[category] || '';
 }
 
-// 显示分类游戏
+// 显示分类游戏（支援分頁顯示）
 function displayCategoryGames(games) {
     const listDiv = document.getElementById('bggCategoryList');
-    listDiv.innerHTML = '';
 
     if (!games || games.length === 0) {
         listDiv.innerHTML = '<p style="text-align: center; padding: 20px; color: #718096;">暫無遊戲</p>';
         return;
     }
 
-    games.forEach((game, index) => {
+    // 儲存完整遊戲列表
+    currentCategoryGames = games;
+
+    // 取得當前分類的 key
+    const categoryKey = `${currentBGGSource}-${currentBGGCategory}`;
+
+    // 初始化顯示狀態（預設顯示 10 款）
+    if (!categoryDisplayState[categoryKey]) {
+        categoryDisplayState[categoryKey] = 10;
+    }
+
+    // 清空列表
+    listDiv.innerHTML = '';
+
+    // 取得當前應該顯示的數量
+    const displayCount = Math.min(categoryDisplayState[categoryKey], games.length);
+
+    // 顯示遊戲卡片
+    for (let i = 0; i < displayCount; i++) {
+        const game = games[i];
         const card = document.createElement('div');
         card.className = 'bgg-category-card';
         card.style.cursor = 'pointer';
@@ -466,7 +496,7 @@ function displayCategoryGames(games) {
         const hasChineseName = !!game.chinese_name;
 
         card.innerHTML = `
-            <div class="bgg-card-rank">#${index + 1}</div>
+            <div class="bgg-card-rank">#${i + 1}</div>
             ${game.thumbnail ? `<img src="${game.thumbnail}" alt="${displayName}" class="bgg-card-thumbnail">` : '<div class="bgg-card-no-image">無圖片</div>'}
             <div class="bgg-card-info">
                 <h4>${displayName}</h4>
@@ -481,7 +511,30 @@ function displayCategoryGames(games) {
         });
 
         listDiv.appendChild(card);
-    });
+    }
+
+    // 如果還有更多遊戲，顯示「加載更多」按鈕
+    if (displayCount < games.length) {
+        const loadMoreBtn = document.createElement('div');
+        loadMoreBtn.className = 'load-more-btn';
+        loadMoreBtn.innerHTML = `
+            <button class="btn primary" onclick="loadMoreGames()">
+                ▼ 顯示更多遊戲 (還有 ${games.length - displayCount} 款)
+            </button>
+        `;
+        listDiv.appendChild(loadMoreBtn);
+    }
+}
+
+// 加載更多遊戲
+function loadMoreGames() {
+    const categoryKey = `${currentBGGSource}-${currentBGGCategory}`;
+
+    // 增加顯示數量（每次增加 10 款）
+    categoryDisplayState[categoryKey] = (categoryDisplayState[categoryKey] || 10) + 10;
+
+    // 重新顯示遊戲（使用儲存的完整列表）
+    displayCategoryGames(currentCategoryGames);
 }
 
 // 移除 HTML 標籤
