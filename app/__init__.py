@@ -50,7 +50,7 @@ def create_app(config_name=None):
     
     # 初始化 BoardGameManager（全域共享）
     with app.app_context():
-        from boardgame_system import BoardGameManager
+        from core.facade import BoardGameManager
         app.config['boardgame_manager'] = BoardGameManager()
         logger.info("BoardGameManager 已初始化")
     

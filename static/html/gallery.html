@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>桌遊展示牆 - 瑞昱桌遊社</title>
     <!-- 引入 CSS 樣式表 -->
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="gallery.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/gallery.css">
 </head>
 
 <body>
@@ -21,7 +21,7 @@
             <span id="totalGamesCount">載入中...</span>
             <span id="filteredGamesCount"></span>
         </div>
-</header>
+    </header>
 
     <!-- 篩選器區域 -->
     <section class="filters-section">
@@ -54,9 +54,12 @@
             <div class="filter-group">
                 <h3>庫存狀態</h3>
                 <div class="filter-tags">
-                    <button class="filter-tag active" data-filter-type="status" data-value="all" onclick="toggleStatusFilter('all')">全部</button>
-                    <button class="filter-tag" data-filter-type="status" data-value="在庫" onclick="toggleStatusFilter('在庫')">在庫</button>
-                    <button class="filter-tag" data-filter-type="status" data-value="借出" onclick="toggleStatusFilter('借出')">借出</button>
+                    <button class="filter-tag active" data-filter-type="status" data-value="all"
+                        onclick="toggleStatusFilter('all')">全部</button>
+                    <button class="filter-tag" data-filter-type="status" data-value="在庫"
+                        onclick="toggleStatusFilter('在庫')">在庫</button>
+                    <button class="filter-tag" data-filter-type="status" data-value="借出"
+                        onclick="toggleStatusFilter('借出')">借出</button>
                 </div>
             </div>
 
@@ -84,7 +87,7 @@
     </div>
 
     <!-- 引入 JavaScript -->
-    <script src="gallery.js"></script>
+    <script src="/js/gallery.js"></script>
 </body>
 
 </html>

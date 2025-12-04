@@ -14,7 +14,7 @@ gallery_bp = Blueprint('gallery', __name__, url_prefix='/api/gallery')
 def get_manager():
     """從 app.config 獲取 BoardGameManager"""
     if 'boardgame_manager' not in current_app.config:
-        from boardgame_system import BoardGameManager
+        from core.facade import BoardGameManager
         logger.info("正在初始化 Google Sheets 連線...")
         current_app.config['boardgame_manager'] = BoardGameManager()
     return current_app.config['boardgame_manager']

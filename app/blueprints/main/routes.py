@@ -14,20 +14,30 @@ main_bp = Blueprint('main', __name__)
 @main_bp.route('/')
 def home():
     """首頁"""
-    return send_from_directory('../static', 'index.html')
+    return send_from_directory('../static/html', 'index.html')
+
+@main_bp.route('/admin.html')
+def admin_page():
+    """管理員頁面"""
+    return send_from_directory('../static/html', 'admin.html')
+
+@main_bp.route('/gallery.html')
+def gallery_page():
+    """展示牆頁面"""
+    return send_from_directory('../static/html', 'gallery.html')
 
 
 @main_bp.route('/favicon.ico')
 def favicon():
     """Favicon"""
-    return send_from_directory('../static', 'favicon.svg', mimetype='image/svg+xml')
+    return send_from_directory('../static/images', 'favicon.svg', mimetype='image/svg+xml')
 
 
 @main_bp.route('/api/health')
 def health_check():
     """健康檢查端點"""
     from flask import current_app
-    from boardgame_system import BoardGameManager
+    from core.facade import BoardGameManager
     
     # 確保 manager 在 config 中
     if 'boardgame_manager' not in current_app.config:
@@ -48,7 +58,7 @@ def sys_info():
     
     info = {}
     try:
-        from boardgame_system import BoardGameManager
+        from core.facade import BoardGameManager
         
         info['cwd'] = os.getcwd()
         
