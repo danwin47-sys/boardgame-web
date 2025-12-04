@@ -4,6 +4,9 @@
 - 開發環境：使用 Flask 內建伺服器（設定 FLASK_ENV=development）
 - 生產環境：使用 Waitress WSGI 伺服器（預設）
 """
+from dotenv import load_dotenv
+load_dotenv()  # 自動載入 .env 檔案
+
 from waitress import serve
 from app import create_app
 import logging
