@@ -229,8 +229,12 @@ function renderGames() {
 
     grid.innerHTML = filteredGames.map(game => {
         const imageUrl = getGameImage(game);
-        const statusClass = game.status === '在庫' ? 'available' : 'borrowed';
-        const statusText = game.status === '在庫' ? '在庫' : '借出';
+        
+        // 改進狀態判斷邏輯：只有明確標示為"借出"或有借閱人才顯示為借出
+        const isBorrowed = (game.status && game.status.includes('借出')) || 
+                          (game.borrower && game.borrower.trim() !== '' && game.borrower !== '-');
+        const statusClass = isBorrowed ? 'borrowed' : 'available';
+        const statusText = isBorrowed ? '借出' : '在庫';
 
         return `
             <div class="game-card" onclick="showGameDetail('${escapeHtml(game.id)}')">
