@@ -29,6 +29,7 @@ wheels/
 boardgame-bot-5f6751855184.json
 *.json
 !package.json
+!static/data/recommendations.json
 
 # IDE
 .vscode/
