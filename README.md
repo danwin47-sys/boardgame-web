@@ -69,7 +69,10 @@ pip install -r requirements.txt
 
 ### 4. 環境變數
 
-建立 `.env` 檔案或設定系統環境變數（參考 `.env.example`）：
+建立 `.env` 檔案（系統會自動讀取）：
+
+1. 複製範本：`cp .env.example .env`
+2. 編輯 `.env` 填入以下資訊：
 
 **必要設定：**
 
@@ -95,6 +98,16 @@ python scripts/update/download_bgg_dumps.py
 # 匯入到本地資料庫
 python scripts/update/import_bgg_ranks.py
 ```
+
+### 6. 部署 (Render)
+
+若部署至 Render.com，請使用 **Secret Files** 設定環境變數：
+
+1. 進入 Render Dashboard > Environment
+2. 點擊 **Add Secret File**
+3. Filename 輸入 `.env`
+4. 內容貼上您的 `.env` 檔案內容（包含密碼與 Token）
+5. 儲存後 Render 會自動重新部署
 
 ## 📖 使用說明
 
