@@ -3,8 +3,7 @@ let allGames = [];
 let filteredGames = [];
 let activeFilters = {
     players: new Set(),
-    types: new Set(),
-    tags: new Set(),
+    location: new Set(),
     status: 'all'
 };
 
@@ -22,7 +21,6 @@ async function loadGames() {
         if (data.success) {
             allGames = data.games;
             document.getElementById('totalGamesCount').textContent = `共 ${data.total} 款桌遊`;
-            processFilters();
             applyFilters();
             renderGames();
         } else {
@@ -35,61 +33,7 @@ async function loadGames() {
 }
 
 // ==================== 篩選器處理 ====================
-function processFilters() {
-    const playersSet = new Set();
-    const typesSet = new Set();
-    const tagsSet = new Set();
-
-    allGames.forEach(game => {
-        // 收集人數資訊
-        const minPlayers = game.minPlayers || 1;
-        const maxPlayers = game.maxPlayers || 10;
-        for (let i = minPlayers; i <= Math.min(maxPlayers, 12); i++) {
-            playersSet.add(i);
-        }
-
-        // 收集類型
-        if (game.types && game.types.length > 0) {
-            game.types.forEach(t => typesSet.add(t));
-        }
-
-        // 收集標籤
-        if (game.tags && game.tags.length > 0) {
-            game.tags.forEach(t => tagsSet.add(t));
-        }
-    });
-
-    // 渲染人數篩選器
-    const playersList = Array.from(playersSet).sort((a, b) => a - b);
-    renderFilterTags('playersFilter', playersList, 'players', (p) => `${p}人`);
-
-    // 渲染類型篩選器（如果有）
-    if (typesSet.size > 0) {
-        document.getElementById('typesFilterGroup').style.display = 'block';
-        renderFilterTags('typesFilter', Array.from(typesSet).sort(), 'types', (t) => t);
-    }
-
-    // 渲染標籤篩選器
-    if (tagsSet.size > 0) {
-        renderFilterTags('tagsFilter', Array.from(tagsSet).sort(), 'tags', (t) => t);
-    } else {
-        // 如果沒有標籤，隱藏標籤篩選區塊
-        const tagsGroup = document.querySelector('#tagsFilter').parentElement;
-        tagsGroup.style.display = 'none';
-    }
-}
-
-function renderFilterTags(containerId, items, filterType, labelFunc) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = items.map(item => `
-        <button class="filter-tag" 
-                data-filter-type="${filterType}" 
-                data-value="${item}"
-                onclick="toggleFilter('${filterType}', ${typeof item === 'number' ? item : `'${item}'`})">
-            ${labelFunc(item)}
-        </button>
-    `).join('');
-}
+// 篩選器已在 HTML 中固定定義，不需要動態生成
 
 function toggleFilter(type, value) {
     const filterSet = activeFilters[type];
@@ -147,8 +91,7 @@ function updateFilterButtonStyles() {
 function clearAllFilters() {
     activeFilters = {
         players: new Set(),
-        types: new Set(),
-        tags: new Set(),
+        location: new Set(),
         status: 'all'
     };
 
@@ -179,25 +122,20 @@ function applyFilters() {
             const matchPlayers = [...activeFilters.players].every(p => {
                 const min = game.minPlayers || 1;
                 const max = game.maxPlayers || 10;
+                if (p === '10+') {
+                    return max >= 10;
+                }
                 return p >= min && p <= max;
             });
             if (!matchPlayers) return false;
         }
 
-        // 類型篩選 (AND邏輯：遊戲必須包含所有選中的類型)
-        if (activeFilters.types.size > 0) {
-            const matchTypes = game.types && [...activeFilters.types].every(t =>
-                game.types.includes(t)
+        // 位置篩選 (AND邏輯：遊戲必須符合所有選中的位置)
+        if (activeFilters.location.size > 0) {
+            const matchLocation = [...activeFilters.location].every(loc =>
+                game.location === loc
             );
-            if (!matchTypes) return false;
-        }
-
-        // 標籤篩選 (AND邏輯：遊戲必須包含所有選中的標籤)
-        if (activeFilters.tags.size > 0) {
-            const matchTags = game.tags && [...activeFilters.tags].every(t =>
-                game.tags.includes(t)
-            );
-            if (!matchTags) return false;
+            if (!matchLocation) return false;
         }
 
         return true;
@@ -229,10 +167,9 @@ function renderGames() {
 
     grid.innerHTML = filteredGames.map(game => {
         const imageUrl = getGameImage(game);
-        
-        // 改進狀態判斷邏輯：只有明確標示為"借出"或有借閱人才顯示為借出
-        const isBorrowed = (game.status && game.status.includes('借出')) || 
-                          (game.borrower && game.borrower.trim() !== '' && game.borrower !== '-');
+
+        // 狀態判斷邏輯：只根據 status 欄位判斷借出狀態
+        const isBorrowed = game.status === '借出';
         const statusClass = isBorrowed ? 'borrowed' : 'available';
         const statusText = isBorrowed ? '借出' : '在庫';
 
