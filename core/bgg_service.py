@@ -221,34 +221,472 @@ class BGGService:
             logger.error(f"Error getting hot games: {e}")
             return []
     
+    def get_party_game_ids(self, limit: int = 100) -> List[int]:
+        """取得派對桌遊 ID 列表（不呼叫 API，直接返回 ID）"""
+        # 派對遊戲：經典遊戲 + 2024熱門
+        party_game_ids = [
+            # 經典派對遊戲
+            178900,  # Codenames
+            39856,   # Dixit
+            166384,  # Spyfall
+            262543,  # Wavelength
+            254640,  # Just One
+            181304,  # Welcome To...
+            124742,  # Camel Up
+            139030,  # Skull
+            131835,  # Coup
+            41114,   # The Resistance
+            225694,  # Decrypto
+            188834,  # Secret Hitler
+            129622,  # Love Letter
+            # 2024 熱門派對遊戲
+            347805,  # Green Team Wins
+            20100,   # Wits and Wagers
+            329839,  # So Clover
+            219215,  # Werewords
+            375651,  # That's Not a Hat
+            46213,   # Telestrations
+            256788,  # Detective Club
+            253664,  # Taco, Cat, Goat, Cheese, Pizza
+            114438,  # But Wait, There's More
+            # 更多派對遊戲
+            131260,  # One Night Ultimate Werewolf
+            244521,  # Time's Up!
+            40692,   # Sushi Go!
+            163412,  # Splendor (party-friendly)
+            136063,  # Monikers
+            177478,  # Insider
+            171131,  # Pitchcar
+            42215,   # Tsuro
+            2726,    # Bohnanza
+            37380,   # Dixit Odyssey
+            98778,   # Hanabi
+            13,      # Catan (family/party)
+            194834,  # Costa Rica
+            181449,  # Spyfall 2
+            171273,  # The Mind
+            256951,  # Wavelength Party Edition
+            229853,  # A Fake Artist Goes to New York
+            184267,  # One Night Ultimate Alien
+            161533,  # Joking Hazard
+            177383,  # Stealth Panda
+            193738,  # Say Anything
+            110327,  # Jungle Speed
+            122515,  # 6 nimmt!
+            8203,    # The Resistance: Avalon
+            154203,  # Mascarade
+            40398,   # Incan Gold
+            18602,   # Cash 'n Guns
+            126042,  # Geistes Blitz
+            99732,   # Times Up! Party
+        ]
+        return party_game_ids[:limit]
+    
     def get_party_games(self, limit: int = 10) -> List[Dict[str, Any]]:
         """取得派對桌遊（使用精選遊戲 ID）"""
-        # 派對遊戲: Codenames, Dixit, Spyfall, Wavelength, Just One等
-        # Added: The Resistance (41114), Decrypto (225694), Secret Hitler (188834), Love Letter (129622)
-        party_game_ids = [178900, 39856, 166384, 262543, 254640, 181304, 124742, 139030, 131835, 41114, 225694, 188834, 129622]
-        return self._get_games_by_ids(party_game_ids[:limit])
+        # 派對遊戲：經典遊戲 + 2024熱門
+        party_game_ids = [
+            # 經典派對遊戲
+            178900,  # Codenames
+            39856,   # Dixit
+            166384,  # Spyfall
+            262543,  # Wavelength
+            254640,  # Just One
+            181304,  # Welcome To...
+            124742,  # Camel Up
+            139030,  # Skull
+            131835,  # Coup
+            41114,   # The Resistance
+            225694,  # Decrypto
+            188834,  # Secret Hitler
+            129622,  # Love Letter
+            # 2024 熱門派對遊戲
+            347805,  # Green Team Wins
+            20100,   # Wits and Wagers
+            329839,  # So Clover
+            219215,  # Werewords
+            375651,  # That's Not a Hat
+            46213,   # Telestrations
+            256788,  # Detective Club
+            253664,  # Taco, Cat, Goat, Cheese, Pizza
+            114438,  # But Wait, There's More
+            # 更多派對遊戲
+            131260,  # One Night Ultimate Werewolf
+            244521,  # Time's Up!
+            40692,   # Sushi Go!
+            163412,  # Splendor (party-friendly)
+            136063,  # Monikers
+            177478,  # Insider
+            171131,  # Pitchcar
+            42215,   # Tsuro
+            2726,    # Bohnanza
+            37380,   # Dixit Odyssey
+            98778,   # Hanabi
+            13,      # Catan (family/party)
+            194834,  # Costa Rica
+            181449,  # Spyfall 2
+            171273,  # The Mind
+            256951,  # Wavelength Party Edition
+            229853,  # A Fake Artist Goes to New York
+            184267,  # One Night Ultimate Alien
+            161533,  # Joking Hazard
+            177383,  # Stealth Panda
+            193738,  # Say Anything
+            110327,  # Jungle Speed
+            122515,  # 6 nimmt!
+            8203,    # The Resistance: Avalon
+            154203,  # Mascarade
+            40398,   # Incan Gold
+            18602,   # Cash 'n Guns
+            126042,  # Geistes Blitz
+            99732,   # Times Up! Party
+        ]
+        return self._get_games_by_ids(self.get_party_game_ids(limit))
+    
+    
+    def get_strategy_game_ids(self, limit: int = 100) -> List[int]:
+        """取得策略桌遊 ID 列表（不呼叫 API，直接返回 ID）"""
+        # 策略遊戲：經典 + 2024熱門
+        strategy_game_ids = [
+            # 經典策略遊戲
+            174430,  # Gloomhaven
+            224517,  # Brass: Birmingham
+            167791,  # Terraforming Mars
+            266192,  # Wingspan
+            233078,  # Twilight Imperium (Fourth Edition)
+            161936,  # Pandemic Legacy: Season 1
+            220308,  # Gaia Project
+            182028,  # Through the Ages: A New Story of Civilization
+            173346,  # 7 Wonders Duel
+            169786,  # Scythe
+            162886,  # Spirit Island
+            342942,  # Ark Nova
+            316554,  # Dune: Imperium
+            # 2024 熱門策略遊戲
+            329500,  # Unconscious Mind
+            415848,  # Lands of Evershade
+            359871,  # Arcs
+            421006,  # The Lord of the Rings: Duel for Middle-Earth
+            400602,  # Civolution
+            418059,  # SETI: Search for Extraterrestrial Intelligence
+            371183,  # Joyride: Survival of the Fastest
+            403150,  # World Order
+            428099,  # Revenant
+            237182,  # Root
+            420805,  # Black Forest
+            413246,  # Bomb Busters
+            414317,  # Harmonies
+            321608,  # Hegemony: Lead Your Class to Victory
+            417197,  # Rebirth
+            338376,  # A Gest of Robin Hood
+            392492,  # Stupor Mundi
+            298231,  # Skyrise
+            407343,  # Ironwood
+            338960,  # Slay the Spire: The Board Game
+            402669,  # Sand
+            # 更多經典策略
+            186834,  # Great Western Trail
+            187645,  # Concordia
+            175914,  # Viticulture Essential Edition
+            230802,  # Azul (strategy-light)
+            205637,  # Arkham Horror: The Card Game
+            12333,   # Twilight Struggle
+            68448,   # 7 Wonders
+            148228,  # Splendor
+            311193,  # Everdell
+            284083,  # The Castles of Tuscany
+            307377,  # Paladins of the West Kingdom
+            266810,  # Barrage
+            276025,  # Res Arcana
+            177736,  # A Feast for Odin
+        ]
+        return strategy_game_ids[:limit]
     
     def get_strategy_games(self, limit: int = 10) -> List[Dict[str, Any]]:
         """取得策略桌遊（使用精選遊戲 ID）"""
-        # 策略遊戲: Gloomhaven, Brass Birmingham, Terraforming Mars, Wingspan等
-        # Added: Scythe (169786), Spirit Island (162886), Ark Nova (342942), Dune: Imperium (316554)
-        strategy_game_ids = [174430, 224517, 167791, 266192, 233078, 161936, 220308, 182028, 173346, 169786, 162886, 342942, 316554]
-        return self._get_games_by_ids(strategy_game_ids[:limit])
+        # 策略遊戲：經典 + 2024熱門
+        strategy_game_ids = [
+            # 經典策略遊戲
+            174430,  # Gloomhaven
+            224517,  # Brass: Birmingham
+            167791,  # Terraforming Mars
+            266192,  # Wingspan
+            233078,  # Twilight Imperium (Fourth Edition)
+            161936,  # Pandemic Legacy: Season 1
+            220308,  # Gaia Project
+            182028,  # Through the Ages: A New Story of Civilization
+            173346,  # 7 Wonders Duel
+            169786,  # Scythe
+            162886,  # Spirit Island
+            342942,  # Ark Nova
+            316554,  # Dune: Imperium
+            # 2024 熱門策略遊戲
+            329500,  # Unconscious Mind
+            415848,  # Lands of Evershade
+            359871,  # Arcs
+            421006,  # The Lord of the Rings: Duel for Middle-Earth
+            400602,  # Civolution
+            418059,  # SETI: Search for Extraterrestrial Intelligence
+            371183,  # Joyride: Survival of the Fastest
+            403150,  # World Order
+            428099,  # Revenant
+            237182,  # Root
+            420805,  # Black Forest
+            413246,  # Bomb Busters
+            414317,  # Harmonies
+            321608,  # Hegemony: Lead Your Class to Victory
+            417197,  # Rebirth
+            338376,  # A Gest of Robin Hood
+            392492,  # Stupor Mundi
+            298231,  # Skyrise
+            407343,  # Ironwood
+            338960,  # Slay the Spire: The Board Game
+            402669,  # Sand
+            # 更多經典策略
+            186834,  # Great Western Trail
+            187645,  # Concordia
+            175914,  # Viticulture Essential Edition
+            230802,  # Azul (strategy-light)
+            205637,  # Arkham Horror: The Card Game
+            12333,   # Twilight Struggle
+            68448,   # 7 Wonders
+            148228,  # Splendor
+            311193,  # Everdell
+            284083,  # The Castles of Tuscany
+            307377,  # Paladins of the West Kingdom
+            266810,  # Barrage
+            276025,  # Res Arcana
+            177736,  # A Feast for Odin
+        ]
+        return self._get_games_by_ids(self.get_strategy_game_ids(limit))
+    
+    
+    def get_family_game_ids(self, limit: int = 100) -> List[int]:
+        """取得家庭桌遊 ID 列表（不呼叫 API，直接返回 ID）"""
+        # 家庭遊戲：經典 + 2024熱門
+        family_game_ids = [
+            # 經典家庭遊戲
+            13,      # CATAN
+            9209,    # Ticket to Ride
+            148228,  # Splendor
+            230802,  # Azul
+            822,     # Carcassonne
+            30549,   # Pandemic
+            31260,   # Agricola
+            68448,   # 7 Wonders
+            84876,   # The Castles of Burgundy
+            204583,  # Kingdomino
+            324856,  # The Crew: Mission Deep Sea
+            295947,  # Cascadia
+            281259,  # The Isle of Cats
+            # 2024 熱門家庭遊戲
+            367204,  # Trio (aka Nana)
+            317351,  # The Crew: Mission Deep Sea (alt ID)
+            396825,  # MLEM: Space Agency
+            395982,  # River Valley Glass Works
+            418464,  # Nune Attack
+            396918,  # Captain Flip
+            388147,  # Entaria
+            393962,  # Aqua Biodiversity in the Oceans
+            399127,  # Zooies
+            385573,  # Festival
+            396116,  # Happy Home
+            360061,  # Decorum
+            346610,  # Verdant
+            377030,  # Shelfie
+            375747,  # Kids Chronicles - The Old Oak Prophecy
+            37780,   # Incan Gold
+            386566,  # Skyrise
+            409945,  # Santa's Workshop
+            399623,  # Umbrella
+            # 更多家庭遊戲
+            178900,  # Codenames (family-friendly)
+            266192,  # Wingspan
+            171131,  # Pitchcar
+            8217,    # Rummikub
+            822,     # Carcassonne
+            40692,   # Sushi Go!
+            98778,   # Hanabi
+            42215,   # Tsuro
+            40398,   # Incan Gold (duplicate check)
+            2651,    # Power Grid
+            128882,  # Escape: The Curse of the Temple
+            172308,  # Stone Age
+            169786,  # Scythe (family-weight for experienced)
+            110308,  # Forbidden Island
+            254640,  # Just One
+        ]
+        return family_game_ids[:limit]
     
     def get_family_games(self, limit: int = 10) -> List[Dict[str, Any]]:
         """取得家庭桌遊（使用精選遊戲 ID）"""
-        # 家庭遊戲: Catan, Ticket to Ride, Splendor, Azul, Carcassonne等
-        # Added: Kingdomino (204583), 7 Wonders Duel (173346 - wait, duplicate in strategy? let's use 7 Wonders 68448 is already there?), 
-        # Let's add: The Crew (324856), Cascadia (295947), Isle of Cats (281259)
-        family_game_ids = [13, 9209, 148228, 230802, 822, 30549, 31260, 68448, 84876, 204583, 324856, 295947, 281259]
-        return self._get_games_by_ids(family_game_ids[:limit])
+        # 家庭遊戲：經典 + 2024熱門
+        family_game_ids = [
+            # 經典家庭遊戲
+            13,      # CATAN
+            9209,    # Ticket to Ride
+            148228,  # Splendor
+            230802,  # Azul
+            822,     # Carcassonne
+            30549,   # Pandemic
+            31260,   # Agricola
+            68448,   # 7 Wonders
+            84876,   # The Castles of Burgundy
+            204583,  # Kingdomino
+            324856,  # The Crew: Mission Deep Sea
+            295947,  # Cascadia
+            281259,  # The Isle of Cats
+            # 2024 熱門家庭遊戲
+            367204,  # Trio (aka Nana)
+            317351,  # The Crew: Mission Deep Sea (alt ID)
+            396825,  # MLEM: Space Agency
+            395982,  # River Valley Glass Works
+            418464,  # Nune Attack
+            396918,  # Captain Flip
+            388147,  # Entaria
+            393962,  # Aqua Biodiversity in the Oceans
+            399127,  # Zooies
+            385573,  # Festival
+            396116,  # Happy Home
+            360061,  # Decorum
+            346610,  # Verdant
+            377030,  # Shelfie
+            375747,  # Kids Chronicles - The Old Oak Prophecy
+            37780,   # Incan Gold
+            386566,  # Skyrise
+            409945,  # Santa's Workshop
+            399623,  # Umbrella
+            # 更多家庭遊戲
+            178900,  # Codenames (family-friendly)
+            266192,  # Wingspan
+            171131,  # Pitchcar
+            8217,    # Rummikub
+            822,     # Carcassonne
+            40692,   # Sushi Go!
+            98778,   # Hanabi
+            42215,   # Tsuro
+            40398,   # Incan Gold (duplicate check)
+            2651,    # Power Grid
+            128882,  # Escape: The Curse of the Temple
+            172308,  # Stone Age
+            169786,  # Scythe (family-weight for experienced)
+            110308,  # Forbidden Island
+            254640,  # Just One
+        ]
+        return self._get_games_by_ids(self.get_family_game_ids(limit))
+    
+    
+    def get_children_game_ids(self, limit: int = 100) -> List[int]:
+        """取得兒童桌遊 ID 列表（不呼叫 API，直接返回 ID）"""
+        # 兒童遊戲：經典 + 2024熱門
+        children_game_ids = [
+            # 經典兒童遊戲
+            70323,   # King of Tokyo
+            256952,  # Zombie Kidz Evolution
+            41010,   # My First Carcassonne
+            163412,  # Patchwork
+            42215,   # Tsuro
+            244521,  # Time's Up! Kids
+            244522,  # Time's Up! Family
+            123540,  # Spot It! (Dobble)
+            193621,  # My Little Scythe
+            91514,   # Rhino Hero
+            177524,  # Ice Cool
+            150484,  # Outfoxed!
+            125921,  # Catan Junior
+            # 2024 熱門兒童遊戲
+            218333,  # Rhino Hero: Super Battle
+            270844,  # Coconuts
+            344254,  # Yummy Yummy Monster Tummy
+            343833,  # Turtle Splash!
+            17329,   # Animal Upon Animal
+            295490,  # Dodo
+            233020,  # Fireball Island: The Curse of Vul-Kar
+            247160,  # Dinosaur Tea Party
+            191925,  # Bandido
+            361861,  # Scribbly Gum
+            226320,  # My Little Scythe (duplicate check)
+            338460,  # The Isle of Cats: Explore & Draw
+            # 更多兒童遊戲
+            204583,  # Kingdomino (kid-friendly)
+            40692,   # Sushi Go!
+            40398,   # Incan Gold (kids version)
+            110308,  # Forbidden Island
+            128882,  # Escape: The Curse of the Temple
+            954,     # Labyrinth
+            822,     # My First Carcassonne (base)
+            188834,  # Secret Hitler (older kids)
+            2655,    # Hive
+            13,      # Catan (family with kids)
+            9209,    # Ticket to Ride (family)
+            230802,  # Azul (abstract for kids)
+            98778,   # Hanabi (cooperative)
+            13,      # CATAN (duplicate - family game)
+            181304,  # Welcome To... (older kids)
+            131260,  # One Night Ultimate Werewolf (older kids)
+            127398,  # Qwirkle
+            822,     # Carcassonne (gateway)
+            40692,   # Sushi Go! Party
+            36218,   # Dominion
+            68448,   # 7 Wonders (family)
+        ]
+        return children_game_ids[:limit]
     
     def get_children_games(self, limit: int = 10) -> List[Dict[str, Any]]:
         """取得兒童桌遊（使用精選遊戲 ID）"""
-        # 兒童遊戲: King of Tokyo, Zombie Kidz Evolution, My First Carcassonne等
-        # Added: Rhino Hero (91514), Ice Cool (177524), Outfoxed! (150484), Catan Junior (125921)
-        children_game_ids = [70323, 256952, 41010, 163412, 42215, 244521, 244522, 123540, 193621, 91514, 177524, 150484, 125921]
-        return self._get_games_by_ids(children_game_ids[:limit])
+        # 兒童遊戲：經典 + 2024熱門
+        children_game_ids = [
+            # 經典兒童遊戲
+            70323,   # King of Tokyo
+            256952,  # Zombie Kidz Evolution
+            41010,   # My First Carcassonne
+            163412,  # Patchwork
+            42215,   # Tsuro
+            244521,  # Time's Up! Kids
+            244522,  # Time's Up! Family
+            123540,  # Spot It! (Dobble)
+            193621,  # My Little Scythe
+            91514,   # Rhino Hero
+            177524,  # Ice Cool
+            150484,  # Outfoxed!
+            125921,  # Catan Junior
+            # 2024 熱門兒童遊戲
+            218333,  # Rhino Hero: Super Battle
+            270844,  # Coconuts
+            344254,  # Yummy Yummy Monster Tummy
+            343833,  # Turtle Splash!
+            17329,   # Animal Upon Animal
+            295490,  # Dodo
+            233020,  # Fireball Island: The Curse of Vul-Kar
+            247160,  # Dinosaur Tea Party
+            191925,  # Bandido
+            361861,  # Scribbly Gum
+            226320,  # My Little Scythe (duplicate check)
+            338460,  # The Isle of Cats: Explore & Draw
+            # 更多兒童遊戲
+            204583,  # Kingdomino (kid-friendly)
+            40692,   # Sushi Go!
+            40398,   # Incan Gold (kids version)
+            110308,  # Forbidden Island
+            128882,  # Escape: The Curse of the Temple
+            954,     # Labyrinth
+            822,     # My First Carcassonne (base)
+            188834,  # Secret Hitler (older kids)
+            2655,    # Hive
+            13,      # Catan (family with kids)
+            9209,    # Ticket to Ride (family)
+            230802,  # Azul (abstract for kids)
+            98778,   # Hanabi (cooperative)
+            13,      # CATAN (duplicate - family game)
+            181304,  # Welcome To... (older kids)
+            131260,  # One Night Ultimate Werewolf (older kids)
+            127398,  # Qwirkle
+            822,     # Carcassonne (gateway)
+            40692,   # Sushi Go! Party
+            36218,   # Dominion
+            68448,   # 7 Wonders (family)
+        ]
+        return self._get_games_by_ids(self.get_children_game_ids(limit))
     
     def _get_games_by_ids(self, game_ids: List[int]) -> List[Dict[str, Any]]:
         """根據 ID 列表獲取遊戲資訊"""
