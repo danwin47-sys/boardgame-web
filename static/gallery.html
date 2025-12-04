@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>桌遊展示牆 - 瑞昱桌遊社</title>
+    <!-- 引入 CSS 樣式表 -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="gallery.css">
+</head>
+
+<body>
+    <!-- 標題欄 -->
+    <header class="gallery-header">
+        <div class="header-content">
+            <h1>🖼️ 桌遊展示牆</h1>
+            <a href="/" class="back-link">← 返回管理系統</a>
+        </div>
+        <div class="stats-summary">
+            <span id="totalGamesCount">載入中...</span>
+            <span id="filteredGamesCount"></span>
+        </div>
+</header>
+
+    <!-- 篩選器區域 -->
+    <section class="filters-section">
+        <div class="filter-container">
+            <!-- 人數篩選 -->
+            <div class="filter-group">
+                <h3>遊玩人數</h3>
+                <div class="filter-tags" id="playersFilter">
+                    <!-- 動態生成 -->
+                </div>
+            </div>
+
+            <!-- 類型篩選 -->
+            <div class="filter-group" id="typesFilterGroup" style="display: none;">
+                <h3>遊戲類型</h3>
+                <div class="filter-tags" id="typesFilter">
+                    <!-- 動態生成 -->
+                </div>
+            </div>
+
+            <!-- 標籤篩選 -->
+            <div class="filter-group">
+                <h3>遊戲標籤</h3>
+                <div class="filter-tags" id="tagsFilter">
+                    <!-- 動態生成 -->
+                </div>
+            </div>
+
+            <!-- 狀態篩選 -->
+            <div class="filter-group">
+                <h3>庫存狀態</h3>
+                <div class="filter-tags">
+                    <button class="filter-tag active" data-filter-type="status" data-value="all" onclick="toggleStatusFilter('all')">全部</button>
+                    <button class="filter-tag" data-filter-type="status" data-value="在庫" onclick="toggleStatusFilter('在庫')">在庫</button>
+                    <button class="filter-tag" data-filter-type="status" data-value="借出" onclick="toggleStatusFilter('借出')">借出</button>
+                </div>
+            </div>
+
+            <!-- 清除全部篩選 -->
+            <button class="clear-filters-btn" onclick="clearAllFilters()">
+                🔄 清除所有篩選
+            </button>
+        </div>
+    </section>
+
+    <!-- 展示牆網格 -->
+    <main class="gallery-container">
+        <div class="gallery-grid" id="galleryGrid">
+            <!-- 遊戲卡片將在此動態生成 -->
+            <div class="loading-message">載入中...</div>
+        </div>
+    </main>
+
+    <!-- 遊戲詳情模態視窗 -->
+    <div class="modal" id="gameModal">
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal-content" id="modalContent">
+            <!-- 遊戲詳情將在此動態生成 -->
+        </div>
+    </div>
+
+    <!-- 引入 JavaScript -->
+    <script src="gallery.js"></script>
+</body>
+
+</html>

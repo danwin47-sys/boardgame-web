@@ -23,10 +23,12 @@ def register_blueprints(app):
     from .api.games import game_bp
     from .api.bgg import bgg_bp
     from .api.members import member_bp
+    from .api.gallery import gallery_bp
     app.register_blueprint(game_bp)
     app.register_blueprint(bgg_bp)
     app.register_blueprint(member_bp)
-    logger.info("已註冊 API blueprints (games, bgg, members)")
+    app.register_blueprint(gallery_bp)
+    logger.info("已註冊 API blueprints (games, bgg, members, gallery)")
     
     # 註冊管理員 Blueprint
     from .admin.routes import admin_bp

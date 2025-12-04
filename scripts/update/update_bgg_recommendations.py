@@ -13,8 +13,14 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 
 from boardgame_system import BoardGameManager
 from core.bgg_service import BGGService
+from core.bgg_ranks_service import BGGRanksService
 from core.sheets_client import SheetsClient
-from scripts.update.update_static_cache import update_static_cache
+
+# 嘗試導入 update_static_cache，如果失敗則定義為 None
+try:
+    from update_static_cache import update_static_cache
+except ImportError:
+    update_static_cache = None
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,26 +28,18 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# 分類配置（使用只返回 ID 的方法）
-CATEGORIES = {
-    'party': 'get_party_game_ids',
-    'strategy': 'get_strategy_game_ids',
-    'family': 'get_family_game_ids',
-    'children': 'get_children_game_ids'
-}
-
-# Club 分類配置
-CLUB_CATEGORIES = ['party', 'strategy', 'family', 'children']
+# 分類配置（從本地資料庫讀取）
+CATEGORIES = ['party', 'strategy', 'family', 'children']
 
 
 
 def update_club_recommendations(sheets_client):
-    """更新社團熱門遊戲推薦（使用 ID 列表，不呼叫 BGG API）"""
+    """更新社團熱門遊戲推薦（從本地資料庫讀取排名）"""
     logger.info("開始更新社團熱門遊戲推薦...")
-    logger.info("[UPDATE] Starting Club Hot Games update")
+    logger.info("[UPDATE] Starting Club Hot Games update (from local database)")
     
     mgr = BoardGameManager()
-    bgg = BGGService()
+    ranks_service = BGGRanksService()
     local_games = mgr.load_data()
     
     # 建立社團遊戲的 BGG ID 集合
@@ -56,36 +54,29 @@ def update_club_recommendations(sheets_client):
     
     logger.info(f"找到 {len(club_bgg_ids)} 個有 BGG ID 的社團遊戲")
     
-    # 對每個分類進行搜尋（直接使用 ID 列表，不呼叫 API）
+    # 對每個分類進行搜尋（從本地資料庫讀取排名）
     success_count = 0
-    for category in CLUB_CATEGORIES:
+    for category in CATEGORIES:
         logger.info(f"正在處理社團 {category} 分類...")
         
         matched_ids = []
         
-        # 獲取對應的 BGG Service 方法（ID 列表方法）
-        method_name = CATEGORIES.get(category)
-        if not method_name:
-            logger.warning(f"找不到 {category} 對應的 BGG 方法")
+        # 從本地資料庫查詢該分類的排名資料（獲取更多以確保能找到 10 款社團遊戲）
+        games = ranks_service.get_by_category_rank(category, limit=100)
+        
+        if not games:
+            logger.warning(f"{category} 分類未找到遊戲資料")
             continue
         
-        method = getattr(bgg, method_name)
+        logger.info(f"  從資料庫獲取了 {len(games)} 個 {category} 遊戲")
         
-        # 直接獲取所有遊戲 ID（不呼叫 API）
-        all_game_ids = method(limit=100)  # 獲取最多 100 個 ID
-        
-        if not all_game_ids:
-            logger.warning(f"{category} 分類未獲取到遊戲 ID")
-            continue
-        
-        logger.info(f"  從 BGG 列表獲取了 {len(all_game_ids)} 個 {category} 遊戲 ID")
-        
-        # 找出社團擁有的遊戲
-        for game_id in all_game_ids:
+        # 找出社團擁有的遊戲（按 BGG 排名順序）
+        for game in games:
+            game_id = game['bgg_id']
             if game_id in club_bgg_ids:
                 if game_id not in matched_ids:  # 避免重複
                     matched_ids.append(game_id)
-                    logger.info(f"  找到匹配: BGG ID {game_id}")
+                    logger.info(f"  找到匹配: BGG ID {game_id} ({game['name']})")
                     
                     if len(matched_ids) >= 10:
                         logger.info(f"  已找到 10 款遊戲，停止搜尋")
@@ -104,24 +95,26 @@ def update_club_recommendations(sheets_client):
     return success_count
 
 def update_bgg_recommendations(sheets_client):
-    """更新 BGG 全球熱門推薦"""
+    """更新 BGG 全球熱門推薦（從本地資料庫讀取）"""
     logger.info("開始更新 BGG 全球熱門推薦...")
-    logger.info("[UPDATE] Starting BGG Hot Games update")
+    logger.info("[UPDATE] Starting BGG Hot Games update (from local database)")
     
-    bgg = BGGService()
+    ranks_service = BGGRanksService()
     success_count = 0
     
-    for category, method_name in CATEGORIES.items():
-        logger.info(f"正在獲取 {category} 分類...")
+    for category in CATEGORIES:
+        logger.info(f"正在從本地資料庫獲取 {category} 分類...")
         
-        method = getattr(bgg, method_name)
-        game_ids = method(limit=10)  # 直接獲取 ID 列表，不呼叫 API
+        # 從本地資料庫查詢該分類的排名資料
+        games = ranks_service.get_by_category_rank(category, limit=10)
         
-        if not game_ids:
-            logger.warning(f"{category} 分類未獲取到遊戲 ID")
+        if not games:
+            logger.warning(f"{category} 分類未找到遊戲資料")
             continue
         
-        logger.info(f"  獲取了 {len(game_ids)} 個 {category} 遊戲 ID")
+        # 提取 BGG ID
+        game_ids = [game['bgg_id'] for game in games]
+        logger.info(f"  找到 {len(game_ids)} 個 {category} 遊戲 ID")
         
         # 儲存到 Google Sheet (使用 bgg- 前綴區分)
         sheet_category = f"bgg-{category}"
@@ -153,7 +146,7 @@ def main():
     logger.info("=" * 60)
     logger.info(f"完成！")
     logger.info(f"BGG 全球熱門更新: {bgg_success}/{len(CATEGORIES)}")
-    logger.info(f"社團熱門更新: {club_success}/{len(CLUB_CATEGORIES)}")
+    logger.info(f"社團熱門更新: {club_success}/{len(CATEGORIES)}")
     logger.info("=" * 60)
     
     # 自動更新靜態緩存
