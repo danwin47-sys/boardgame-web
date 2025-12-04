@@ -31,11 +31,11 @@ if __name__ == '__main__':
     
     # 根據環境選擇伺服器
     if flask_env == 'development':
-        print(f"🔧 Starting Flask development server on http://localhost:{port}")
+        print(f"[DEV] Starting Flask development server on http://localhost:{port}")
         logger.info(f"Starting Flask development server on {host}:{port}")
         app.run(host=host, port=port, debug=True)
     else:
-        print(f"🚀 Starting Waitress production server on http://localhost:{port}")
+        print(f"[PROD] Starting Waitress production server on http://localhost:{port}")
         logger.info(f"Starting Waitress production server on {host}:{port}")
         serve(app, host=host, port=port, threads=6)
 
