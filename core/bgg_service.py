@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class BGGService:
     """BoardGameGeek API 服務"""
-    
+
     def __init__(self):
         """初始化 BGG 客戶端"""
         # 嘗試從 Flask app context 獲取配置
@@ -27,12 +27,13 @@ class BGGService:
         except RuntimeError:
             # 如果不在 app context 中，使用環境變數
             import os
-            demo_mode = os.environ.get("DEMO_MODE", "False").lower() in ('true', '1', 'yes')
+            demo_mode = os.environ.get(
+                "DEMO_MODE", "False").lower() in (
+                'true', '1', 'yes')
             bgg_token = os.environ.get("BGG_API_TOKEN", "")
             bgg_timeout = int(os.environ.get("BGG_TIMEOUT", 15))
             bgg_retries = int(os.environ.get("BGG_RETRIES", 2))
-        
-        
+
         if not demo_mode:
             # 使用新的 BGGApiClient，支援 Bearer Token
             self.client = BGGApiClient(
@@ -40,48 +41,51 @@ class BGGService:
                 timeout=bgg_timeout,
                 retries=bgg_retries
             )
-            logger.info("BGG Service initialized (Live mode with Bearer Token)")
+            logger.info(
+                "BGG Service initialized (Live mode with Bearer Token)")
         else:
             self.client = None
             logger.info("BGG Service initialized (Demo mode)")
-        
+
         self.demo_mode = demo_mode
-    
+
     @cache_with_timeout(seconds=300)  # 快取 5 分鐘
-    def search_games(self, query: str, exact: bool = False) -> List[Dict[str, Any]]:
+    def search_games(self, query: str,
+                     exact: bool = False) -> List[Dict[str, Any]]:
         """
         搜尋桌遊
-        
+
         Args:
             query: 搜尋關鍵字
             exact: 是否精確搜尋
-            
+
         Returns:
             桌遊列表，每個項目包含 id, name, year
         """
         if not query or not query.strip():
             return []
-        
+
         # 演示模式：使用範例資料
         if self.demo_mode:
             logger.info(f"[DEMO MODE] Searching for: {query}")
             query_lower = query.lower()
-            
+
             # 尋找匹配的演示資料
             for key in DEMO_GAMES.keys():
                 if key in query_lower:
-                    logger.info(f"[DEMO MODE] Found {len(DEMO_GAMES[key])} games")
+                    logger.info(
+                        f"[DEMO MODE] Found {len(DEMO_GAMES[key])} games")
                     return DEMO_GAMES[key]
-            
+
             # 如果沒有匹配，返回預設資料
             logger.info(f"[DEMO MODE] Returning default games")
             return DEMO_GAMES['default']
-        
+
         # 真實 API 模式
         try:
             logger.info(f"Searching BGG for: {query}")
             results = self.client.search(query, exact=exact)
-            
+
             games = []
             for game in results:
                 games.append({
@@ -90,62 +94,64 @@ class BGGService:
                     'year': game.get('year'),
                     'type': game.get('type', 'boardgame')
                 })
-            
+
             logger.info(f"Found {len(games)} games for query: {query}")
             return games
-            
+
         except Exception as e:
             error_msg = str(e)
             logger.error(f"Error during BGG search for '{query}': {error_msg}")
-            
+
             # 提供更詳細的錯誤訊息
             if "non-XML reply" in error_msg:
-                logger.warning("BGG API returned non-XML response - server may be overloaded or under maintenance")
+                logger.warning(
+                    "BGG API returned non-XML response - server may be overloaded or under maintenance")
             elif "timeout" in error_msg.lower():
                 logger.warning("BGG API timeout - server is responding slowly")
-            
+
             return []
-    
+
     @cache_with_timeout(seconds=3600)  # 快取 1 小時
     def get_game_details(self, game_id: int) -> Optional[Dict[str, Any]]:
         """
         取得桌遊詳細資訊
-        
+
         Args:
             game_id: BGG 遊戲 ID
-            
+
         Returns:
             桌遊詳細資訊字典，包含名稱、評分、排名、圖片等
         """
         # 演示模式：返回範例詳細資料
         if self.demo_mode:
             logger.info(f"[DEMO MODE] Getting details for game {game_id}")
-            return DEMO_GAME_DETAILS.get(game_id, DEMO_GAME_DETAILS[13])  # 預設返回 Catan
-        
+            return DEMO_GAME_DETAILS.get(
+                game_id, DEMO_GAME_DETAILS[13])  # 預設返回 Catan
+
         # 真實 API 模式
         try:
             game = self.client.game(game_id=game_id)
-            
+
             if not game:
                 logger.warning(f"Game not found: {game_id}")
                 return None
-            
+
             # 處理玩家人數
             min_players = game.get('min_players')
             max_players = game.get('max_players')
             players = f"{min_players}-{max_players}" if min_players and max_players else "N/A"
             if min_players == max_players and min_players:
                 players = str(min_players)
-            
+
             # 處理遊戲時間
             playing_time = game.get('playing_time')
             min_time = game.get('min_playing_time')
             max_time = game.get('max_playing_time')
-            
+
             time_str = f"{playing_time} 分鐘" if playing_time else "N/A"
             if min_time and max_time and min_time != max_time:
                 time_str = f"{min_time}-{max_time} 分鐘"
-            
+
             details = {
                 'id': game['id'],
                 'name': game['name'],
@@ -169,41 +175,44 @@ class BGGService:
                 'artists': game.get('artists', []),
                 'publishers': game.get('publishers', [])
             }
-            
-            logger.info(f"Retrieved details for game: {game['name']} (ID: {game_id})")
+
+            logger.info(
+                f"Retrieved details for game: {
+                    game['name']} (ID: {game_id})")
             return details
-            
+
         except Exception as e:
             logger.error(f"Error getting game {game_id}: {e}")
             return None
-    
+
     def _get_overall_rank(self, game) -> Optional[int]:
         """取得桌遊的整體排名"""
         try:
             ranks = game.get('ranks', [])
             for rank in ranks:
-                if rank.get('name') == 'boardgame' or rank.get('type') == 'subtype':
+                if rank.get('name') == 'boardgame' or rank.get(
+                        'type') == 'subtype':
                     rank_value = rank.get('value')
                     if rank_value and rank_value != 'Not Ranked':
                         return int(rank_value)
             return None
-        except:
+        except BaseException:
             return None
-    
+
     @cache_with_timeout(seconds=1800)  # 快取 30 分鐘
     def get_hot_games(self, limit: int = 10) -> List[Dict[str, Any]]:
         """
         取得熱門桌遊列表
-        
+
         Args:
             limit: 限制數量
-            
+
         Returns:
             熱門桌遊列表
         """
         try:
             hot_items = self.client.hot_items('boardgame')
-            
+
             games = []
             for item in hot_items[:limit]:
                 games.append({
@@ -213,14 +222,14 @@ class BGGService:
                     'rank': item.get('rank'),
                     'thumbnail': item.get('thumbnail', '')
                 })
-            
+
             logger.info(f"Retrieved {len(games)} hot games")
             return games
-            
+
         except Exception as e:
             logger.error(f"Error getting hot games: {e}")
             return []
-    
+
     def get_party_game_ids(self, limit: int = 100) -> List[int]:
         """取得派對桌遊 ID 列表（不呼叫 API，直接返回 ID）"""
         # 派對遊戲：經典遊戲 + 2024熱門
@@ -281,7 +290,7 @@ class BGGService:
             99732,   # Times Up! Party
         ]
         return party_game_ids[:limit]
-    
+
     def get_party_games(self, limit: int = 10) -> List[Dict[str, Any]]:
         """取得派對桌遊（使用精選遊戲 ID）"""
         # 派對遊戲：經典遊戲 + 2024熱門
@@ -342,8 +351,7 @@ class BGGService:
             99732,   # Times Up! Party
         ]
         return self._get_games_by_ids(self.get_party_game_ids(limit))
-    
-    
+
     def get_strategy_game_ids(self, limit: int = 100) -> List[int]:
         """取得策略桌遊 ID 列表（不呼叫 API，直接返回 ID）"""
         # 策略遊戲：經典 + 2024熱門
@@ -403,7 +411,7 @@ class BGGService:
             246900,  # Eclipse: Second Dawn for the Galaxy
         ]
         return strategy_game_ids[:limit]
-    
+
     def get_strategy_games(self, limit: int = 10) -> List[Dict[str, Any]]:
         """取得策略桌遊（使用精選遊戲 ID）"""
         # 策略遊戲：經典 + 2024熱門
@@ -461,8 +469,7 @@ class BGGService:
             177736,  # A Feast for Odin
         ]
         return self._get_games_by_ids(self.get_strategy_game_ids(limit))
-    
-    
+
     def get_family_game_ids(self, limit: int = 100) -> List[int]:
         """取得家庭桌遊 ID 列表（不呼叫 API，直接返回 ID）"""
         # 家庭遊戲：經典 + 2024熱門
@@ -522,7 +529,7 @@ class BGGService:
             263918,  # Cartographers
         ]
         return family_game_ids[:limit]
-    
+
     def get_family_games(self, limit: int = 10) -> List[Dict[str, Any]]:
         """取得家庭桌遊（使用精選遊戲 ID）"""
         # 家庭遊戲：經典 + 2024熱門
@@ -579,8 +586,7 @@ class BGGService:
             254640,  # Just One
         ]
         return self._get_games_by_ids(self.get_family_game_ids(limit))
-    
-    
+
     def get_children_game_ids(self, limit: int = 100) -> List[int]:
         """取得兒童桌遊 ID 列表（不呼叫 API，直接返回 ID）"""
         # 兒童遊戲：經典 + 2024熱門
@@ -640,7 +646,7 @@ class BGGService:
             94483,   # Hoot Owl Hoot!
         ]
         return children_game_ids[:limit]
-    
+
     def get_children_games(self, limit: int = 10) -> List[Dict[str, Any]]:
         """取得兒童桌遊（使用精選遊戲 ID）"""
         # 兒童遊戲：經典 + 2024熱門
@@ -696,7 +702,7 @@ class BGGService:
             68448,   # 7 Wonders (family)
         ]
         return self._get_games_by_ids(self.get_children_game_ids(limit))
-    
+
     def _get_games_by_ids(self, game_ids: List[int]) -> List[Dict[str, Any]]:
         """根據 ID 列表獲取遊戲資訊"""
         games = []
@@ -715,15 +721,16 @@ class BGGService:
                 logger.warning(f"Failed to get game {game_id}: {e}")
                 continue
         return games
-    
-    def get_our_hot_games(self, sheets_client, limit: int = 50) -> List[Dict[str, Any]]:
+
+    def get_our_hot_games(self, sheets_client,
+                          limit: int = 50) -> List[Dict[str, Any]]:
         """
         取得我們館藏中的熱門遊戲
-        
+
         Args:
             sheets_client: SheetsClient 實例，用於讀取館藏資料
             limit: 檢查熱門榜前幾名（預設 50 名）
-            
+
         Returns:
             館藏中的熱門遊戲列表，每個項目包含：
             - id: BGG ID
@@ -739,13 +746,13 @@ class BGGService:
             if not hot_list:
                 logger.warning("無法取得 BGG 熱門榜")
                 return []
-            
+
             # 取得本地館藏
             our_games = sheets_client.load_games()
             if not our_games:
                 logger.warning("無法取得館藏資料")
                 return []
-            
+
             # 建立 BGG ID 到本地遊戲的映射
             bgg_id_map = {}
             for game in our_games:
@@ -755,7 +762,7 @@ class BGGService:
                         bgg_id_map[int(bgg_id)] = game
                     except (ValueError, TypeError):
                         continue
-            
+
             # 比對熱門榜
             our_hot_games = []
             for hot_game in hot_list:
@@ -772,11 +779,10 @@ class BGGService:
                         'thumbnail': hot_game.get('thumbnail', ''),
                         'year': hot_game.get('year')
                     })
-            
+
             logger.info(f"找到 {len(our_hot_games)} 款館藏中的熱門遊戲（檢查前 {limit} 名）")
             return our_hot_games
-            
+
         except Exception as e:
             logger.error(f"比對館藏熱門遊戲失敗: {e}")
             return []
-

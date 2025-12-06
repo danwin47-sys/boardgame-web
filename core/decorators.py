@@ -11,7 +11,7 @@ from typing import Callable, Any
 def validate_json(f: Callable) -> Callable:
     """
     驗證請求包含 JSON 資料
-    
+
     使用範例:
         @app.route('/api/endpoint', methods=['POST'])
         @validate_json
@@ -31,10 +31,10 @@ def validate_json(f: Callable) -> Callable:
 def validate_fields(*required_fields: str) -> Callable:
     """
     驗證必要欄位存在
-    
+
     Args:
         required_fields: 必要的欄位名稱列表
-    
+
     使用範例:
         @app.route('/api/borrow', methods=['POST'])
         @validate_json
@@ -48,9 +48,11 @@ def validate_fields(*required_fields: str) -> Callable:
         @wraps(f)
         def decorated_function(*args: Any, **kwargs: Any):
             data = request.get_json()
-            missing = [field for field in required_fields if not data.get(field)]
+            missing = [
+                field for field in required_fields if not data.get(field)]
             if missing:
-                return jsonify({'error': f'Missing fields: {", ".join(missing)}'}), 400
+                return jsonify(
+                    {'error': f'Missing fields: {", ".join(missing)}'}), 400
             return f(*args, **kwargs)
         return decorated_function
     return decorator
@@ -59,9 +61,9 @@ def validate_fields(*required_fields: str) -> Callable:
 def handle_exceptions(f: Callable) -> Callable:
     """
     統一處理自定義異常
-    
+
     將自定義異常轉換為適當的 JSON 響應
-    
+
     使用範例:
         @app.route('/api/endpoint')
         @handle_exceptions
@@ -81,7 +83,7 @@ def handle_exceptions(f: Callable) -> Callable:
                 MemberNotFoundException,
                 GameAlreadyBorrowedException
             )
-            
+
             if isinstance(e, (GameNotFoundException, MemberNotFoundException)):
                 return jsonify({'error': str(e), 'success': False}), 404
             elif isinstance(e, GameAlreadyBorrowedException):

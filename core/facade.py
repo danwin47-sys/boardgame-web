@@ -3,17 +3,18 @@ from core.game_service import GameService
 from core.member_service import MemberService
 from core.utils import get_current_timestamp
 
+
 class BoardGameManager:
     """
     向後相容的 Facade 類別，將操作委派給核心服務。
     """
-    
+
     def __init__(self):
         print("[Info] Initializing BoardGameManager (Facade)...")
         self.client = SheetsClient()
         self.member_service = MemberService(self.client)
         self.game_service = GameService(self.client, self.member_service)
-        
+
         # 用於相容應用程式中的 mgr.games = ...
         self.games = []
 

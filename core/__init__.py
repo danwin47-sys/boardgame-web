@@ -18,7 +18,7 @@ __all__ = [
     'GAME_STATUS_BORROWED',
     'WORKSHEET_GAMES',
     'WORKSHEET_MEMBERS',
-    
+
     # 異常
     'BoardGameException',
     'GameNotFoundException',
@@ -27,13 +27,13 @@ __all__ = [
     'MemberNotFoundException',
     'SheetConnectionError',
     'InvalidDataError',
-    
+
     # 工具函數
     'get_current_timestamp',
     'format_datetime',
     'create_history_entry',
     'append_history',
-    
+
     # 快取
     'SimpleCache',
 ]
