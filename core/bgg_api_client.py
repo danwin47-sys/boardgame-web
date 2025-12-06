@@ -44,7 +44,7 @@ class BGGApiClient:
             })
             logger.warning("BGG API Client initialized WITHOUT Bearer Token - API calls may fail")
     
-    def _make_request(self, endpoint: str, params: Dict[str, Any] = None) -> Optional[ET.Element]:
+    def _make_request(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Optional[ET.Element]:
         """
         發送 API 請求並解析 XML 回應
         
@@ -127,10 +127,13 @@ class BGGApiClient:
                 year_elem = item.find('yearpublished')
                 
                 if game_id and name_elem is not None:
+                    year_value = year_elem.get('value') if year_elem is not None else None
+                    year =  int(year_value) if year_value else None
+                    
                     games.append({
                         'id': int(game_id),
                         'name': name_elem.get('value', ''),
-                        'year': int(year_elem.get('value')) if year_elem is not None and year_elem.get('value') else None,
+                        'year': year,
                         'type': item.get('type', 'boardgame')
                     })
             except (ValueError, AttributeError) as e:
@@ -175,12 +178,13 @@ class BGGApiClient:
                     name = name_elem.get('value', '')
                     break
             if not name:
-                name_elem = item.find('name')
-                name = name_elem.get('value', '') if name_elem is not None else ''
+                fallback_name_elem = item.find('name')
+                name = fallback_name_elem.get('value', '') if fallback_name_elem is not None else ''
             
             # 年份
             year_elem = item.find('yearpublished')
-            year = int(year_elem.get('value')) if year_elem is not None and year_elem.get('value') else None
+            year_value = year_elem.get('value') if year_elem is not None else None
+            year = int(year_value) if year_value else None
             
             # 描述
             desc_elem = item.find('description')
@@ -195,24 +199,30 @@ class BGGApiClient:
             
             # 玩家人數
             minplayers_elem = item.find('minplayers')
-            min_players = int(minplayers_elem.get('value')) if minplayers_elem is not None and minplayers_elem.get('value') else None
+            minplayers_value = minplayers_elem.get('value') if minplayers_elem is not None else None
+            min_players = int(minplayers_value) if minplayers_value else None
             
             maxplayers_elem = item.find('maxplayers')
-            max_players = int(maxplayers_elem.get('value')) if maxplayers_elem is not None and maxplayers_elem.get('value') else None
+            maxplayers_value = maxplayers_elem.get('value') if maxplayers_elem is not None else None
+            max_players = int(maxplayers_value) if maxplayers_value else None
             
             # 遊戲時間
             playingtime_elem = item.find('playingtime')
-            playing_time = int(playingtime_elem.get('value')) if playingtime_elem is not None and playingtime_elem.get('value') else None
+            playingtime_value = playingtime_elem.get('value') if playingtime_elem is not None else None
+            playing_time = int(playingtime_value) if playingtime_value else None
             
             minplaytime_elem = item.find('minplaytime')
-            min_time = int(minplaytime_elem.get('value')) if minplaytime_elem is not None and minplaytime_elem.get('value') else None
+            minplaytime_value = minplaytime_elem.get('value') if minplaytime_elem is not None else None
+            min_time = int(minplaytime_value) if minplaytime_value else None
             
             maxplaytime_elem = item.find('maxplaytime')
-            max_time = int(maxplaytime_elem.get('value')) if maxplaytime_elem is not None and maxplaytime_elem.get('value') else None
+            maxplaytime_value = maxplaytime_elem.get('value') if maxplaytime_elem is not None else None
+            max_time = int(maxplaytime_value) if maxplaytime_value else None
             
             # 年齡
             minage_elem = item.find('minage')
-            min_age = int(minage_elem.get('value')) if minage_elem is not None and minage_elem.get('value') else None
+            minage_value = minage_elem.get('value') if minage_elem is not None else None
+            min_age = int(minage_value) if minage_value else None
             
             # 統計資料
             stats = item.find('statistics/ratings')
@@ -313,7 +323,8 @@ class BGGApiClient:
                 name = name_elem.get('value', '') if name_elem is not None else ''
                 
                 year_elem = item.find('yearpublished')
-                year = int(year_elem.get('value')) if year_elem is not None and year_elem.get('value') else None
+                year_value = year_elem.get('value') if year_elem is not None else None
+                year = int(year_value) if year_value else None
                 
                 thumbnail_elem = item.find('thumbnail')
                 thumbnail = thumbnail_elem.get('value', '') if thumbnail_elem is not None else ''

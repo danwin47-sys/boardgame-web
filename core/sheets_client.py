@@ -69,9 +69,14 @@ class SheetsClient:
                     self.gc = gspread.service_account(filename=local_creds_path)
                     
                     if not sheet_url:
-                        # 本地測試用的 Hardcoded URL
-                        sheet_url = "https://docs.google.com/spreadsheets/d/1n2cCI1glkErCq835kNJD5hXyk1iR7IptPlnKKPm0_0Y/edit?gid=0#gid=0"
-                        logger.info(f"Using hardcoded Sheet URL: {sheet_url}")
+                        # 嘗試從 .env 檔案讀取 (dotenv 可能已載入)
+                        from dotenv import load_dotenv
+                        load_dotenv()
+                        sheet_url = os.environ.get("SHEET_URL")
+                        
+                        if not sheet_url:
+                            logger.error("SHEET_URL 環境變數未設定！請在 .env 檔案中設定 SHEET_URL")
+                            return
                     
                     if sheet_url:
                         self.sh = self.gc.open_by_url(sheet_url)
@@ -129,7 +134,8 @@ class SheetsClient:
 
         try:
             ws = self.get_games_worksheet()
-            self._games_cache = ws.get_all_records()
+            records = ws.get_all_records()
+            self._games_cache = records if records is not None else []
             self._games_cache_time = current_time
             return self._games_cache
         except Exception as e:
@@ -139,8 +145,8 @@ class SheetsClient:
             self._connect()
             if self.valid:
                 try:
-                    ws = self.get_games_worksheet()
-                    self._games_cache = ws.get_all_records()
+                    records = ws.get_all_records()
+                    self._games_cache = records if records is not None else []
                     self._games_cache_time = current_time
                     return self._games_cache
                 except Exception as retry_e:
@@ -166,7 +172,8 @@ class SheetsClient:
 
         try:
             ws = self.get_members_worksheet()
-            self._members_cache = ws.get_all_records()
+            records = ws.get_all_records()
+            self._members_cache = records if records is not None else []
             self._members_cache_time = current_time
             return self._members_cache
         except Exception as e:
@@ -176,8 +183,8 @@ class SheetsClient:
             self._connect()
             if self.valid:
                 try:
-                    ws = self.get_members_worksheet()
-                    self._members_cache = ws.get_all_records()
+                    records = ws.get_all_records()
+                    self._members_cache = records if records is not None else []
                     self._members_cache_time = current_time
                     return self._members_cache
                 except Exception as retry_e:

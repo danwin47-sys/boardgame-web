@@ -6,7 +6,7 @@
 2. 從 BGG API 獲取玩家數資訊
 3. 更新 Google Sheet 的 players 欄位
 """
-from boardgame_system import BoardGameManager
+from core.facade import BoardGameManager
 from core.bgg_service import BGGService
 import time
 import logging

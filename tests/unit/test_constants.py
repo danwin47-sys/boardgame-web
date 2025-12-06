@@ -24,8 +24,8 @@ class TestConstants:
     
     def test_game_status_constants(self):
         """測試遊戲狀態常數"""
-        assert GAME_STATUS_BORROWED == "借出"
-        assert GAME_STATUS_AVAILABLE == "歸還"
+        assert GAME_STATUS_BORROWED == "已借出"
+        assert GAME_STATUS_AVAILABLE == "可用"
     
     def test_field_name_constants(self):
         """測試欄位名稱常數"""

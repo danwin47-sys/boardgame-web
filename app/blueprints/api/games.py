@@ -2,27 +2,32 @@
 遊戲 API Blueprint
 處理桌遊相關的路由：列表、借還操作
 """
-from flask import Blueprint, jsonify, request, current_app
+from typing import Tuple, Any, Optional, Dict
+from flask import Blueprint, jsonify, request, Response
 import logging
+
+from app.utils import get_manager
 
 logger = logging.getLogger(__name__)
 
 # 建立 Blueprint
-game_bp = Blueprint('game', __name__, url_prefix='/api')
+games_bp = Blueprint('games', __name__, url_prefix='/api')
 
 
-def get_manager():
-    """從 app.config 獲取 BoardGameManager"""
-    if 'boardgame_manager' not in current_app.config:
-        from boardgame_system import BoardGameManager
-        logger.info("正在初始化 Google Sheets 連線...")
-        current_app.config['boardgame_manager'] = BoardGameManager()
-    return current_app.config['boardgame_manager']
-
-
-@game_bp.route('/games', methods=['GET'])
-def get_games():
-    """獲取桌遊列表"""
+@games_bp.route('/games', methods=['GET'])
+def get_games() -> Tuple[Response, int]:
+    """獲取桌遊列表
+    
+    從 Google Sheets 讀取所有桌遊資料並返回。
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應包含桌遊列表和 HTTP 狀態碼
+            - 成功時: ({'games': [...]}, 200)
+            - 失敗時: ({'success': False, 'error': '錯誤訊息'}, 500)
+    
+    Raises:
+        Exception: 當資料庫連線失敗或資料讀取錯誤時
+    """
     try:
         mgr = get_manager()
         mgr.games = mgr.load_data()
@@ -32,9 +37,26 @@ def get_games():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@game_bp.route('/borrow', methods=['POST'])
-def borrow_game():
-    """借桌遊"""
+@games_bp.route('/borrow', methods=['POST'])
+def borrow_game() -> Tuple[Response, int]:
+    """借出桌遊
+    
+    處理桌遊借出請求，更新桌遊狀態並記錄借閱人資訊。
+    
+    Request Body:
+        {
+            "name": str,        # 桌遊名稱
+            "member_id": str    # 社員 ID
+        }
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 成功時: ({'message': '訊息', 'success': True}, 200)
+            - 失敗時: ({'success': False, 'error': '錯誤訊息'}, 400/404/500)
+    
+    Raises:
+        Exception: 當資料庫更新失敗時
+    """
     try:
         data = request.get_json()
         if not data: 
@@ -58,9 +80,25 @@ def borrow_game():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@game_bp.route('/return', methods=['POST'])
-def return_game():
-    """還桌遊"""
+@games_bp.route('/return', methods=['POST'])
+def return_game() -> Tuple[Response, int]:
+    """歸還桌遊
+    
+    處理桌遊歸還請求，更新桌遊狀態並清除借閱人資訊。
+    
+    Request Body:
+        {
+            "name": str  # 桌遊名稱
+        }
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 成功時: ({'message': '訊息', 'success': True}, 200)
+            - 失敗時: ({'success': False, 'error': '錯誤訊息'}, 400/500)
+    
+    Raises:
+        Exception: 當資料庫更新失敗時
+    """
     try:
         data = request.get_json()
         name = data.get('name')

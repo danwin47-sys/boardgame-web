@@ -5,7 +5,8 @@
 """
 import time
 from datetime import datetime
-from .constants import DATETIME_FORMAT, MILLISECONDS_PER_SECOND, ACTION_BORROW, ACTION_RETURN
+from typing import Optional
+from .constants import DATETIME_FORMAT, MILLISECONDS_PER_SECOND
 
 
 def get_current_timestamp() -> int:
@@ -31,7 +32,7 @@ def format_datetime(timestamp_ms: int) -> str:
     return datetime.fromtimestamp(timestamp_ms / MILLISECONDS_PER_SECOND).strftime(DATETIME_FORMAT)
 
 
-def create_history_entry(user_name: str, action: str, timestamp_ms: int = None) -> str:
+def create_history_entry(user_name: str, action: str, timestamp_ms: Optional[int] = None) -> str:
     """
     創建歷史記錄條目
     

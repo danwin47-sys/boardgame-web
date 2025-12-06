@@ -715,3 +715,68 @@ class BGGService:
                 logger.warning(f"Failed to get game {game_id}: {e}")
                 continue
         return games
+    
+    def get_our_hot_games(self, sheets_client, limit: int = 50) -> List[Dict[str, Any]]:
+        """
+        取得我們館藏中的熱門遊戲
+        
+        Args:
+            sheets_client: SheetsClient 實例，用於讀取館藏資料
+            limit: 檢查熱門榜前幾名（預設 50 名）
+            
+        Returns:
+            館藏中的熱門遊戲列表，每個項目包含：
+            - id: BGG ID
+            - name: 遊戲名稱
+            - hot_rank: 熱門排名
+            - status: 借閱狀態
+            - borrower: 借閱人（如果被借出）
+            - local_name: 本地名稱
+        """
+        try:
+            # 取得 BGG 熱門榜
+            hot_list = self.get_hot_games(limit=limit)
+            if not hot_list:
+                logger.warning("無法取得 BGG 熱門榜")
+                return []
+            
+            # 取得本地館藏
+            our_games = sheets_client.load_games()
+            if not our_games:
+                logger.warning("無法取得館藏資料")
+                return []
+            
+            # 建立 BGG ID 到本地遊戲的映射
+            bgg_id_map = {}
+            for game in our_games:
+                bgg_id = game.get('bgg_id')
+                if bgg_id:
+                    try:
+                        bgg_id_map[int(bgg_id)] = game
+                    except (ValueError, TypeError):
+                        continue
+            
+            # 比對熱門榜
+            our_hot_games = []
+            for hot_game in hot_list:
+                bgg_id = hot_game['id']
+                if bgg_id in bgg_id_map:
+                    local_game = bgg_id_map[bgg_id]
+                    our_hot_games.append({
+                        'id': bgg_id,
+                        'name': hot_game['name'],
+                        'hot_rank': hot_game['rank'],
+                        'status': local_game.get('status', '未知'),
+                        'borrower': local_game.get('borrower', ''),
+                        'local_name': local_game.get('name', hot_game['name']),
+                        'thumbnail': hot_game.get('thumbnail', ''),
+                        'year': hot_game.get('year')
+                    })
+            
+            logger.info(f"找到 {len(our_hot_games)} 款館藏中的熱門遊戲（檢查前 {limit} 名）")
+            return our_hot_games
+            
+        except Exception as e:
+            logger.error(f"比對館藏熱門遊戲失敗: {e}")
+            return []
+

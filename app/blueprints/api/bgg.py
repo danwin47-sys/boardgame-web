@@ -2,10 +2,13 @@
 BGG (BoardGameGeek) API Routes
 處理所有 BGG 相關的 API 端點
 """
-from flask import Blueprint, jsonify, request
+from typing import Tuple, Optional
+from flask import Blueprint, jsonify, request, Response
 from urllib.parse import unquote
 import logging
 import traceback
+
+from app.utils import get_manager
 
 logger = logging.getLogger(__name__)
 
@@ -15,8 +18,15 @@ bgg_bp = Blueprint('bgg', __name__, url_prefix='/api/bgg')
 # 延遲導入 BGG Service，避免循環依賴
 _bgg_service = None
 
+
 def get_bgg_service():
-    """延遲載入 BGG Service"""
+    """延遲載入 BGG Service
+    
+    使用單例模式，確保 BGG Service 只被初始化一次。
+    
+    Returns:
+        BGGService: BGG 服務實例
+    """
     global _bgg_service
     if _bgg_service is None:
         from core.bgg_service import BGGService
@@ -28,8 +38,22 @@ def get_bgg_service():
 # ============ BGG 通用 API ============
 
 @bgg_bp.route('/search', methods=['GET'])
-def search_bgg():
-    """搜尋 BGG 桌遊"""
+def search_bgg() -> Tuple[Response, int]:
+    """搜尋 BGG 桌遊
+    
+    根據關鍵字搜尋 BoardGameGeek 資料庫中的桌遊。
+    
+    Query Parameters:
+        q (str): 搜尋關鍵字（必填）
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 成功時: ({'success': True, 'results': [...]}, 200)
+            - 失敗時: ({'success': False, 'error': '錯誤訊息'}, 400/500)
+    
+    Raises:
+        Exception: 當 BGG API 請求失敗時
+    """
     try:
         query = request.args.get('q', '').strip()
         if not query:
@@ -47,8 +71,22 @@ def search_bgg():
 
 
 @bgg_bp.route('/games/<int:game_id>', methods=['GET'])
-def get_bgg_game(game_id):
-    """取得 BGG 遊戲詳情"""
+def get_bgg_game(game_id: int) -> Tuple[Response, int]:
+    """取得 BGG 遊戲詳情
+    
+    根據 BGG ID 獲取遊戲的詳細資訊。
+    
+    Args:
+        game_id: BGG 遊戲 ID
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 成功時: ({'success': True, 'game': {...}}, 200)
+            - 失敗時: ({'success': False, 'error': '錯誤訊息'}, 404/500)
+    
+    Raises:
+        Exception: 當 BGG API 請求失敗時
+    """
     try:
         logger.debug(f"Fetching BGG game details: {game_id}")
         bgg = get_bgg_service()
@@ -65,8 +103,22 @@ def get_bgg_game(game_id):
 
 
 @bgg_bp.route('/hot', methods=['GET'])
-def get_hot_games():
-    """取得 BGG 熱門桌遊"""
+def get_hot_games() -> Tuple[Response, int]:
+    """取得 BGG 熱門桌遊
+    
+    從 BoardGameGeek 獲取當前熱門的桌遊列表。
+    
+    Query Parameters:
+        limit (int, optional): 限制返回數量，預設為 10
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 成功時: ({'success': True, 'games': [...]}, 200)
+            - 失敗時: ({'success': False, 'error': '錯誤訊息'}, 500)
+    
+    Raises:
+        Exception: 當 BGG API 請求失敗時
+    """
     try:
         limit = int(request.args.get('limit', 10))
         logger.debug(f"Fetching hot games, limit: {limit}")
@@ -81,12 +133,71 @@ def get_hot_games():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+@bgg_bp.route('/our-hot-games', methods=['GET'])
+def get_our_hot_games() -> Tuple[Response, int]:
+    """取得館藏中的熱門遊戲
+    
+    從 BGG 熱門遊戲列表中篩選出本館藏已有的遊戲。
+    
+    Query Parameters:
+        limit (int, optional): 檢查前 N 個熱門遊戲，預設為 50
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 成功時: ({
+                'success': True,
+                'games': [...],
+                'total': int
+              }, 200)
+            - 失敗時: ({'success': False, 'error': '錯誤訊息'}, 500)
+    
+    Raises:
+        Exception: 當資料讀取失敗時
+    """
+    try:
+        limit = int(request.args.get('limit', 50))
+        logger.debug(f"Fetching our hot games, checking top {limit}")
+        
+        # 取得 Manager
+        mgr = get_manager()
+        
+        # 使用 BGG Service 的新方法
+        bgg = get_bgg_service()
+        our_hot_games = bgg.get_our_hot_games(mgr.client, limit=limit)
+        
+        return jsonify({
+            'success': True,
+            'games': our_hot_games,
+            'total': len(our_hot_games)
+        }), 200
+    except Exception as e:
+        logger.error(f"Get our hot games exception: {e}")
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @bgg_bp.route('/recommendations', methods=['GET'])
-def get_recommendations():
-    """取得推薦桌遊（從 Google Sheet 讀取）"""
+def get_recommendations() -> Tuple[Response, int]:
+    """取得推薦桌遊
+    
+    從 Google Sheets 讀取指定分類的推薦遊戲列表，並獲取遊戲詳細資訊。
+    支援 BGG 推薦和社團推薦兩種來源。
+    
+    Query Parameters:
+        category (str): 分類名稱（party/strategy/family/children）
+        source (str, optional): 來源（bgg 或 club），預設為 'bgg'
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 成功時: ({'success': True, 'games': [...]}, 200)
+            - 失敗時: ({'success': False, 'error': '錯誤訊息'}, 400/500)
+    
+    Raises:
+        Exception: 當資料讀取或 API 請求失敗時
+    """
     try:
         category = request.args.get('category')
-        source = request.args.get('source', 'bgg') # bgg or club
+        source = request.args.get('source', 'bgg')  # bgg or club
         
         if not category:
             return jsonify({'success': False, 'error': '缺少 category 參數'}), 400
@@ -96,12 +207,8 @@ def get_recommendations():
         # 組合 Sheet 中的分類鍵值
         sheet_category = f"{source}-{category}"
         
-        # 初始化 BoardGameManager
-        from core.facade import BoardGameManager
-        from flask import current_app
-        mgr = current_app.config.get('boardgame_manager')
-        if not mgr:
-            mgr = BoardGameManager()
+        # 取得 Manager
+        mgr = get_manager()
             
         # 從 Google Sheet 讀取 ID
         game_ids = mgr.client.load_bgg_recommendations(sheet_category)
@@ -150,8 +257,28 @@ def get_recommendations():
 
 
 @bgg_bp.route('/collection', methods=['POST'])
-def add_to_collection():
-    """從 BGG 加入桌遊到館藏"""
+def add_to_collection() -> Tuple[Response, int]:
+    """從 BGG 加入桌遊到館藏
+    
+    根據 BGG ID 將遊戲加入到 Google Sheets 館藏中（功能待實作）。
+    
+    Request Body:
+        {
+            "game_id": int,           # BGG 遊戲 ID（必填）
+            "custodian": str          # 保管人（選填）
+        }
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 成功時: ({'success': True, 'message': '訊息'}, 200)
+            - 失敗時: ({'success': False, 'error': '錯誤訊息'}, 400/404/500)
+    
+    Note:
+        此功能目前尚未完整實作（TODO）
+    
+    Raises:
+        Exception: 當 BGG API 請求失敗時
+    """
     try:
         data = request.get_json()
         game_id = data.get('game_id')
@@ -181,8 +308,26 @@ def add_to_collection():
 # ============ BGG 遊戲連結 API ============
 
 @bgg_bp.route('/games/link/search/<game_name>', methods=['GET'])
-def search_for_linking(game_name):
-    """搜尋 BGG 遊戲（用於連結功能）"""
+def search_for_linking(game_name: str) -> Tuple[Response, int]:
+    """搜尋 BGG 遊戲（用於連結功能）
+    
+    根據遊戲名稱搜尋 BGG，用於將本地遊戲連結到 BGG 資料庫。
+    
+    Args:
+        game_name: URL 編碼的遊戲名稱
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 成功時: ({
+                'success': True,
+                'game_name': str,
+                'results': [...]
+              }, 200)
+            - 失敗時: ({'success': False, 'error': '錯誤訊息'}, 500)
+    
+    Raises:
+        Exception: 當 BGG API 請求失敗時
+    """
     try:
         decoded_game_name = unquote(game_name)
         logger.debug(f"search_for_linking - Original: {game_name}, Decoded: {decoded_game_name}")
@@ -202,11 +347,28 @@ def search_for_linking(game_name):
 
 
 @bgg_bp.route('/games/link/<game_name>', methods=['POST'])
-def link_game(game_name):
-    """連結桌遊到 BGG"""
+def link_game(game_name: str) -> Tuple[Response, int]:
+    """連結桌遊到 BGG
+    
+    將 Google Sheets 中的桌遊連結到 BGG 資料庫，並更新 BGG ID、縮圖等資訊。
+    
+    Args:
+        game_name: URL 編碼的遊戲名稱
+    
+    Request Body:
+        {
+            "bgg_id": int  # BGG 遊戲 ID（必填）
+        }
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 成功時: ({'success': True, 'message': '訊息'}, 200)
+            - 失敗時: ({'success': False, 'error': '錯誤訊息'}, 400/404/500)
+    
+    Raises:
+        Exception: 當資料庫更新失敗時
+    """
     try:
-        from core.facade import BoardGameManager
-        
         decoded_game_name = unquote(game_name)
         logger.debug(f"link_game - Original: {game_name}")
         logger.debug(f"link_game - Decoded: {decoded_game_name}")
@@ -217,11 +379,8 @@ def link_game(game_name):
         if not bgg_id:
             return jsonify({'success': False, 'error': '缺少 bgg_id'}), 400
         
-        # 使用全局 manager
-        from flask import current_app
-        mgr = current_app.config.get('boardgame_manager')
-        if not mgr:
-            mgr = BoardGameManager()
+        # 使用共用 manager
+        mgr = get_manager()
         
         all_games = mgr.load_data()
         all_game_names = [g.get('name', '') for g in all_games]
@@ -261,19 +420,28 @@ def link_game(game_name):
 
 
 @bgg_bp.route('/games/link/<game_name>', methods=['DELETE'])
-def unlink_game(game_name):
-    """取消桌遊與 BGG 的連結"""
+def unlink_game(game_name: str) -> Tuple[Response, int]:
+    """取消桌遊與 BGG 的連結
+    
+    移除 Google Sheets 中桌遊的 BGG ID 連結。
+    
+    Args:
+        game_name: URL 編碼的遊戲名稱
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 成功時: ({'success': True, 'message': '訊息'}, 200)
+            - 失敗時: ({'success': False, 'error': '錯誤訊息'}, 404/500)
+    
+    Raises:
+        Exception: 當資料庫更新失敗時
+    """
     try:
-        from core.facade import BoardGameManager
-        
         decoded_game_name = unquote(game_name)
         logger.debug(f"unlink_game - Original: {game_name}, Decoded: {decoded_game_name}")
         
-        # 使用全局 manager
-        from flask import current_app
-        mgr = current_app.config.get('boardgame_manager')
-        if not mgr:
-            mgr = BoardGameManager()
+        # 使用共用 manager
+        mgr = get_manager()
         
         success = mgr.client.update_game_bgg_id(decoded_game_name, None)
         

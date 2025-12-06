@@ -2,8 +2,11 @@
 Gallery API Blueprint
 處理桌遊展示牆相關的路由
 """
-from flask import Blueprint, jsonify, request, current_app
+from typing import Tuple, Optional, List, Dict, Any
+from flask import Blueprint, jsonify, request, Response
 import logging
+
+from app.utils import get_manager
 
 logger = logging.getLogger(__name__)
 
@@ -11,17 +14,27 @@ logger = logging.getLogger(__name__)
 gallery_bp = Blueprint('gallery', __name__, url_prefix='/api/gallery')
 
 
-def get_manager():
-    """從 app.config 獲取 BoardGameManager"""
-    if 'boardgame_manager' not in current_app.config:
-        from core.facade import BoardGameManager
-        logger.info("正在初始化 Google Sheets 連線...")
-        current_app.config['boardgame_manager'] = BoardGameManager()
-    return current_app.config['boardgame_manager']
-
-
-def parse_players_range(players_str):
-    """解析人數範圍字串，例如 '2-4' 或 '5+'"""
+def parse_players_range(players_str: Any) -> Tuple[Optional[int], Optional[int]]:
+    """解析人數範圍字串
+    
+    支援多種格式：'2-4', '2~4', '5+', 或單一數字。
+    
+    Args:
+        players_str: 人數範圍字串，例如 '2-4', '5+', 或空字串/None
+    
+    Returns:
+        Tuple[Optional[int], Optional[int]]: (最小人數, 最大人數)
+            - 成功解析時返回對應的數值
+            - 無法解析時返回 (None, None)
+    
+    Examples:
+        >>> parse_players_range('2-4')
+        (2, 4)
+        >>> parse_players_range('5+')
+        (5, 99)
+        >>> parse_players_range('3')
+        (3, 3)
+    """
     if not players_str or players_str == '':
         return None, None
     
@@ -52,15 +65,24 @@ def parse_players_range(players_str):
         return None, None
 
 
-def classify_game_type(game_data):
-    """
-    根據遊戲資訊自動分類遊戲類型
+def classify_game_type(game_data: Dict[str, Any]) -> List[str]:
+    """根據遊戲資訊自動分類遊戲類型
+    
+    根據遊戲的人數、難度等資訊自動判斷遊戲類型。
+    可能的類型包括：派對遊戲、策略遊戲、家庭遊戲、兒童遊戲、其他。
     
     Args:
-        game_data: 遊戲數據字典
-        
+        game_data: 遊戲數據字典，應包含以下欄位：
+            - minPlayers: 最小玩家人數
+            - maxPlayers: 最大玩家人數
+            - difficulty: 難度（簡單/普通/中等/困難）
+    
     Returns:
-        類型列表
+        List[str]: 遊戲類型列表，可能包含多個類型
+    
+    Examples:
+        >>> classify_game_type({'minPlayers': 2, 'maxPlayers': 8, 'difficulty': '簡單'})
+        ['派對遊戲', '家庭遊戲']
     """
     types = []
     
@@ -94,8 +116,43 @@ def classify_game_type(game_data):
 
 
 @gallery_bp.route('/games', methods=['GET'])
-def get_gallery_games():
-    """獲取展示牆的桌遊列表"""
+def get_gallery_games() -> Tuple[Response, int]:
+    """獲取展示牆的桌遊列表
+    
+    從 Google Sheets 讀取桌遊資料，處理圖片、人數、類型等資訊，
+    並根據查詢參數進行篩選。
+    
+    Query Parameters:
+        status (str, optional): 依狀態篩選（例如：'歸還'、'借出'）
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 成功時: ({
+                'success': True,
+                'games': [...],
+                'total': int
+              }, 200)
+            - 失敗時: ({'success': False, 'error': '錯誤訊息'}, 500)
+    
+    Response Format:
+        每個遊戲物件包含以下欄位：
+        - id: 遊戲 ID（使用名稱）
+        - name: 遊戲名稱
+        - status: 狀態
+        - borrower: 借閱人
+        - location: 位置
+        - difficulty: 難度
+        - custodian: 保管人
+        - bggId: BGG ID（如果有）
+        - thumbnail/image: 圖片 URL
+        - minPlayers/maxPlayers: 人數範圍
+        - minMinutes/maxMinutes: 遊戲時間
+        - types: 類型列表
+        - tags: 標籤列表
+    
+    Raises:
+        Exception: 當資料庫連線失敗或資料讀取錯誤時
+    """
     try:
         mgr = get_manager()
         mgr.games = mgr.load_data()

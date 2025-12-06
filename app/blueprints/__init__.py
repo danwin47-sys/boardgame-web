@@ -20,13 +20,13 @@ def register_blueprints(app):
     logger.info("已註冊 main blueprint")
     
     # 註冊 API Blueprints
-    from .api.games import game_bp
+    from .api.games import games_bp
     from .api.bgg import bgg_bp
-    from .api.members import member_bp
+    from .api.members import members_bp
     from .api.gallery import gallery_bp
-    app.register_blueprint(game_bp)
+    app.register_blueprint(games_bp)
     app.register_blueprint(bgg_bp)
-    app.register_blueprint(member_bp)
+    app.register_blueprint(members_bp)
     app.register_blueprint(gallery_bp)
     logger.info("已註冊 API blueprints (games, bgg, members, gallery)")
     

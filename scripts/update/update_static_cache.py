@@ -11,7 +11,7 @@ from datetime import datetime
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from boardgame_system import BoardGameManager
+from core.facade import BoardGameManager
 from core.bgg_service import BGGService
 
 # Configure logging

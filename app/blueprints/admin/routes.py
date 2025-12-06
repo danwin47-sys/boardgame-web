@@ -2,10 +2,13 @@
 管理員 API Blueprint
 處理管理員相關的路由：登入、批次操作
 """
-from flask import Blueprint, jsonify, request, current_app
+from typing import Tuple
+from flask import Blueprint, jsonify, request, Response
 import os
 import secrets
 import logging
+
+from app.utils import get_manager
 
 logger = logging.getLogger(__name__)
 
@@ -13,18 +16,40 @@ logger = logging.getLogger(__name__)
 admin_bp = Blueprint('admin', __name__, url_prefix='/api')
 
 
-def get_manager():
-    """從 app.config 獲取 BoardGameManager"""
-    if 'boardgame_manager' not in current_app.config:
-        from core.facade import BoardGameManager
-        logger.info("正在初始化 Google Sheets 連線...")
-        current_app.config['boardgame_manager'] = BoardGameManager()
-    return current_app.config['boardgame_manager']
-
-
 @admin_bp.route('/admin-login', methods=['POST'])
-def admin_login():
-    """管理員登入"""
+def admin_login() -> Tuple[Response, int]:
+    """管理員登入
+    
+    驗證管理員密碼並生成訪問 token。
+    
+    Request Body:
+        {
+            "password": str  # 管理員密碼（必填）
+        }
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 成功時: ({
+                'success': True,
+                'token': str,
+                'message': '登入成功'
+              }, 200)
+            - 失敗時: ({
+                'success': False,
+                'message': '密碼錯誤'
+              }, 401)
+            - 錯誤時: ({
+                'success': False,
+                'error': '錯誤訊息'
+              }, 500)
+    
+    Note:
+        - 管理員密碼從環境變數 ADMIN_PASSWORD 讀取
+        - Token 使用簡單的隨機生成（生產環境應使用 JWT）
+    
+    Raises:
+        Exception: 當環境變數未設定或其他系統錯誤時
+    """
     try:
         data = request.get_json()
         password = data.get('password')
@@ -49,8 +74,32 @@ def admin_login():
 
 
 @admin_bp.route('/admin/verify', methods=['POST'])
-def admin_verify():
-    """管理員密碼驗證（前端使用）"""
+def admin_verify() -> Tuple[Response, int]:
+    """管理員密碼驗證
+    
+    驗證管理員密碼是否正確（用於前端權限檢查）。
+    
+    Request Body:
+        {
+            "password": str  # 管理員密碼（選填，空字串視為驗證失敗）
+        }
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 驗證成功: ({'success': True}, 200)
+            - 驗證失敗: ({'success': False}, 200)
+            - 錯誤時: ({
+                'success': False,
+                'error': '錯誤訊息'
+              }, 500)
+    
+    Note:
+        - 無論驗證成功或失敗，都返回 200 狀態碼
+        - 通過 success 欄位區分驗證結果
+    
+    Raises:
+        Exception: 當環境變數未設定或其他系統錯誤時
+    """
     try:
         data = request.get_json()
         password = data.get('password', '')
@@ -73,8 +122,37 @@ def admin_verify():
 
 
 @admin_bp.route('/batch-borrow', methods=['POST'])
-def batch_borrow():
-    """批次借桌遊"""
+def batch_borrow() -> Tuple[Response, int]:
+    """批次借出桌遊
+    
+    同時借出多個桌遊給指定社員。
+    
+    Request Body:
+        {
+            "game_names": List[str],  # 桌遊名稱列表（必填）
+            "member_id": str          # 社員 ID（必填）
+        }
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 成功時: ({
+                'message': str,
+                'success': True,
+                'success_games': List[str],  # 成功借出的遊戲列表
+                'failed_games': List[str]    # 失敗的遊戲列表
+              }, 200)
+            - 失敗時: ({
+                'success': False,
+                'error': '錯誤訊息'
+              }, 400/500)
+    
+    Note:
+        - 部分成功也會返回 success: True
+        - 通過 success_games 和 failed_games 區分結果
+    
+    Raises:
+        Exception: 當資料庫更新失敗或其他系統錯誤時
+    """
     try:
         data = request.get_json()
         if not data: 
@@ -103,8 +181,36 @@ def batch_borrow():
 
 
 @admin_bp.route('/batch-return', methods=['POST'])
-def batch_return():
-    """批次還桌遊"""
+def batch_return() -> Tuple[Response, int]:
+    """批次歸還桌遊
+    
+    同時歸還多個桌遊。
+    
+    Request Body:
+        {
+            "game_names": List[str]  # 桌遊名稱列表（必填）
+        }
+    
+    Returns:
+        Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
+            - 成功時: ({
+                'message': str,
+                'success': True,
+                'success_games': List[str],  # 成功歸還的遊戲列表
+                'failed_games': List[str]    # 失敗的遊戲列表
+              }, 200)
+            - 失敗時: ({
+                'success': False,
+                'error': '錯誤訊息'
+              }, 400/500)
+    
+    Note:
+        - 部分成功也會返回 success: True
+        - 通過 success_games 和 failed_games 區分結果
+    
+    Raises:
+        Exception: 當資料庫更新失敗或其他系統錯誤時
+    """
     try:
         data = request.get_json()
         if not data: 
