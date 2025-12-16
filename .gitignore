@@ -30,6 +30,8 @@ boardgame-bot-5f6751855184.json
 *.json
 !package.json
 !static/data/recommendations.json
+!mcp_servers.json
+!agent_memory.json
 
 # IDE
 .vscode/
@@ -45,3 +47,11 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Antigravity AI artifacts
+artifacts/logs/*.log
+artifacts/plan_*.md
+
+# Python cache
+.mypy_cache/
+.pytest_cache/
