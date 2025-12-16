@@ -6,6 +6,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
+from typing import Optional
 import os
 import logging
 
@@ -15,8 +16,8 @@ logger = logging.getLogger(__name__)
 class EmailNotifier:
     """郵件通知服務"""
 
-    def __init__(self, smtp_server: str = None, smtp_port: int = None,
-                 username: str = None, password: str = None):
+    def __init__(self, smtp_server: Optional[str] = None, smtp_port: Optional[int] = None,
+                 username: Optional[str] = None, password: Optional[str] = None):
         """
         初始化郵件通知服務
 
@@ -89,7 +90,7 @@ class EmailNotifier:
             total_records: int,
             errors: int,
             import_time: float,
-            db_stats: dict = None):
+            db_stats: Optional[dict] = None):
         """
         發送導入成功通知
 

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class BGGRanksService:
     """BGG 排名數據查詢服務"""
 
-    def __init__(self, db_path: str = None):
+    def __init__(self, db_path: Optional[str] = None):
         """
         初始化 BGG Ranks Service
 
