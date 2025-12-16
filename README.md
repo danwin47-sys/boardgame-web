@@ -1,5 +1,13 @@
 # Boardgame-Web 桌遊管理系統
 
+![CI/CD Pipeline](https://img.shields.io/github/actions/workflow/status/danwin47-sys/boardgame-web/ci.yml?label=CI%2FCD%20Pipeline&style=flat-square)
+![Tests](https://img.shields.io/badge/tests-216%20passed-success?style=flat-square)
+![Coverage](https://img.shields.io/badge/coverage-65%25-yellow?style=flat-square)
+![Python](https://img.shields.io/badge/python-3.12+-blue?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)
+![Docker](https://img.shields.io/badge/docker-ready-blue?style=flat-square)
+
 一個基於 Flask 的桌遊借還管理系統，使用 Google Sheets 作為後端資料庫，整合 BoardGameGeek (BGG) 資料，提供完整的桌遊收藏管理解決方案。適合社團、工作室或個人收藏管理。
 
 ## ✨ 功能特色
