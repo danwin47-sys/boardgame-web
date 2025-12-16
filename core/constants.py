@@ -5,8 +5,8 @@
 """
 
 # === 快取時間（秒）===
-GAMES_CACHE_TTL = 30  # 遊戲列表快取 30 秒
-MEMBERS_CACHE_TTL = 3600  # 社員列表快取 1 小時
+GAMES_CACHE_TTL = 300  # 遊戲列表快取 5 分鐘（優化：減少 API 呼叫）
+MEMBERS_CACHE_TTL = 1800  # 社員列表快取 30 分鐘（優化：平衡即時性與效能）
 
 # === 時間相關 ===
 MILLISECONDS_PER_SECOND = 1000

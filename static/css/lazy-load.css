@@ -1,0 +1,55 @@
+/* 懶加載樣式 */
+
+/* 載入中動畫 */
+.lazy-loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s ease-in-out infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* 載入完成淡入效果 */
+.lazy-loaded {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* 載入失敗樣式 */
+.lazy-error {
+    background-color: #f5f5f5;
+    border: 1px dashed #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 12px;
+}
+
+/* 圖片預設樣式 */
+img[data-src] {
+    min-height: 100px;
+    background-color: #f5f5f5;
+}
+
+/* 背景圖片預設樣式 */
+[data-bg] {
+    background-color: #f5f5f5;
+}
