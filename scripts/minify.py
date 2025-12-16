@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 """
-前端資源壓縮腳本
-自動壓縮 CSS 和 JavaScript 檔案
+Frontend Resource Minifier
+Automatically minify CSS and JavaScript files
 """
 import os
 import sys
@@ -10,13 +11,13 @@ try:
     import rcssmin
     import jsmin
 except ImportError:
-    print("錯誤：缺少必要的套件")
-    print("請執行：pip install rcssmin jsmin")
+    print("Error: Missing required packages")
+    print("Please run: pip install rcssmin jsmin")
     sys.exit(1)
 
 
 def minify_css(input_path, output_path):
-    """壓縮 CSS 檔案"""
+    """Minify CSS file"""
     try:
         with open(input_path, 'r', encoding='utf-8') as f:
             css_content = f.read()
@@ -30,17 +31,17 @@ def minify_css(input_path, output_path):
         minified_size = len(minified)
         reduction = (1 - minified_size / original_size) * 100
         
-        print(f"✓ CSS: {input_path.name} -> {output_path.name}")
-        print(f"  大小: {original_size:,} -> {minified_size:,} bytes ({reduction:.1f}% 減少)")
+        print(f"[OK] CSS: {input_path.name} -> {output_path.name}")
+        print(f"  Size: {original_size:,} -> {minified_size:,} bytes ({reduction:.1f}% reduction)")
         
         return True
     except Exception as e:
-        print(f"✗ 壓縮 CSS 失敗 {input_path}: {e}")
+        print(f"[FAIL] CSS minify failed {input_path}: {e}")
         return False
 
 
 def minify_js(input_path, output_path):
-    """壓縮 JavaScript 檔案"""
+    """Minify JavaScript file"""
     try:
         with open(input_path, 'r', encoding='utf-8') as f:
             js_content = f.read()
@@ -54,18 +55,18 @@ def minify_js(input_path, output_path):
         minified_size = len(minified)
         reduction = (1 - minified_size / original_size) * 100
         
-        print(f"✓ JS: {input_path.name} -> {output_path.name}")
-        print(f"  大小: {original_size:,} -> {minified_size:,} bytes ({reduction:.1f}% 減少)")
+        print(f"[OK] JS: {input_path.name} -> {output_path.name}")
+        print(f"  Size: {original_size:,} -> {minified_size:,} bytes ({reduction:.1f}% reduction)")
         
         return True
     except Exception as e:
-        print(f"✗ 壓縮 JS 失敗 {input_path}: {e}")
+        print(f"[FAIL] JS minify failed {input_path}: {e}")
         return False
 
 
 def main():
-    """主函數"""
-    # 取得專案根目錄
+    """Main function"""
+    # Get project root directory
     project_root = Path(__file__).parent.parent
     static_dir = project_root / 'static'
     
@@ -73,12 +74,12 @@ def main():
     js_dir = static_dir / 'js'
     
     print("=" * 60)
-    print("前端資源壓縮工具")
+    print("Frontend Resource Minifier")
     print("=" * 60)
     print()
     
-    # 壓縮 CSS 檔案
-    print("壓縮 CSS 檔案...")
+    # Minify CSS files
+    print("Minifying CSS files...")
     print("-" * 60)
     
     css_files = [
@@ -97,12 +98,12 @@ def main():
             if minify_css(input_path, output_path):
                 css_success += 1
         else:
-            print(f"⚠ 檔案不存在: {css_file}")
+            print(f"[WARN] File not found: {css_file}")
     
     print()
     
-    # 壓縮 JS 檔案
-    print("壓縮 JavaScript 檔案...")
+    # Minify JS files
+    print("Minifying JavaScript files...")
     print("-" * 60)
     
     js_files = [
@@ -121,11 +122,11 @@ def main():
             if minify_js(input_path, output_path):
                 js_success += 1
         else:
-            print(f"⚠ 檔案不存在: {js_file}")
+            print(f"[WARN] File not found: {js_file}")
     
     print()
     print("=" * 60)
-    print(f"完成！成功壓縮 {css_success} 個 CSS 檔案和 {js_success} 個 JS 檔案")
+    print(f"Done! Successfully minified {css_success} CSS and {js_success} JS files")
     print("=" * 60)
 
 
