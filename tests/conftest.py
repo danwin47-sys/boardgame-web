@@ -22,6 +22,9 @@ def app():
         'DEMO_MODE': True,  # 使用演示模式避免實際 API 呼叫
     })
     
+    # 設定測試用管理員密碼
+    os.environ['ADMIN_PASSWORD'] = 'admin123'
+    
     yield app
 
 

@@ -109,8 +109,8 @@
 
 ### 程式碼品質
 
-- [ ] 移除 `boardgame_system.py` 舊架構
-- [ ] 統一錯誤處理機制
+- [x] 移除 `boardgame_system.py` 舊架構 *(已重構為 `core/facade.py`)*
+- [x] 統一錯誤處理機制 *(已完成)*
 - [ ] Pydantic 模型全面導入
 - [ ] 類型檢查 (mypy) 通過率 100%
 

@@ -7,7 +7,7 @@
 | 檔案/目錄 | 用途說明 | 必要性 |
 | :--- | :--- | :--- |
 | `serve.py` | **程式進入點**。負責啟動 Web 伺服器 (Waitress/Flask)。 | ✅ **核心必要** |
-| `boardgame_system.py` | **系統外觀 (Facade)**。提供統一介面供 API 呼叫核心服務。雖然是舊架構留存，但目前被多個路由引用。 | ✅ **核心必要** |
+| `core/facade.py` | **系統外觀 (Facade)**。提供統一介面供 API 呼叫核心服務。 | ✅ **核心必要** |
 | `boardgame-bot-*.json` | **Google Sheets 憑證**。用於存取後端資料庫 (Google Sheets)。 | ✅ **核心必要** |
 | `start.ps1` | **啟動腳本**。方便在 Windows 環境下快速啟動伺服器。 | ✅ **工具必要** |
 | `requirements.txt` | **依賴套件清單**。定義專案所需的 Python 套件。 | ✅ **核心必要** |
@@ -98,6 +98,6 @@
 
 目前專案中的檔案結構非常精實，所有檔案都有其明確的職責。
 
-- **沒有發現多餘的垃圾檔案** (已刪除 `style_original.css`)。
-- **`boardgame_system.py`** 雖然是舊架構，但為了保持相容性必須保留。
+- **沒有發現多餘的垃圾檔案**。
+- **`core/facade.py`** 作為系統外觀 (Facade)，提供統一介面供 API 呼叫核心服務。
 - **`core/demo_data.py`** 為了支援無網路或無 API Key 的開發環境，建議保留。
