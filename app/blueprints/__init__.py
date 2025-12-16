@@ -25,12 +25,14 @@ def register_blueprints(app):
     from .api.members import members_bp
     from .api.gallery import gallery_bp
     from .api.docs import api_docs_bp
+    from .api.search import search_bp  # 新增搜尋 API
     app.register_blueprint(games_bp)
     app.register_blueprint(bgg_bp)
     app.register_blueprint(members_bp)
     app.register_blueprint(gallery_bp)
     app.register_blueprint(api_docs_bp)
-    logger.info("已註冊 API blueprints (games, bgg, members, gallery, docs)")
+    app.register_blueprint(search_bp)  # 註冊搜尋 API
+    logger.info("已註冊 API blueprints (games, bgg, members, gallery, docs, search)")
     
     # 註冊管理員 Blueprint
     from .admin.routes import admin_bp

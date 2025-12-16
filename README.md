@@ -1,8 +1,8 @@
 # Boardgame-Web 桌遊管理系統
 
 ![CI/CD Pipeline](https://img.shields.io/github/actions/workflow/status/danwin47-sys/boardgame-web/ci.yml?label=CI%2FCD%20Pipeline&style=flat-square)
-![Tests](https://img.shields.io/badge/tests-216%20passed-success?style=flat-square)
-![Coverage](https://img.shields.io/badge/coverage-65%25-yellow?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-270%20passed-success?style=flat-square)
+![Coverage](https://img.shields.io/badge/coverage-80%25-brightgreen?style=flat-square)
 ![Python](https://img.shields.io/badge/python-3.12+-blue?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 ![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)
@@ -214,7 +214,7 @@ boardgame-web/
 
 ## 🧪 測試
 
-本專案包含完整的單元測試與整合測試，目前覆蓋率 **65%**，共 **216** 個測試。
+本專案包含完整的單元測試與整合測試，目前覆蓋率 **80%**，共 **270** 個測試。
 
 ```bash
 # 安裝測試依賴
@@ -291,4 +291,4 @@ pytest --cov=app --cov=core
 ---
 
 **最後更新：** 2025-12-16  
-**版本：** 3.1 (技術債處理 - 測試覆蓋率 65%, Docker Compose, API 文件)
+**版本：** 3.1 (技術債處理 - 測試覆蓋率 81%, Docker Compose, API 文件)
