@@ -9,7 +9,9 @@ from core.exceptions import (
     GameAlreadyBorrowedException,
     GameNotBorrowedException,
     SheetConnectionError,
-    InvalidDataError
+    InvalidDataError,
+    ValidationError,
+    DuplicateGameError
 )
 
 
@@ -74,3 +76,69 @@ class TestExceptions:
         
         with pytest.raises(GameAlreadyBorrowedException):
             raise GameAlreadyBorrowedException("遊戲", "借閱者")
+
+
+class TestExceptionAttributes:
+    """測試例外類別的新屬性"""
+    
+    def test_http_status_code(self):
+        """測試 http_status_code 屬性"""
+        assert GameNotFoundException("test").http_status_code == 404
+        assert MemberNotFoundException("test").http_status_code == 404
+        assert GameAlreadyBorrowedException("game", "user").http_status_code == 409
+        assert GameNotBorrowedException("test").http_status_code == 400
+        assert SheetConnectionError().http_status_code == 503
+        assert InvalidDataError("test").http_status_code == 400
+        assert ValidationError("test").http_status_code == 400
+        assert DuplicateGameError("game", 123).http_status_code == 409
+    
+    def test_error_code(self):
+        """測試 error_code 屬性"""
+        assert GameNotFoundException("test").error_code == "GAME_NOT_FOUND"
+        assert MemberNotFoundException("test").error_code == "MEMBER_NOT_FOUND"
+        assert GameAlreadyBorrowedException("game", "user").error_code == "GAME_ALREADY_BORROWED"
+        assert GameNotBorrowedException("test").error_code == "GAME_NOT_BORROWED"
+        assert SheetConnectionError().error_code == "SHEET_CONNECTION_ERROR"
+        assert InvalidDataError("test").error_code == "INVALID_DATA"
+        assert ValidationError("test").error_code == "VALIDATION_ERROR"
+        assert DuplicateGameError("game", 123).error_code == "DUPLICATE_GAME"
+    
+    def test_to_dict(self):
+        """測試 to_dict 方法"""
+        exc = GameNotFoundException("卡坦島")
+        result = exc.to_dict()
+        
+        assert result['success'] is False
+        assert result['error_code'] == "GAME_NOT_FOUND"
+        assert "卡坦島" in result['message']
+    
+    def test_to_dict_structure(self):
+        """測試 to_dict 回傳結構"""
+        exc = ValidationError("缺少必要參數")
+        result = exc.to_dict()
+        
+        # 確認所有必要欄位都存在
+        assert 'success' in result
+        assert 'error_code' in result
+        assert 'message' in result
+
+
+class TestNewExceptions:
+    """測試新增的例外類別"""
+    
+    def test_validation_error(self):
+        """測試 ValidationError"""
+        exc = ValidationError("缺少 game_id 參數")
+        assert "缺少 game_id 參數" in str(exc)
+        assert exc.http_status_code == 400
+        assert exc.error_code == "VALIDATION_ERROR"
+    
+    def test_duplicate_game_error(self):
+        """測試 DuplicateGameError"""
+        exc = DuplicateGameError("卡坦島", 13)
+        assert "卡坦島" in str(exc)
+        assert "13" in str(exc)
+        assert exc.game_name == "卡坦島"
+        assert exc.bgg_id == 13
+        assert exc.http_status_code == 409
+        assert exc.error_code == "DUPLICATE_GAME"

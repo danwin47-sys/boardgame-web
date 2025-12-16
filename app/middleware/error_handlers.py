@@ -2,8 +2,10 @@
 全域錯誤處理器
 統一處理應用程式的錯誤回應
 """
-from flask import jsonify, render_template_string
+from flask import jsonify, render_template_string, request
 import logging
+
+from core.exceptions import BoardGameException
 
 logger = logging.getLogger(__name__)
 
@@ -16,17 +18,29 @@ def register_error_handlers(app):
         app: Flask 應用程式實例
     """
     
+    @app.errorhandler(BoardGameException)
+    def handle_boardgame_exception(error):
+        """處理所有 BoardGameException 子類別
+        
+        自動使用異常的 http_status_code 和 to_dict() 方法回應。
+        """
+        logger.warning(
+            f"{error.error_code}: {error} "
+            f"[{request.method} {request.path}]"
+        )
+        return jsonify(error.to_dict()), error.http_status_code
+    
     @app.errorhandler(404)
     def not_found(error):
         """處理 404 錯誤"""
-        logger.warning(f"404 錯誤: {error}")
+        logger.warning(f"404 錯誤: {request.path}")
         
         # API 請求返回 JSON
-        if '/api/' in str(error):
+        if request.path.startswith('/api/'):
             return jsonify({
                 'success': False,
-                'error': '找不到請求的資源',
-                'status_code': 404
+                'error_code': 'NOT_FOUND',
+                'message': '找不到請求的資源'
             }), 404
         
         # 一般頁面返回 HTML
@@ -57,8 +71,8 @@ def register_error_handlers(app):
         
         return jsonify({
             'success': False,
-            'error': '伺服器內部錯誤',
-            'status_code': 500
+            'error_code': 'INTERNAL_ERROR',
+            'message': '伺服器內部錯誤'
         }), 500
     
     @app.errorhandler(400)
@@ -68,8 +82,8 @@ def register_error_handlers(app):
         
         return jsonify({
             'success': False,
-            'error': '無效的請求',
-            'status_code': 400
+            'error_code': 'BAD_REQUEST',
+            'message': '無效的請求'
         }), 400
     
     @app.errorhandler(Exception)
@@ -79,8 +93,8 @@ def register_error_handlers(app):
         
         return jsonify({
             'success': False,
-            'error': '發生未預期的錯誤',
-            'status_code': 500
+            'error_code': 'INTERNAL_ERROR',
+            'message': '發生未預期的錯誤'
         }), 500
     
     logger.info("錯誤處理器已註冊")
