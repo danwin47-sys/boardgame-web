@@ -208,6 +208,57 @@ class SheetsClient:
         self._games_cache = None
         self._games_cache_time = 0
 
+    def add_new_game(self, game_data: Dict[str, Any]) -> bool:
+        """
+        新增遊戲到 Google Sheets
+        
+        Args:
+            game_data: 遊戲資料字典，包含：
+                - name: 遊戲名稱（必填）
+                - bgg_id: BGG ID（選填）
+                - players: 玩家數（選填）
+                - image: 圖片URL（選填）
+                - bgg_thumbnail: 縮圖URL（選填）
+                - custodian: 保管人（選填）
+                - status: 狀態（選填，預設為「可用」）
+        
+        Returns:
+            bool: 是否成功
+        """
+        from .constants import GAME_STATUS_AVAILABLE
+        
+        logger.info(f"[UPDATE] Adding new game: {game_data.get('name')}")
+        if not self.valid:
+            return False
+        
+        try:
+            ws = self.get_games_worksheet()
+            
+            # 獲取標題列
+            headers = ws.row_values(1)
+            
+            # 準備新遊戲的資料行（按照 headers 順序）
+            new_row = []
+            for header in headers:
+                # 獲取對應的值，如果沒有則使用預設值
+                if header == 'status' and 'status' not in game_data:
+                    new_row.append(GAME_STATUS_AVAILABLE)
+                else:
+                    new_row.append(game_data.get(header, ''))
+            
+            # 添加到工作表
+            ws.append_row(new_row)
+            
+            # 使快取失效
+            self.invalidate_games_cache()
+            
+            logger.info(f"成功新增遊戲：{game_data.get('name')}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"新增遊戲失敗: {e}")
+            return False
+
     def create_batch_update(self, row: int, col_idx: int,
                             value: Any) -> Dict[str, Any]:
         """

@@ -260,34 +260,75 @@ def get_recommendations() -> Tuple[Response, int]:
 def add_to_collection() -> Tuple[Response, int]:
     """從 BGG 加入桌遊到館藏
     
-    根據 BGG ID 將遊戲加入到 Google Sheets 館藏中（功能待實作）。
+    根據 BGG ID 獲取遊戲詳情並將遊戲加入到 Google Sheets 館藏中。
+    支援重複檢查，避免加入已存在的遊戲。
     
     Request Body:
         {
             "game_id": int,           # BGG 遊戲 ID（必填）
-            "custodian": str          # 保管人（選填）
+            "custodian": str,         # 保管人（選填）
+            "force": bool             # 強制加入（選填，預設 False）
         }
     
     Returns:
         Tuple[Response, int]: JSON 響應和 HTTP 狀態碼
-            - 成功時: ({'success': True, 'message': '訊息'}, 200)
+            - 成功時: ({
+                'success': True,
+                'message': '訊息',
+                'game': {遊戲資料}
+              }, 200)
+            - 重複時: ({
+                'success': False,
+                'duplicate': True,
+                'existing_game': {...},
+                'message': '遊戲已存在'
+              }, 409)
             - 失敗時: ({'success': False, 'error': '錯誤訊息'}, 400/404/500)
     
     Note:
-        此功能目前尚未完整實作（TODO）
+        - 自動從 BGG 獲取遊戲詳情（名稱、玩家數、圖片等）
+        - 新加入的遊戲狀態預設為「可用」
+        - 加入前檢查 BGG ID 是否已存在
+        - 可使用 force=true 強制加入重複遊戲
+        - 加入後會自動清除遊戲列表快取
     
     Raises:
-        Exception: 當 BGG API 請求失敗時
+        Exception: 當 BGG API 請求失敗或 Google Sheets 更新失敗時
     """
     try:
         data = request.get_json()
         game_id = data.get('game_id')
         custodian = data.get('custodian', '')
+        force = data.get('force', False)
         
         if not game_id:
             return jsonify({'success': False, 'error': '缺少 game_id'}), 400
         
-        logger.debug(f"Adding BGG game to collection: {game_id}, custodian: {custodian}")
+        logger.debug(f"Adding BGG game to collection: {game_id}, custodian: {custodian}, force: {force}")
+        
+        # 取得 Manager
+        mgr = get_manager()
+        
+        # 檢查遊戲是否已存在（除非強制加入）
+        if not force:
+            existing_games = mgr.load_data()
+            for existing_game in existing_games:
+                existing_bgg_id = existing_game.get('bgg_id')
+                # 檢查 BGG ID 是否相符
+                if existing_bgg_id and str(existing_bgg_id) == str(game_id):
+                    logger.warning(f"遊戲已存在：{existing_game.get('name')} (BGG ID: {game_id})")
+                    return jsonify({
+                        'success': False,
+                        'duplicate': True,
+                        'existing_game': {
+                            'name': existing_game.get('name'),
+                            'bgg_id': existing_game.get('bgg_id'),
+                            'custodian': existing_game.get('custodian', ''),
+                            'status': existing_game.get('status', ''),
+                            'players': existing_game.get('players', '')
+                        },
+                        'message': f'遊戲「{existing_game.get("name")}」(BGG ID: {game_id}) 已存在於館藏中'
+                    }), 409
         
         # 取得遊戲詳情
         bgg = get_bgg_service()
@@ -296,13 +337,41 @@ def add_to_collection() -> Tuple[Response, int]:
         if not game:
             return jsonify({'success': False, 'error': '找不到遊戲'}), 404
         
-        # TODO: 實作將 BGG 遊戲加入到 Google Sheets 的邏輯
-        return jsonify({'success': True, 'message': f'已加入「{game["name"]}」到館藏'}), 200
+        # 準備要加入到 Google Sheets 的遊戲資料
+        game_data = {
+            'name': game['name'],
+            'bgg_id': game_id,
+            'players': game.get('players_display', ''),
+            'image': game.get('image', ''),
+            'bgg_thumbnail': game.get('thumbnail', ''),
+            'custodian': custodian,
+            'status': '可用'  # 新加入的遊戲預設為可用
+        }
+        
+        # 將遊戲加入到 Google Sheets
+        success = mgr.client.add_new_game(game_data)
+        
+        if success:
+            msg = f'已成功將「{game["name"]}」加入館藏'
+            if force:
+                msg += '（強制加入）'
+            logger.info(f"成功將 BGG 遊戲加入館藏：{game['name']} (ID: {game_id}){' [FORCED]' if force else ''}")
+            return jsonify({
+                'success': True,
+                'message': msg,
+                'game': game_data
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': '加入遊戲到 Google Sheets 失敗'
+            }), 500
         
     except Exception as e:
         logger.error(f"Add to collection exception: {e}")
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
+
 
 
 # ============ BGG 遊戲連結 API ============

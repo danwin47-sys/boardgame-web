@@ -601,3 +601,181 @@
     white-space: nowrap;
 }
 
+/* ==================== Add Game Modal Styles ==================== */
+
+/* Add Game Modal 特殊樣式 */
+.add-game-modal .add-game-content {
+    max-width: 500px;
+    width: 90%;
+}
+
+.add-game-form {
+    padding: 20px 0;
+}
+
+.game-name-display {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f7fafc;
+    border-radius: 8px;
+    border-left: 4px solid #4299e1;
+}
+
+.game-name-display label {
+    display: block;
+    font-size: 0.9em;
+    color: #718096;
+    margin-bottom: 5px;
+}
+
+.game-name-display strong {
+    font-size: 1.2em;
+    color: #2d3748;
+}
+
+/* 表單群組 */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1em;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.form-control::placeholder {
+    color: #a0aec0;
+}
+
+/* 重複警告樣式 */
+.duplicate-warning {
+    display: flex;
+    gap: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #fff5f5;
+    border: 2px solid #fc8181;
+    border-radius: 8px;
+    animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.warning-icon {
+    font-size: 2em;
+    line-height: 1;
+}
+
+.warning-content h4 {
+    margin: 0 0 10px 0;
+    color: #c53030;
+    font-size: 1.1em;
+}
+
+.warning-content p {
+    margin: 5px 0;
+    font-size: 0.95em;
+    color: #2d3748;
+}
+
+.warning-content p strong {
+    color: #718096;
+}
+
+.warning-note {
+    margin-top: 15px !important;
+    padding-top: 10px;
+    border-top: 1px solid #fc8181;
+    font-style: italic;
+    color: #c53030 !important;
+}
+
+/* Modal 動作按鈕 */
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.modal-actions .btn {
+    padding: 10px 20px;
+    min-width: 100px;
+}
+
+/* 載入指示器 */
+.loading-indicator {
+    text-align: center;
+    padding: 15px;
+    color: #4299e1;
+    font-weight: 600;
+}
+
+.loading-indicator span {
+    display: inline-block;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* 按鈕樣式增強 */
+.btn.danger {
+    background-color: #fc8181;
+    color: white;
+    border: none;
+}
+
+.btn.danger:hover {
+    background-color: #f56565;
+}
+
+.btn.danger:disabled {
+    background-color: #feb2b2;
+    cursor: not-allowed;
+}
+
+/* 響應式設計 */
+@media (max-width: 600px) {
+    .add-game-modal .add-game-content {
+        width: 95%;
+        max-width: none;
+    }
+    
+    .duplicate-warning {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+    
+    .modal-actions .btn {
+        width: 100%;
+    }
+}

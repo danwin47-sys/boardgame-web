@@ -222,34 +222,149 @@ function closeBGGModal() {
 
 // 加入桌遊到館藏
 function addBGGGameToCollection(gameId, gameName) {
-    const custodian = prompt(`要將「${gameName}」加入館藏，請輸入保管人名稱：`);
-    if (!custodian) return;
+    showAddGameModal(gameId, gameName);
+}
 
+// 顯示加入遊戲的 Modal
+function showAddGameModal(gameId, gameName, isDuplicate = false, existingGame = null) {
+    // 建立 Modal
+    const modal = document.createElement('div');
+    modal.className = 'bgg-modal add-game-modal';
+    modal.id = 'addGameModal';
+    
+    let warningHtml = '';
+    let actionButtonText = '確認加入';
+    let actionButtonClass = 'btn primary';
+    
+    if (isDuplicate && existingGame) {
+        warningHtml = `
+            <div class="duplicate-warning">
+                <div class="warning-icon">⚠️</div>
+                <div class="warning-content">
+                    <h4>遊戲已存在於館藏中</h4>
+                    <p><strong>名稱：</strong>${existingGame.name}</p>
+                    <p><strong>BGG ID：</strong>${existingGame.bgg_id}</p>
+                    <p><strong>保管人：</strong>${existingGame.custodian || '無'}</p>
+                    <p><strong>狀態：</strong>${existingGame.status}</p>
+                    <p class="warning-note">如果仍要加入此遊戲，請點擊「強制加入」</p>
+                </div>
+            </div>
+        `;
+        actionButtonText = '強制加入';
+        actionButtonClass = 'btn danger';
+    }
+    
+    modal.innerHTML = `
+        <div class="bgg-modal-content add-game-content">
+            <span class="bgg-modal-close" onclick="closeAddGameModal()">&times;</span>
+            <h2>加入遊戲到館藏</h2>
+            <div class="add-game-form">
+                <div class="game-name-display">
+                    <label>遊戲名稱：</label>
+                    <strong>${gameName}</strong>
+                </div>
+                ${warningHtml}
+                <div class="form-group">
+                    <label for="custodianInput">保管人：</label>
+                    <input type="text" id="custodianInput" class="form-control" placeholder="請輸入保管人名稱" ${isDuplicate ? '' : 'required'}>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn" onclick="closeAddGameModal()">取消</button>
+                    <button class="${actionButtonClass}" id="confirmAddBtn" onclick="confirmAddGame(${gameId}, '${gameName.replace(/'/g, "\\'")}', ${isDuplicate})">
+                        ${actionButtonText}
+                    </button>
+                </div>
+                <div id="addGameLoading" class="loading-indicator" style="display: none;">
+                    <span>處理中...</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // 自動 focus 到輸入框
+    setTimeout(() => {
+        const input = document.getElementById('custodianInput');
+        if (input) {
+            input.focus();
+            // Enter 鍵確認
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    confirmAddGame(gameId, gameName, isDuplicate);
+                }
+            });
+        }
+    }, 100);
+}
+
+// 關閉加入遊戲 Modal
+function closeAddGameModal() {
+    const modal = document.getElementById('addGameModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// 確認加入遊戲
+function confirmAddGame(gameId, gameName, isForce = false) {
+    const custodianInput = document.getElementById('custodianInput');
+    const custodian = custodianInput ? custodianInput.value.trim() : '';
+    
+    // 如果不是強制加入，則驗證保管人欄位
+    if (!isForce && !custodian) {
+        showToast('請輸入保管人名稱', 'error');
+        custodianInput.focus();
+        return;
+    }
+    
+    // 顯示載入中
+    const loadingDiv = document.getElementById('addGameLoading');
+    const confirmBtn = document.getElementById('confirmAddBtn');
+    if (loadingDiv) loadingDiv.style.display = 'block';
+    if (confirmBtn) confirmBtn.disabled = true;
+    
+    // 發送請求
     fetch('/api/bgg/collection', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             game_id: gameId,
-            custodian: custodian
+            custodian: custodian,
+            force: isForce
         })
     })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                closeBGGModal();
+        .then(r => r.json().then(data => ({ status: r.status, data: data })))
+        .then(({ status, data }) => {
+            if (loadingDiv) loadingDiv.style.display = 'none';
+            if (confirmBtn) confirmBtn.disabled = false;
+            
+            if (status === 409 && data.duplicate) {
+                // 遊戲重複，顯示警告
+                closeAddGameModal();
+                showAddGameModal(gameId, gameName, true, data.existing_game);
+                showToast(data.message, 'warning');
+            } else if (data.success) {
+                // 成功加入
+                showToast(data.message, 'success');
+                closeAddGameModal();
+                closeBGGModal(); // 同時關閉遊戲詳情 modal
                 if (typeof loadGames === 'function') {
                     loadGames(); // 重新載入遊戲列表
                 }
             } else {
-                alert(data.error || '加入失敗');
+                // 其他錯誤
+                showToast(data.error || '加入失敗', 'error');
             }
         })
         .catch(err => {
             console.error('Error adding game:', err);
-            alert('加入失敗');
+            if (loadingDiv) loadingDiv.style.display = 'none';
+            if (confirmBtn) confirmBtn.disabled = false;
+            showToast('加入失敗，請稍後再試', 'error');
         });
 }
+
 
 // 斷開桌遊與 BGG 的連結
 function unlinkGameFromBGG(gameName) {
