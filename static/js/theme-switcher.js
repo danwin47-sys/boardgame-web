@@ -31,12 +31,10 @@ class ThemeSwitcher {
     }
 
     /**
-     * 取得系統主題偏好
+     * 取得系統主題偏好（預設為淺色）
      */
     getSystemTheme() {
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            return 'dark';
-        }
+        // 預設使用淺色模式
         return 'light';
     }
 
