@@ -9,15 +9,12 @@ load_dotenv()  # 自動載入 .env 檔案
 
 from waitress import serve
 from app import create_app
-import logging
+from core.logging_config import setup_logging, get_logger
 import os
 
-# 設定 logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# 設定統一 logging
+setup_logging()
+logger = get_logger(__name__)
 
 if __name__ == '__main__':
     # 檢查環境變數
