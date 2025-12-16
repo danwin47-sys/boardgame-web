@@ -206,7 +206,7 @@ boardgame-web/
 
 ## 🧪 測試
 
-本專案包含完整的單元測試與整合測試。
+本專案包含完整的單元測試與整合測試，目前覆蓋率 **65%**，共 **216** 個測試。
 
 ```bash
 # 安裝測試依賴
@@ -223,7 +223,12 @@ pytest tests/integration/test_gallery_api.py
 pytest --cov=app --cov=core
 ```
 
-詳細測試說明請參考 [測試文檔](docs/TESTING.md)。
+### API 文件
+
+本專案提供 Swagger UI 自動生成的 API 文件：
+
+- 訪問 `/api/docs` 查看互動式 API 文件
+- 訪問 `/api/openapi.json` 取得 OpenAPI 規格
 
 ## � 詳細文檔
 
@@ -277,5 +282,5 @@ pytest --cov=app --cov=core
 
 ---
 
-**最後更新：** 2025-12-04  
-**版本：** 3.0 (Gallery Wall & BGG Ranks Integration)
+**最後更新：** 2025-12-16  
+**版本：** 3.1 (技術債處理 - 測試覆蓋率 65%, Docker Compose, API 文件)

@@ -101,17 +101,17 @@
 
 ### 持續性任務
 
-- [ ] 提升測試覆蓋率至 80%
-- [ ] API 文件自動生成 (OpenAPI/Swagger)
-- [ ] 日誌系統完善
-- [ ] 容器化部署優化 (Docker Compose)
-- [ ] CI/CD 流程完善 (GitHub Actions)
+- [ ] 提升測試覆蓋率至 80% *(目前 65%，已完成 216 測試)*
+- [x] API 文件自動生成 (OpenAPI/Swagger) *(已完成 - /api/docs)*
+- [x] 日誌系統完善 *(已完成 - core/logging_config.py)*
+- [x] 容器化部署優化 (Docker Compose) *(已完成 - docker-compose.yml)*
+- [x] CI/CD 流程完善 (GitHub Actions) *(已完成 - .github/workflows/ci.yml)*
 
 ### 程式碼品質
 
 - [x] 移除 `boardgame_system.py` 舊架構 *(已重構為 `core/facade.py`)*
-- [x] 統一錯誤處理機制 *(已完成)*
-- [ ] Pydantic 模型全面導入
+- [x] 統一錯誤處理機制 *(已完成 - error_code, to_dict())*
+- [x] Pydantic 模型導入 *(已完成 - app/schemas.py)*
 - [ ] 類型檢查 (mypy) 通過率 100%
 
 ---
