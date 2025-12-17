@@ -195,6 +195,9 @@ def get_gallery_games() -> Tuple[Response, int]:
             # 解析遊玩人數範圍
             players_str = game.get('players', '')
             if players_str:
+                # 確保是字串類型
+                players_str = str(players_str)
+                
                 # 移除中文字符和空格
                 players_clean = players_str.replace('人', '').replace(' ', '').strip()
                 
