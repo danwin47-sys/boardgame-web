@@ -34,6 +34,11 @@ FIELD_HISTORY = 'history'
 FIELD_CUSTODIAN = 'custodian'
 FIELD_ID = 'id'
 
+# 擴充管理欄位
+FIELD_IS_EXPANSION = 'is_expansion'
+FIELD_PARENT_GAME = 'parent_game'
+FIELD_STORAGE_MODE = 'storage_mode'
+
 # === 欄位名稱（中文，Google Sheets 實際欄位名）===
 FIELD_NAME_ZH = '名稱'
 FIELD_STATUS_ZH = '狀態'
@@ -47,6 +52,10 @@ FIELD_PLAYERS_ZH = '人數'
 # === 歷史記錄動作 ===
 ACTION_BORROW = "借閱"
 ACTION_RETURN = "歸還"
+
+# === 擴充收納模式 ===
+STORAGE_MODE_MERGED = 'merged'          # 合併收納（借出主遊戲時自動連動擴充）
+STORAGE_MODE_INDEPENDENT = 'independent'  # 獨立收納（擴充可單獨借出）
 
 # === 環境變數 ===
 ENV_SHEET_URL = "SHEET_URL"

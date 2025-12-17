@@ -111,3 +111,78 @@ def return_game() -> Tuple[Response, int]:
     except Exception as e:
         logger.error(f"歸還桌遊失敗: {e}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ============ 擴充管理 API ============
+
+@games_bp.route('/games/<game_name>/expansions', methods=['GET'])
+def get_game_expansions(game_name):
+    """取得遊戲的所有擴充"""
+    try:
+        from core.expansion_service import ExpansionService
+        from app.utils import get_manager
+        
+        mgr = get_manager()
+        expansion_service = ExpansionService(mgr.client)
+        all_games = mgr.load_data()
+        
+        expansions = expansion_service.get_expansions(game_name, all_games)
+        
+        return jsonify({
+            'success': True,
+            'game_name': game_name,
+            'expansions': expansions,
+            'count': len(expansions)
+        })
+    except Exception as e:
+        logger.error(f"取得擴充失敗: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@games_bp.route('/games/<game_name>/family', methods=['GET'])
+def get_game_family(game_name):
+    """取得遊戲家族（主遊戲 + 所有擴充）"""
+    try:
+        from core.expansion_service import ExpansionService
+        from app.utils import get_manager
+        
+        mgr = get_manager()
+        expansion_service = ExpansionService(mgr.client)
+        all_games = mgr.load_data()
+        
+        family = expansion_service.get_game_family(game_name, all_games)
+        
+        return jsonify({
+            'success': True,
+            'game_name': game_name,
+            'parent': family.get('parent'),
+            'expansions': family.get('expansions', []),
+            'expansion_count': len(family.get('expansions', []))
+        })
+    except Exception as e:
+        logger.error(f"取得遊戲家族失敗: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@games_bp.route('/games/<game_name>/validate-borrow', methods=['GET'])
+def validate_game_borrow(game_name):
+    """驗證借出操作（檢查擴充依賴）"""
+    try:
+        from core.expansion_service import ExpansionService
+        from app.utils import get_manager
+        
+        mgr = get_manager()
+        expansion_service = ExpansionService(mgr.client)
+        all_games = mgr.load_data()
+        
+        can_borrow, message, info = expansion_service.validate_borrow(game_name, all_games)
+        
+        return jsonify({
+            'success': True,
+            'can_borrow': can_borrow,
+            'message': message,
+            'info': info
+        })
+    except Exception as e:
+        logger.error(f"驗證借出失敗: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500

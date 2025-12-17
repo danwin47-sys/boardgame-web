@@ -127,6 +127,13 @@ function renderTable(games) {
                     <span>${game.name}</span>
                 </div>
             </td>
+            <td>${(() => {
+                const isExpansion = String(game.is_expansion || '').trim();
+                if (isExpansion === '1' || isExpansion.toLowerCase() === 'true') {
+                    return '<span class="expansion-badge">🧩 擴充</span>';
+                }
+                return '<span class="main-game-badge">🎮 主遊戲</span>';
+            })()}</td>
             <td><span class="status-badge ${statusClass}"><span class="status-dot"></span>${statusText}</span></td>
             <td>${borrowerDisplay}</td>
             <td>${(() => {

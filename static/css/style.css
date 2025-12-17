@@ -556,3 +556,31 @@ tbody tr:last-child td {
     z-index: 10;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
+
+/* ============ 擴充管理樣式 ============ */
+.expansion-badge,
+.main-game-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.expansion-badge {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.main-game-badge {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.expansion-row {
+    background-color: #fafafa;
+}
+
+.expansion-row td:first-child {
+    padding-left: 30px;
+}
