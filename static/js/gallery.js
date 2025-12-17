@@ -173,19 +173,51 @@ function renderGames() {
         const statusClass = isBorrowed ? 'borrowed' : 'available';
         const statusText = isBorrowed ? '借出' : '在庫';
 
+        // 檢查是否已收藏
+        const favorites = JSON.parse(localStorage.getItem('gallery_favorites') || '[]');
+        const isFavorited = favorites.includes(game.id);
+
         return `
-            <div class="game-card" onclick="showGameDetail('${escapeHtml(game.id)}')">
-                <div class="game-card-image">
-                    <img src="${imageUrl}" 
-                         alt="${escapeHtml(game.name)}"
-                         loading="lazy"
-                         onerror="this.src='https://via.placeholder.com/300x420/667eea/ffffff?text=No+Image'">
-                    <div class="game-top-labels">
-                        ${game.label ? `<span class="game-label">${escapeHtml(game.label)}</span>` : ''}
-                        ${(game.minPlayers && game.maxPlayers) ? `<span class="game-players-badge">${game.minPlayers == game.maxPlayers ? game.minPlayers + '人' : game.minPlayers + '-' + game.maxPlayers + '人'}</span>` : ''}
+            <div class="game-card">
+                <div class="card-inner">
+                    <!-- 卡片正面 -->
+                    <div class="card-front">
+                        <div class="game-card-image">
+                            <img src="${imageUrl}" 
+                                 alt="${escapeHtml(game.name)}"
+                                 loading="lazy"
+                                 onerror="this.src='https://via.placeholder.com/300x420/667eea/ffffff?text=No+Image'">
+                            <div class="game-top-labels">
+                                ${game.label ? `<span class="game-label">${escapeHtml(game.label)}</span>` : ''}
+                                ${(game.minPlayers && game.maxPlayers) ? `<span class="game-players-badge">${game.minPlayers == game.maxPlayers ? game.minPlayers + '人' : game.minPlayers + '-' + game.maxPlayers + '人'}</span>` : ''}
+                            </div>
+                            <span class="game-status-badge ${statusClass}">${statusText}</span>
+                            <div class="game-card-title">${escapeHtml(game.name)}</div>
+                        </div>
                     </div>
-                    <span class="game-status-badge ${statusClass}">${statusText}</span>
-                    <div class="game-card-title">${escapeHtml(game.name)}</div>
+                    
+                    <!-- 卡片背面 -->
+                    <div class="card-back">
+                        <h3>${escapeHtml(game.name)}</h3>
+                        <div class="card-back-info">
+                            ${game.minPlayers && game.maxPlayers ? `
+                                <p>👥 ${game.minPlayers}${game.minPlayers !== game.maxPlayers ? `-${game.maxPlayers}` : ''} 人</p>
+                            ` : ''}
+                            ${game.minMinutes && game.maxMinutes ? `
+                                <p>⏱️ ${game.minMinutes}${game.minMinutes !== game.maxMinutes ? `-${game.maxMinutes}` : ''} 分鐘</p>
+                            ` : ''}
+                            ${game.difficulty ? `<p>🎯 難度：${escapeHtml(game.difficulty)}</p>` : ''}
+                            ${game.status ? `<p>📦 ${escapeHtml(game.status)}</p>` : ''}
+                            ${game.location ? `<p>📍 ${escapeHtml(game.location)}</p>` : ''}
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button class="favorite-btn-back ${isFavorited ? 'favorited' : ''}" 
+                                    onclick="toggleFavorite(event, '${escapeHtml(game.id)}')">
+                                ${isFavorited ? '❤️ 已收藏' : '♥ 收藏'}
+                            </button>
+                            <button class="detail-btn" onclick="showGameDetail('${escapeHtml(game.id)}')">查看詳情</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -228,12 +260,20 @@ function showGameDetail(gameId) {
 
     const imageUrl = getGameImage(game);
 
+    // 使用更高品質的圖片（BGG 原圖而非 thumbnail）
+    let modalImageUrl = imageUrl;
+    if (game.bggId) {
+        // 如果有 BGG ID，嘗試使用更高品質的圖片
+        // BGG thumbnail 格式通常是 __small，可以替換為更大的版本
+        modalImageUrl = imageUrl.replace('__small', '__medium').replace('__thumb', '__medium');
+    }
+
     content.innerHTML = `
         <button class="modal-close" onclick="closeModal()">✕</button>
-        <img src="${imageUrl}" 
+        <img src="${modalImageUrl}" 
              alt="${escapeHtml(game.name)}" 
              class="modal-image"
-             onerror="this.src='https://via.placeholder.com/600x840/667eea/ffffff?text=No+Image'">
+             onerror="this.src='${imageUrl}'">
         <h2>${escapeHtml(game.name)}</h2>
         <div class="game-info">
             ${game.minPlayers && game.maxPlayers ? `
@@ -284,6 +324,85 @@ document.addEventListener('keydown', (e) => {
         closeModal();
     }
 });
+
+// ==================== 收藏功能 ====================
+function toggleFavorite(event, gameId) {
+    event.stopPropagation(); // 防止觸發卡片點擊
+
+    let favorites = JSON.parse(localStorage.getItem('gallery_favorites') || '[]');
+    const index = favorites.indexOf(gameId);
+
+    if (index > -1) {
+        favorites.splice(index, 1);
+    } else {
+        favorites.push(gameId);
+    }
+
+    localStorage.setItem('gallery_favorites', JSON.stringify(favorites));
+
+    // 更新按鈕樣式
+    const btn = event.target;
+    btn.classList.toggle('favorited');
+
+    // 顯示提示
+    const gameName = allGames.find(g => g.id === gameId)?.name || '遊戲';
+    const message = index > -1 ? `已取消收藏 ${gameName}` : `已收藏 ${gameName}`;
+    showToast(message);
+}
+
+function showToast(message) {
+    // 創建 toast 元素
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #333;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+
+    document.body.appendChild(toast);
+
+    // 3 秒後移除
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// 添加動畫樣式
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
 
 // ==================== 工具函數 ====================
 function escapeHtml(text) {

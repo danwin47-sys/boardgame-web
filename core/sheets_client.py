@@ -361,6 +361,61 @@ class SheetsClient:
             logger.error(f"更新 BGG 資料失敗: {e}")
             return False
 
+    def update_game_playtime(self, game_name: str, min_playtime: int, max_playtime: int) -> bool:
+        """更新遊戲的遊玩時間到 Google Sheets
+        
+        Args:
+            game_name: 遊戲名稱
+            min_playtime: 最小遊玩時間（分鐘）
+            max_playtime: 最大遊玩時間（分鐘）
+        
+        Returns:
+            bool: 更新成功返回 True，失敗返回 False
+        """
+        logger.info(f"[UPDATE] Updating playtime for {game_name}")
+        if not self.valid:
+            return False
+        
+        try:
+            ws = self.get_games_worksheet()
+            all_records = ws.get_all_records()
+            
+            # 找到對應的遊戲
+            for idx, game in enumerate(all_records):
+                if game.get('name') == game_name:
+                    headers = ws.row_values(1)
+                    
+                    # Helper function to get or create column index
+                    def get_or_create_col(header_name):
+                        if header_name not in headers:
+                            col_idx = len(headers)
+                            ws.update_cell(1, col_idx + 1, header_name)
+                            headers.append(header_name)
+                            logger.info(f"已新增 {header_name} 欄位到 Google Sheets")
+                            return col_idx
+                        return headers.index(header_name)
+                    
+                    minplaytime_idx = get_or_create_col('minplaytime')
+                    maxplaytime_idx = get_or_create_col('maxplaytime')
+                    
+                    # 更新遊玩時間
+                    row_num = idx + 2
+                    ws.update_cell(row_num, minplaytime_idx + 1, min_playtime)
+                    ws.update_cell(row_num, maxplaytime_idx + 1, max_playtime)
+                    
+                    # 使快取失效
+                    self.invalidate_games_cache()
+                    
+                    logger.info(f"已更新 '{game_name}' 的遊玩時間: {min_playtime}-{max_playtime}分鐘")
+                    return True
+            
+            logger.warning(f"找不到遊戲: {game_name}")
+            return False
+            
+        except Exception as e:
+            logger.error(f"更新遊戲時間失敗: {e}", exc_info=True)
+            return False
+
     # ============ BGG 推薦快取功能 ============
 
     def get_bgg_cache_worksheet(self):

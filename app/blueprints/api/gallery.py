@@ -192,16 +192,84 @@ def get_gallery_games() -> Tuple[Response, int]:
             elif thumbnail:
                 game_data['thumbnail'] = thumbnail
             
-            # 人數資訊
+            # 解析遊玩人數範圍
             players_str = game.get('players', '')
-            min_players, max_players = parse_players_range(players_str)
-            if min_players is not None:
-                game_data['minPlayers'] = min_players
-                game_data['maxPlayers'] = max_players
+            if players_str:
+                # 移除中文字符和空格
+                players_clean = players_str.replace('人', '').replace(' ', '').strip()
+                
+                if '-' in players_clean:
+                    # 範圍格式：2-4
+                    try:
+                        parts = players_clean.split('-')
+                        min_players = int(parts[0])
+                        max_players = int(parts[1])
+                        game_data['minPlayers'] = min_players
+                        game_data['maxPlayers'] = max_players
+                    except (ValueError, IndexError):
+                        pass
+                elif '+' in players_clean:
+                    # 10+ 格式
+                    try:
+                        min_players = int(players_clean.replace('+', ''))
+                        game_data['minPlayers'] = min_players
+                        game_data['maxPlayers'] = 99
+                    except ValueError:
+                        pass
+                else:
+                    # 單一數字
+                    try:
+                        player_count = int(players_clean)
+                        game_data['minPlayers'] = player_count
+                        game_data['maxPlayers'] = player_count
+                    except ValueError:
+                        pass
             
-            # 遊戲時間（使用預設值，未來可從 Google Sheets 讀取）
-            game_data['minMinutes'] = 30
-            game_data['maxMinutes'] = 60
+            # 遊戲時間解析（從 Google Sheets 讀取，如果沒有則從 BGG Ranks 讀取並寫回）
+            min_time_from_sheet = game.get('minplaytime')
+            max_time_from_sheet = game.get('maxplaytime')
+            
+            # 嘗試轉換為整數
+            try:
+                if min_time_from_sheet:
+                    game_data['minMinutes'] = int(min_time_from_sheet)
+                if max_time_from_sheet:
+                    game_data['maxMinutes'] = int(max_time_from_sheet)
+            except (ValueError, TypeError):
+                min_time_from_sheet = None
+                max_time_from_sheet = None
+            
+            # 如果 Google Sheets 沒有遊戲時間資料，且有 BGG ID，則從 BGG Ranks 讀取並寫回
+            if (not min_time_from_sheet or not max_time_from_sheet) and bgg_id:
+                try:
+                    from core.bgg_ranks_service import BGGRanksService
+                    bgg_ranks = BGGRanksService()
+                    bgg_data = bgg_ranks.get_by_id(int(bgg_id))
+                    
+                    if bgg_data:
+                        bgg_min_time = bgg_data.get('minplaytime')
+                        bgg_max_time = bgg_data.get('maxplaytime')
+                        
+                        if bgg_min_time and bgg_max_time:
+                            game_data['minMinutes'] = int(bgg_min_time)
+                            game_data['maxMinutes'] = int(bgg_max_time)
+                            
+                            # 寫回 Google Sheets
+                            try:
+                                game_name = game.get('name', '')
+                                if game_name:
+                                    mgr.update_game_playtime(game_name, int(bgg_min_time), int(bgg_max_time))
+                                    logger.info(f"已將 BGG 遊戲時間寫回 Sheets: {game_name} ({bgg_min_time}-{bgg_max_time}分鐘)")
+                            except Exception as write_error:
+                                logger.warning(f"無法將遊戲時間寫回 Sheets: {write_error}")
+                except Exception as e:
+                    logger.debug(f"無法從 BGG Ranks 讀取遊戲時間: {e}")
+            
+            # 如果還是沒有時間資料，使用預設值
+            if 'minMinutes' not in game_data:
+                game_data['minMinutes'] = 30
+            if 'maxMinutes' not in game_data:
+                game_data['maxMinutes'] = 60
             
             # 類型和標籤分類邏輯
             types = classify_game_type(game_data)
