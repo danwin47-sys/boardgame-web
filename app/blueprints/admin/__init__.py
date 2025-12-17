@@ -1,4 +1,4 @@
 """
 Admin Blueprint 模組
 """
-__all__ = []
+__all__: list[str] = []

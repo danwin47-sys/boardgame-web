@@ -3,6 +3,7 @@ BGG Data Dumps Auto Downloader
 自動下載 BGG ranks 數據檔案（需要處理登入）
 """
 import requests
+from typing import Optional
 from requests.auth import HTTPBasicAuth
 import os
 from pathlib import Path
@@ -25,7 +26,7 @@ class BGGDumpsDownloader:
     BASE_URL = "https://boardgamegeek.com/data_dumps/bg_ranks"
     DOWNLOAD_URL_TEMPLATE = "https://boardgamegeek.com/data_dumps/download/bg_ranks/{date}"
     
-    def __init__(self, username: str = None, password: str = None):
+    def __init__(self, username: Optional[str] = None, password: Optional[str] = None):
         """
         初始化下載器
         
@@ -96,7 +97,7 @@ class BGGDumpsDownloader:
         
         return dump_date.strftime('%Y-%m-%d')
     
-    def download_dump(self, output_dir: str, date: str = None):
+    def download_dump(self, output_dir: str, date: Optional[str] = None):
         """
         下載 BGG ranks dump
         

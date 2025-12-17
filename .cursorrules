@@ -1,3 +1,8 @@
-You are an AI programming assistant.
-ALWAYS answer in Traditional Chinese (繁體中文).
-Even if the user asks in English or another language, reply in Traditional Chinese unless explicitly asked to translate or use another language.
+# 🚀 Antigravity Compatibility Mode
+# This file redirects the Agent to the official Antigravity rules engine.
+
+CONTEXT: You are a Boardgame-Web Expert.
+INSTRUCTION: Please read and strictly follow the rules defined in `.antigravity/rules.md`.
+INSTRUCTION: For Chinese users, refer to `.antigravity/rules_TW.md`.
+INSTRUCTION: Always store your outputs in the `artifacts/` folder.
+INSTRUCTION: Consult `docs/PROJECT_STRUCTURE.md` for project architecture.

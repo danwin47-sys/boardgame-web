@@ -24,16 +24,26 @@ function initSearch() {
             clearTimeout(searchTimeout);
         }
 
-        // 如果查詢為空，隱藏結果
+        // 如果查詢為空，顯示搜尋歷史
         if (!query) {
-            hideSearchResults();
+            showSearchHistory();
             return;
         }
+
+        // 顯示匹配的搜尋歷史（autocomplete）
+        showSearchHistoryAutocomplete(query);
 
         // 延遲搜尋（debounce）
         searchTimeout = setTimeout(() => {
             performGlobalSearch(query);
         }, SEARCH_DEBOUNCE_MS);
+    });
+
+    // 獲得焦點時顯示搜尋歷史
+    searchInput.addEventListener('focus', () => {
+        if (!searchInput.value.trim()) {
+            showSearchHistory();
+        }
     });
 
     // 點擊外部關閉搜尋結果
@@ -116,6 +126,120 @@ function getSearchHistory() {
  */
 function clearSearchHistory() {
     localStorage.removeItem('searchHistory');
+    showSearchHistory(); // 重新顯示（空的）
+}
+
+/**
+ * 顯示搜尋歷史下拉選單
+ */
+function showSearchHistory() {
+    const searchResults = document.getElementById('searchResults');
+    const history = getSearchHistory();
+
+    if (history.length === 0) {
+        searchResults.innerHTML = `
+            <div class="search-history-empty">
+                <p>📝 尚無搜尋歷史</p>
+            </div>
+        `;
+        searchResults.classList.add('show');
+        return;
+    }
+
+    let html = '<div class="search-section">';
+    html += '<div class="search-history-header">';
+    html += '<div class="search-section-title">🕐 最近搜尋</div>';
+    html += '<button class="search-history-clear" onclick="clearSearchHistory()">清空</button>';
+    html += '</div>';
+    html += '<div class="search-items">';
+
+    history.forEach((item, index) => {
+        html += `
+            <div class="search-item search-history-item">
+                <div class="search-item-icon">🔍</div>
+                <div class="search-item-content" onclick="fillSearchInput('${escapeHtml(item)}')">
+                    <div class="search-item-title">${escapeHtml(item)}</div>
+                </div>
+                <button class="search-history-delete" onclick="removeSearchHistoryItem(${index})" title="刪除">✕</button>
+            </div>
+        `;
+    });
+
+    html += '</div></div>';
+    searchResults.innerHTML = html;
+    searchResults.classList.add('show');
+}
+
+/**
+ * 顯示搜尋歷史自動完成建議
+ */
+function showSearchHistoryAutocomplete(query) {
+    const searchResults = document.getElementById('searchResults');
+    const history = getSearchHistory();
+
+    // 過濾匹配的歷史記錄
+    const matches = history.filter(item =>
+        item.toLowerCase().includes(query.toLowerCase())
+    );
+
+    if (matches.length === 0) {
+        return; // 沒有匹配項，等待搜尋結果
+    }
+
+    let html = '<div class="search-section">';
+    html += '<div class="search-section-title">💡 搜尋建議</div>';
+    html += '<div class="search-items">';
+
+    matches.slice(0, 5).forEach((item) => {
+        // 高亮匹配的文字
+        const highlightedText = highlightMatch(item, query);
+        html += `
+            <div class="search-item search-history-item" onclick="fillSearchInput('${escapeHtml(item)}')">
+                <div class="search-item-icon">🔍</div>
+                <div class="search-item-content">
+                    <div class="search-item-title">${highlightedText}</div>
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div></div>';
+    searchResults.innerHTML = html;
+    searchResults.classList.add('show');
+}
+
+/**
+ * 移除單筆搜尋歷史
+ */
+function removeSearchHistoryItem(index) {
+    let history = getSearchHistory();
+    history.splice(index, 1);
+    localStorage.setItem('searchHistory', JSON.stringify(history));
+    showSearchHistory();
+}
+
+/**
+ * 填入搜尋框並執行搜尋
+ */
+function fillSearchInput(query) {
+    const searchInput = document.getElementById('globalSearchInput');
+    searchInput.value = query;
+    performGlobalSearch(query);
+}
+
+/**
+ * 高亮匹配文字
+ */
+function highlightMatch(text, query) {
+    const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+    return escapeHtml(text).replace(regex, '<mark>$1</mark>');
+}
+
+/**
+ * 正則表達式轉義
+ */
+function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**

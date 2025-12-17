@@ -5,6 +5,7 @@ BGG Ranks CSV Import Script
 import csv
 import sqlite3
 import argparse
+from typing import Optional
 from datetime import datetime
 from pathlib import Path
 import logging
@@ -55,7 +56,7 @@ def create_database(db_path: str):
     logger.info(f"Database created: {db_path}")
 
 
-def parse_int(value: str) -> int:
+def parse_int(value: str) -> Optional[int]:
     """安全解析整數"""
     if not value or value.strip() == '':
         return None
@@ -65,7 +66,7 @@ def parse_int(value: str) -> int:
         return None
 
 
-def parse_float(value: str) -> float:
+def parse_float(value: str) -> Optional[float]:
     """安全解析浮點數"""
     if not value or value.strip() == '':
         return None

@@ -341,7 +341,9 @@ class GameService:
 
             game_names = [g.get(FIELD_NAME)
                           for g in borrowed_games if g.get(FIELD_NAME)]
-            success, msg, s_list, f_list = self.batch_return_games(game_names)
+            # 過濾掉 None 值，確保類型為 List[str]
+            game_names_filtered: List[str] = [name for name in game_names if name is not None]
+            success, msg, s_list, f_list = self.batch_return_games(game_names_filtered)
 
             return success, msg, s_list
         except Exception as e:

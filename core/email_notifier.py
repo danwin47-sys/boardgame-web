@@ -72,9 +72,10 @@ class EmailNotifier:
                 msg.attach(MIMEText(content, 'plain'))
 
             # 發送郵件
-            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
+            # 這裡 self.smtp_server, self.username, self.password 已在上面檢查過不為 None
+            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:  # type: ignore[arg-type]
                 server.starttls()
-                server.login(self.username, self.password)
+                server.login(self.username, self.password)  # type: ignore[arg-type]
                 server.send_message(msg)
 
             logger.info(f"✅ Email sent to {to_email}")

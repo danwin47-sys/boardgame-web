@@ -8,8 +8,8 @@ import sys
 from pathlib import Path
 
 try:
-    import rcssmin
-    import jsmin
+    import rcssmin  # type: ignore
+    import jsmin  # type: ignore
 except ImportError:
     print("Error: Missing required packages")
     print("Please run: pip install rcssmin jsmin")

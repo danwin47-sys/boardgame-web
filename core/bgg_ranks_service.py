@@ -23,9 +23,9 @@ class BGGRanksService:
         if db_path is None:
             # 預設路徑
             base_dir = Path(__file__).parent.parent
-            db_path = base_dir / 'data' / 'bgg_ranks' / 'bgg_ranks.db'
-
-        self.db_path = str(db_path)
+            self.db_path: str = str(base_dir / 'data' / 'bgg_ranks' / 'bgg_ranks.db')
+        else:
+            self.db_path = db_path
         logger.info(
             f"BGGRanksService initialized with database: {
                 self.db_path}")

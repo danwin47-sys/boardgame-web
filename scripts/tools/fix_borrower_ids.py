@@ -58,7 +58,7 @@ class BorrowerIdFixer:
         self.total_games = 0
         self.borrowed_games = 0
         self.formula_set_count = 0
-        self.errors = []
+        self.errors: List[Dict] = []
         
     @staticmethod
     def col_index_to_letter(col_idx: int) -> str:

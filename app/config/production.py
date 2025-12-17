@@ -12,7 +12,7 @@ class ProductionConfig(BaseConfig):
     TESTING = False
     
     # 生產環境必須設定 SECRET_KEY
-    SECRET_KEY = os.environ.get('SECRET_KEY')
+    SECRET_KEY: str = os.environ.get('SECRET_KEY') or ''  # type: ignore[assignment]
     
     # 生產環境日誌級別
     LOG_LEVEL = os.environ.get('LOG_LEVEL', 'WARNING')

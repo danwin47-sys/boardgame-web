@@ -20,7 +20,8 @@ from core.sheets_client import SheetsClient
 try:
     from update_static_cache import update_static_cache
 except ImportError:
-    update_static_cache = None
+    def update_static_cache():
+        logging.getLogger(__name__).warning("update_static_cache module not found, skipping.")
 
 logging.basicConfig(
     level=logging.INFO,

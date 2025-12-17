@@ -301,9 +301,107 @@ function debounce(func, wait) {
     };
 }
 
+// ============ 搜尋歷史功能 ============
+const MAX_SEARCH_HISTORY = 10;
+
+function getSearchHistory() {
+    try {
+        const history = localStorage.getItem('tableSearchHistory');
+        return history ? JSON.parse(history) : [];
+    } catch {
+        return [];
+    }
+}
+
+function saveSearchToHistory(query) {
+    if (!query || query.length < 2) return; // 太短不儲存
+
+    let history = getSearchHistory();
+    history = history.filter(item => item !== query);
+    history.unshift(query);
+
+    if (history.length > MAX_SEARCH_HISTORY) {
+        history = history.slice(0, MAX_SEARCH_HISTORY);
+    }
+
+    localStorage.setItem('tableSearchHistory', JSON.stringify(history));
+}
+
+function clearSearchHistory() {
+    localStorage.removeItem('tableSearchHistory');
+    hideSearchHistory();
+}
+
+function removeSearchHistoryItem(index) {
+    let history = getSearchHistory();
+    history.splice(index, 1);
+    localStorage.setItem('tableSearchHistory', JSON.stringify(history));
+    showSearchHistory();
+}
+
+function showSearchHistory() {
+    const historyContainer = document.getElementById('tableSearchHistory');
+    const history = getSearchHistory();
+
+    if (history.length === 0) {
+        historyContainer.innerHTML = '';
+        historyContainer.classList.remove('show');
+        return;
+    }
+
+    let html = '<div class="search-history-header">';
+    html += '<span class="search-history-title">🕐 最近搜尋</span>';
+    html += '<button class="search-history-clear" onclick="clearSearchHistory()">清空</button>';
+    html += '</div>';
+    html += '<div class="search-history-items">';
+
+    history.forEach((item, index) => {
+        html += `
+            <div class="search-history-item">
+                <span class="search-history-text" onclick="fillSearchBox('${escapeHtml(item)}')">${escapeHtml(item)}</span>
+                <button class="search-history-delete" onclick="removeSearchHistoryItem(${index})" title="刪除">✕</button>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    historyContainer.innerHTML = html;
+    historyContainer.classList.add('show');
+}
+
+function hideSearchHistory() {
+    const historyContainer = document.getElementById('tableSearchHistory');
+    historyContainer.classList.remove('show');
+}
+
+function fillSearchBox(query) {
+    const searchBox = document.getElementById('searchBox');
+    searchBox.value = query;
+    searchBox.dispatchEvent(new Event('input'));
+    hideSearchHistory();
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // 搜尋功能 (使用防抖) - 只搜尋桌遊名稱、借閱人、工號
-document.getElementById('searchBox').addEventListener('input', debounce((e) => {
+const searchBox = document.getElementById('searchBox');
+let searchPerformed = false;
+
+searchBox.addEventListener('input', debounce((e) => {
     const term = e.target.value.toLowerCase();
+
+    if (!term) {
+        // 空白時顯示所有遊戲
+        applyCurrentFilter();
+        hideSearchHistory();
+        searchPerformed = false;
+        return;
+    }
+
     const filtered = allGames.filter(game => {
         // 只搜尋特定欄位：桌遊名稱、借閱人、工號
         const nameMatch = String(game.name || '').toLowerCase().includes(term);
@@ -312,8 +410,40 @@ document.getElementById('searchBox').addEventListener('input', debounce((e) => {
 
         return nameMatch || borrowerMatch || borrowerIdMatch;
     });
+
     renderTable(filtered);
+    searchPerformed = true;
+
+    // 儲存到搜尋歷史（延遲儲存，避免每次輸入都儲存）
+    if (term.length >= 2) {
+        setTimeout(() => {
+            if (searchBox.value === term) {
+                saveSearchToHistory(term);
+            }
+        }, 1000);
+    }
 }, 50)); // 縮短延遲至 50ms，提供即時搜尋體驗
+
+// 獲得焦點時顯示搜尋歷史
+searchBox.addEventListener('focus', () => {
+    if (!searchBox.value.trim()) {
+        showSearchHistory();
+    }
+});
+
+// 失去焦點時隱藏搜尋歷史（延遲以允許點擊歷史項目）
+searchBox.addEventListener('blur', () => {
+    setTimeout(hideSearchHistory, 200);
+});
+
+// 按 ESC 清空搜尋
+searchBox.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        searchBox.value = '';
+        searchBox.dispatchEvent(new Event('input'));
+        searchBox.blur();
+    }
+});
 
 // 排序功能
 document.querySelectorAll('th[data-col]').forEach(th => {
@@ -555,11 +685,11 @@ function displayBGGLinkResults(gameName, results) {
     results.forEach(game => {
         const card = document.createElement('div');
         card.className = 'bgg-link-card';
-        
+
         // 跳脫遊戲名稱中的特殊字元以避免破壞 onclick 屬性
         const escapedGameName = gameName.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const escapedBggName = game.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        
+
         card.innerHTML = `
             <div class="bgg-link-info">
                 <h4>${game.name}</h4>
