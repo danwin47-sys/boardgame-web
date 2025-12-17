@@ -149,7 +149,9 @@ function renderTable(games) {
             <td>${formatDate(game.mdate)}</td>
             <td>${game.location || ''}</td>
             <td>${game.diff || ''}</td>
-            <td>${game.players || ''}</td>
+            <td>${game.players || ''}
+                ${isAdmin ? `<button class="btn-edit" onclick="openEditGameModal('${escapeHtml(game.name)}')">編輯</button>` : ''}
+            </td>
         `;
 
         if (isAdmin) {
@@ -175,31 +177,55 @@ function renderTable(games) {
     }
 }
 
-// 單筆借出
-function executeSingleBorrow(gameName) {
-    const memberId = prompt(`借出桌遊：${gameName}\n請輸入工號：`);
-    if (memberId) {
-        fetch('/api/borrow', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name: gameName,
-                member_id: memberId
-            })
-        })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    showToast('借出成功');
-                    loadGames();
-                } else {
-                    showToast(data.message || data.error, 'error');
+// 單筆借出 (含驗證)
+async function executeSingleBorrow(gameName) {
+    try {
+        // 1. 先驗證是否可借出（檢查擴充依賴）
+        const validResp = await fetch(`/api/games/${encodeURIComponent(gameName)}/validate-borrow`);
+        const validData = await validResp.json();
+
+        if (!validData.success) {
+            showToast('驗證失敗: ' + validData.error, 'error');
+            return;
+        }
+
+        // 如果有訊息（警告或錯誤），需要處理
+        if (validData.message) {
+            if (!validData.can_borrow) {
+                // 不可借出（例如：合併收納的擴充）
+                alert(`❌ 無法借出\n\n${validData.message}`);
+                return;
+            } else {
+                // 可借出但有警告（例如：獨立收納擴充提醒）
+                if (!confirm(`⚠️ 提醒\n\n${validData.message}\n\n是否仍要繼續借出？`)) {
+                    return;
                 }
-            })
-            .catch(err => {
-                showToast('借出失敗', 'error');
-                console.error(err);
+            }
+        }
+
+        // 2. 執行借出流程
+        const memberId = prompt(`借出桌遊：${gameName}\n請輸入工號：`);
+        if (memberId) {
+            const borrowResp = await fetch('/api/borrow', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: gameName,
+                    member_id: memberId
+                })
             });
+            const borrowData = await borrowResp.json();
+
+            if (borrowData.success) {
+                showToast('借出成功');
+                loadGames();
+            } else {
+                showToast(borrowData.message || borrowData.error, 'error');
+            }
+        }
+    } catch (err) {
+        showToast('借出流程發生錯誤', 'error');
+        console.error(err);
     }
 }
 

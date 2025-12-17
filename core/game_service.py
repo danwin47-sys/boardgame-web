@@ -348,3 +348,10 @@ class GameService:
             return success, msg, s_list
         except Exception as e:
             return False, f"批次歸還失敗: {e}", []
+
+    def update_game_expansion_info(self, game_name: str, is_expansion: bool, 
+                                  parent_game: str, storage_mode: str) -> bool:
+        """更新遊戲的擴充資訊"""
+        return self.client.update_game_expansion_info(
+            game_name, is_expansion, parent_game, storage_mode
+        )

@@ -286,6 +286,48 @@
 
     <!-- 引入 JavaScript 邏輯 -->
     <script src="/js/script.js"></script>
+    <script src="/js/admin.js"></script>
+
+    <!-- 編輯遊戲 Modal -->
+    <div id="editGameModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <h2 id="editGameTitle">編輯遊戲</h2>
+            <form id="editGameForm">
+                <div class="form-group">
+                    <label>遊戲類型</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="gameType" value="main" checked> 主遊戲
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="gameType" value="expansion"> 擴充
+                        </label>
+                    </div>
+                </div>
+
+                <div id="expansionFields" style="display: none;">
+                    <div class="form-group">
+                        <label>主遊戲名稱</label>
+                        <input type="text" id="parentGameInput" class="form-control" placeholder="請輸入主遊戲名稱">
+                    </div>
+                    <div class="form-group">
+                        <label>收納模式</label>
+                        <select id="storageMode" class="form-control">
+                            <option value="independent">獨立收納 (可單獨借出)</option>
+                            <option value="merged">合併收納 (需借主遊戲)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="loadBggBtn" class="btn btn-secondary"
+                        style="margin-right: auto; display: none;">從 BGG 載入</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditGameModal()">取消</button>
+                    <button type="button" class="btn primary" onclick="saveGameChanges()">儲存變更</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 
 </html>

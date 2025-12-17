@@ -287,17 +287,32 @@ class BGGApiClient:
                         break
 
             # 類別、機制、設計師、美術、出版商
-            categories = [link.get('value', '') for link in item.findall(
-                "link[@type='boardgamecategory']")]
-            mechanics = [link.get('value', '') for link in item.findall(
-                "link[@type='boardgamemechanic']")]
-            designers = [link.get('value', '') for link in item.findall(
-                "link[@type='boardgamedesigner']")]
-            artists = [link.get('value', '') for link in item.findall(
-                "link[@type='boardgameartist']")]
-            publishers = [link.get('value', '') for link in item.findall(
-                "link[@type='boardgamepublisher']")]
+            categories = [link.get('value', '') for link in item.findall("link[@type='boardgamecategory']")]
+            mechanics = [link.get('value', '') for link in item.findall("link[@type='boardgamemechanic']")]
+            designers = [link.get('value', '') for link in item.findall("link[@type='boardgamedesigner']")]
+            artists = [link.get('value', '') for link in item.findall("link[@type='boardgameartist']")]
+            publishers = [link.get('value', '') for link in item.findall("link[@type='boardgamepublisher']")]
+            
+            # 判斷是否為擴充（更可靠的多重檢查）
+            game_type = item.get('type', 'boardgame')
+            
+            # 方法1: 檢查 type 屬性
+            is_expansion = (game_type == 'boardgameexpansion')
+            
+            # 方法2: 檢查是否有 inbound 的 boardgameexpansion link（更可靠）
+            # 有些擴充的 type 是 'boardgame'，但會有指向主遊戲的 inbound link
+            parent_game = None
+            for link in item.findall("link[@type='boardgameexpansion']"):
+                if link.get('inbound') == 'true':
+                    is_expansion = True  # 有 inbound expansion link 就是擴充
+                    parent_game = link.get('value')
+                    break  # 取第一個主遊戲
+            
+            # 方法3: 檢查類別中是否有 "Expansion for Base-game"
+            if not is_expansion and 'Expansion for Base-game' in categories:
+                is_expansion = True
 
+            # 顯示格式
             # 顯示格式
             players_display = f"{min_players}-{max_players}" if min_players and max_players else "N/A"
             if min_players == max_players and min_players:
@@ -310,6 +325,9 @@ class BGGApiClient:
             details = {
                 'id': game_id,
                 'name': name,
+                'type': game_type,
+                'is_expansion': is_expansion,
+                'parent_game': parent_game,
                 'year': year,
                 'description': description,
                 'image': image,

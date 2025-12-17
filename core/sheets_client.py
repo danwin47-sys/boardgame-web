@@ -416,6 +416,89 @@ class SheetsClient:
             logger.error(f"更新遊戲時間失敗: {e}", exc_info=True)
             return False
 
+    def update_game_expansion_info(self, game_name: str, is_expansion: bool, 
+                                  parent_game: str = '', storage_mode: str = '') -> bool:
+        """更新遊戲的擴充資訊
+        
+        Args:
+            game_name: 遊戲名稱
+            is_expansion: 是否為擴充
+            parent_game: 主遊戲名稱 (若非擴充則為空)
+            storage_mode: 收納模式 (independent/merged)
+        
+        Returns:
+            bool: 更新成功返回 True，失敗返回 False
+        """
+        logger.info(f"[UPDATE] Updating expansion info for {game_name}")
+        if not self.valid:
+            return False
+            
+        try:
+            ws = self.get_games_worksheet()
+            all_records = ws.get_all_records()
+            
+            # 找到對應的遊戲
+            for idx, game in enumerate(all_records):
+                if game.get('name') == game_name:
+                    headers = ws.row_values(1)
+                    
+                    # Helper function to get or create column index
+                    def get_or_create_col(header_name):
+                        if header_name not in headers:
+                            col_idx = len(headers)
+                            ws.update_cell(1, col_idx + 1, header_name)
+                            headers.append(header_name)
+                            logger.info(f"已新增 {header_name} 欄位到 Google Sheets")
+                            return col_idx
+                        return headers.index(header_name)
+                    
+                    from .constants import (
+                        FIELD_IS_EXPANSION, 
+                        FIELD_PARENT_GAME, 
+                        FIELD_STORAGE_MODE
+                    )
+                    
+                    is_exp_idx = get_or_create_col(FIELD_IS_EXPANSION)
+                    parent_idx = get_or_create_col(FIELD_PARENT_GAME)
+                    storage_idx = get_or_create_col(FIELD_STORAGE_MODE)
+                    
+                    # 準備批量更新
+                    row_num = idx + 2
+                    updates = []
+                    
+                    # 更新 is_expansion (存為字串 'TRUE' 或 'FALSE')
+                    updates.append({
+                        'range': rowcol_to_a1(row_num, is_exp_idx + 1),
+                        'values': [['TRUE' if is_expansion else 'FALSE']]
+                    })
+                    
+                    # 更新 parent_game
+                    updates.append({
+                        'range': rowcol_to_a1(row_num, parent_idx + 1),
+                        'values': [[parent_game]]
+                    })
+                    
+                    # 更新 storage_mode
+                    updates.append({
+                        'range': rowcol_to_a1(row_num, storage_idx + 1),
+                        'values': [[storage_mode]]
+                    })
+                    
+                    ws.batch_update(updates)
+                    
+                    # 使快取失效
+                    self.invalidate_games_cache()
+                    
+                    logger.info(f"已更新 '{game_name}' 的擴充資訊")
+                    return True
+            
+            logger.warning(f"找不到遊戲: {game_name}")
+            return False
+            
+        except Exception as e:
+            logger.error(f"更新擴充資訊失敗: {e}", exc_info=True)
+            return False
+
     # ============ BGG 推薦快取功能 ============
 
     def get_bgg_cache_worksheet(self):

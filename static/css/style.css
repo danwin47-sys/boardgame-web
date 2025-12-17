@@ -557,30 +557,130 @@ tbody tr:last-child td {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* ============ 擴充管理樣式 ============ */
-.expansion-badge,
-.main-game-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
+/* ============ 擴充管理與 Modal 樣式 ============ */
 .expansion-badge {
-    background-color: #e3f2fd;
-    color: #1976d2;
+    background: #e6fffa;
+    color: #2c7a7b;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    border: 1px solid #b2f5ea;
+    display: inline-block;
 }
 
 .main-game-badge {
-    background-color: #f3e5f5;
-    color: #7b1fa2;
+    background: #ebf8ff;
+    color: #2b6cb0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    border: 1px solid #bee3f8;
+    display: inline-block;
 }
 
 .expansion-row {
     background-color: #fafafa;
 }
 
-.expansion-row td:first-child {
-    padding-left: 30px;
+/* 編輯遊戲 Modal */
+.edit-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.edit-modal.show {
+    display: flex;
+}
+
+.edit-modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.edit-modal h2 {
+    margin-top: 0;
+    color: #2d3748;
+    border-bottom: 2px solid #edf2f7;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.radio-group {
+    display: flex;
+    gap: 20px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.btn-secondary {
+    background: #cbd5e0;
+    color: #2d3748;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-secondary:hover {
+    background: #a0aec0;
+}
+
+/* 管理員表格按鈕 */
+.btn-edit {
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+.btn-edit:hover {
+    background: #3182ce;
 }

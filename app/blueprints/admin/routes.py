@@ -235,3 +235,46 @@ def batch_return() -> Tuple[Response, int]:
     except Exception as e:
         logger.error(f"批次歸還失敗: {e}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@admin_bp.route('/admin/games/update', methods=['POST'])
+def update_game_details() -> Tuple[Response, int]:
+    """更新遊戲詳細資料 (擴充資訊)
+    
+    Request Body:
+        {
+            "name": str,            # 遊戲名稱 (必填)
+            "is_expansion": bool,   # 是否為擴充
+            "parent_game": str,     # 主遊戲名稱
+            "storage_mode": str     # 收納模式
+        }
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': '缺少請求資料'}), 400
+            
+        name = data.get('name')
+        if not name:
+            return jsonify({'success': False, 'error': '缺少遊戲名稱'}), 400
+            
+        # 取得其他參數
+        is_expansion = data.get('is_expansion', False)
+        parent_game = data.get('parent_game', '')
+        storage_mode = data.get('storage_mode', '')
+        
+        mgr = get_manager()
+        success = mgr.update_game_expansion_info(
+            name, is_expansion, parent_game, storage_mode
+        )
+        
+        if success:
+            logger.info(f"成功更新遊戲 '{name}' 的詳細資料")
+            return jsonify({'success': True, 'message': '更新成功'}), 200
+        else:
+            return jsonify({'success': False, 'error': '更新失敗，可能是找不到遊戲或連線錯誤'}), 400
+            
+    except Exception as e:
+        logger.error(f"更新遊戲資料失敗: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500
