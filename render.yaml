@@ -1,0 +1,24 @@
+services:
+  # Web 服務
+  - type: web
+    name: boardgame-web
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python serve.py
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.6
+      - key: FLASK_ENV
+        value: production
+      - key: PORT
+        value: 5001
+    
+  # Redis 服務（可選）
+  - type: redis
+    name: boardgame-redis
+    region: singapore
+    plan: free
+    maxmemoryPolicy: allkeys-lru
