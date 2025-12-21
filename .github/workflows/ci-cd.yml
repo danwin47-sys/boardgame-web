@@ -116,10 +116,10 @@ jobs:
     
     - name: Test Docker image
       run: |
-        docker-compose up -d
+        docker compose up -d
         sleep 10
         curl -f http://localhost:5001/api/health || exit 1
-        docker-compose down
+        docker compose down
 
   deploy:
     name: Deploy to Production
