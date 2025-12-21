@@ -19,12 +19,14 @@ def validate_json(f: Callable) -> Callable:
             data = request.get_json()
             ...
     """
+
     @wraps(f)
     def decorated_function(*args: Any, **kwargs: Any):
         data = request.get_json()
         if not data:
-            return jsonify({'error': 'No data provided'}), 400
+            return jsonify({"error": "No data provided"}), 400
         return f(*args, **kwargs)
+
     return decorated_function
 
 
@@ -44,17 +46,18 @@ def validate_fields(*required_fields: str) -> Callable:
             # 保證 data['name'] 和 data['member_id'] 存在
             ...
     """
+
     def decorator(f: Callable) -> Callable:
         @wraps(f)
         def decorated_function(*args: Any, **kwargs: Any):
             data = request.get_json()
-            missing = [
-                field for field in required_fields if not data.get(field)]
+            missing = [field for field in required_fields if not data.get(field)]
             if missing:
-                return jsonify(
-                    {'error': f'Missing fields: {", ".join(missing)}'}), 400
+                return jsonify({"error": f'Missing fields: {", ".join(missing)}'}), 400
             return f(*args, **kwargs)
+
         return decorated_function
+
     return decorator
 
 
@@ -71,6 +74,7 @@ def handle_exceptions(f: Callable) -> Callable:
             # 可能拋出自定義異常
             raise GameNotFoundException("Catan")
     """
+
     @wraps(f)
     def decorated_function(*args: Any, **kwargs: Any):
         try:
@@ -81,17 +85,18 @@ def handle_exceptions(f: Callable) -> Callable:
                 BoardGameException,
                 GameNotFoundException,
                 MemberNotFoundException,
-                GameAlreadyBorrowedException
+                GameAlreadyBorrowedException,
             )
 
             if isinstance(e, (GameNotFoundException, MemberNotFoundException)):
-                return jsonify({'error': str(e), 'success': False}), 404
+                return jsonify({"error": str(e), "success": False}), 404
             elif isinstance(e, GameAlreadyBorrowedException):
-                return jsonify({'error': str(e), 'success': False}), 409
+                return jsonify({"error": str(e), "success": False}), 409
             elif isinstance(e, BoardGameException):
-                return jsonify({'error': str(e), 'success': False}), 400
+                return jsonify({"error": str(e), "success": False}), 400
             else:
                 # 未預期的錯誤
                 print(f"Unexpected error: {e}")
-                return jsonify({'error': '系統錯誤', 'success': False}), 500
+                return jsonify({"error": "系統錯誤", "success": False}), 500
+
     return decorated_function

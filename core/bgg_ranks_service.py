@@ -16,19 +16,18 @@ class BGGRanksService:
     def __init__(self, db_path: Optional[str] = None):
         """
         初始化 BGG Ranks Service
-        
+
         Args:
             db_path: SQLite 資料庫路徑，預設為 data/bgg_ranks/bgg_ranks.db
         """
         if db_path is None:
             # 預設路徑
             base_dir = Path(__file__).parent.parent
-            self.db_path: str = str(base_dir / 'data' / 'bgg_ranks' / 'bgg_ranks.db')
+            self.db_path: str = str(base_dir / "data" / "bgg_ranks" / "bgg_ranks.db")
         else:
             self.db_path = db_path
-        logger.info(
-            f"BGGRanksService initialized with database: {self.db_path}")
-        
+        logger.info(f"BGGRanksService initialized with database: {self.db_path}")
+
         # 確保索引存在以優化查詢效能
         self._ensure_indexes()
 
@@ -37,11 +36,11 @@ class BGGRanksService:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         return conn
-    
+
     def _ensure_indexes(self):
         """
         確保必要的索引存在以優化查詢效能
-        
+
         建立索引可以將查詢速度提升 5-10 倍，特別是對於：
         - bgg_id 查詢（get_by_id）
         - rank 排序（get_top_games）
@@ -51,34 +50,39 @@ class BGGRanksService:
         try:
             conn = self._get_connection()
             cursor = conn.cursor()
-            
+
             # 定義需要的索引
             indexes = [
-                ('idx_bgg_id', 'bgg_id'),
-                ('idx_rank', 'rank'),
-                ('idx_name', 'name'),
-                ('idx_year', 'year'),
-                ('idx_is_expansion', 'is_expansion')
+                ("idx_bgg_id", "bgg_id"),
+                ("idx_rank", "rank"),
+                ("idx_name", "name"),
+                ("idx_year", "year"),
+                ("idx_is_expansion", "is_expansion"),
             ]
-            
+
             for idx_name, column in indexes:
                 # 檢查索引是否已存在
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT name FROM sqlite_master 
                     WHERE type='index' AND name=?
-                """, (idx_name,))
-                
+                """,
+                    (idx_name,),
+                )
+
                 if not cursor.fetchone():
                     # 建立索引
-                    cursor.execute(f"""
+                    cursor.execute(
+                        f"""
                         CREATE INDEX {idx_name} 
                         ON bgg_ranks({column})
-                    """)
+                    """
+                    )
                     logger.info(f"✅ 建立索引: {idx_name} on {column}")
-            
+
             conn.commit()
             conn.close()
-            
+
         except Exception as e:
             logger.error(f"建立索引失敗: {e}")
 
@@ -96,8 +100,7 @@ class BGGRanksService:
             conn = self._get_connection()
             cursor = conn.cursor()
 
-            cursor.execute(
-                'SELECT * FROM bgg_ranks WHERE bgg_id = ?', (bgg_id,))
+            cursor.execute("SELECT * FROM bgg_ranks WHERE bgg_id = ?", (bgg_id,))
             row = cursor.fetchone()
             conn.close()
 
@@ -108,8 +111,7 @@ class BGGRanksService:
             logger.error(f"Error getting game by ID {bgg_id}: {e}")
             return None
 
-    def search_by_name(
-            self, name: str, limit: int = 10) -> List[Dict[str, Any]]:
+    def search_by_name(self, name: str, limit: int = 10) -> List[Dict[str, Any]]:
         """
         模糊搜尋遊戲名稱
 
@@ -124,12 +126,15 @@ class BGGRanksService:
             conn = self._get_connection()
             cursor = conn.cursor()
 
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT * FROM bgg_ranks
                 WHERE name LIKE ?
                 ORDER BY rank
                 LIMIT ?
-            ''', (f'%{name}%', limit))
+            """,
+                (f"%{name}%", limit),
+            )
 
             rows = cursor.fetchall()
             conn.close()
@@ -139,8 +144,9 @@ class BGGRanksService:
             logger.error(f"Error searching games by name '{name}': {e}")
             return []
 
-    def get_top_games(self, limit: int = 100,
-                      exclude_expansions: bool = True) -> List[Dict[str, Any]]:
+    def get_top_games(
+        self, limit: int = 100, exclude_expansions: bool = True
+    ) -> List[Dict[str, Any]]:
         """
         獲取 BGG Top N 遊戲
 
@@ -155,10 +161,10 @@ class BGGRanksService:
             conn = self._get_connection()
             cursor = conn.cursor()
 
-            query = 'SELECT * FROM bgg_ranks WHERE rank IS NOT NULL'
+            query = "SELECT * FROM bgg_ranks WHERE rank IS NOT NULL"
             if exclude_expansions:
-                query += ' AND is_expansion = 0'
-            query += ' ORDER BY rank LIMIT ?'
+                query += " AND is_expansion = 0"
+            query += " ORDER BY rank LIMIT ?"
 
             cursor.execute(query, (limit,))
             rows = cursor.fetchall()
@@ -170,7 +176,8 @@ class BGGRanksService:
             return []
 
     def get_by_category_rank(
-            self, category: str, limit: int = 50) -> List[Dict[str, Any]]:
+        self, category: str, limit: int = 50
+    ) -> List[Dict[str, Any]]:
         """
         根據分類排名獲取遊戲
 
@@ -182,14 +189,14 @@ class BGGRanksService:
             該分類 Top N 遊戲列表
         """
         category_map = {
-            'strategy': 'strategygames_rank',
-            'thematic': 'thematic_rank',
-            'family': 'familygames_rank',
-            'party': 'partygames_rank',
-            'abstract': 'abstracts_rank',
-            'wargame': 'wargames_rank',
-            'cgs': 'cgs_rank',
-            'children': 'childrensgames_rank'
+            "strategy": "strategygames_rank",
+            "thematic": "thematic_rank",
+            "family": "familygames_rank",
+            "party": "partygames_rank",
+            "abstract": "abstracts_rank",
+            "wargame": "wargames_rank",
+            "cgs": "cgs_rank",
+            "children": "childrensgames_rank",
         }
 
         column = category_map.get(category.lower())
@@ -201,12 +208,12 @@ class BGGRanksService:
             conn = self._get_connection()
             cursor = conn.cursor()
 
-            query = f'''
+            query = f"""
                 SELECT * FROM bgg_ranks
                 WHERE {column} IS NOT NULL
                 ORDER BY {column}
                 LIMIT ?
-            '''
+            """
 
             cursor.execute(query, (limit,))
             rows = cursor.fetchall()
@@ -231,22 +238,24 @@ class BGGRanksService:
             stats = {}
 
             # 總遊戲數
-            cursor.execute('SELECT COUNT(*) as count FROM bgg_ranks')
-            stats['total_games'] = cursor.fetchone()['count']
+            cursor.execute("SELECT COUNT(*) as count FROM bgg_ranks")
+            stats["total_games"] = cursor.fetchone()["count"]
 
             # 有排名的遊戲數
             cursor.execute(
-                'SELECT COUNT(*) as count FROM bgg_ranks WHERE rank IS NOT NULL')
-            stats['ranked_games'] = cursor.fetchone()['count']
+                "SELECT COUNT(*) as count FROM bgg_ranks WHERE rank IS NOT NULL"
+            )
+            stats["ranked_games"] = cursor.fetchone()["count"]
 
             # 擴充數量
             cursor.execute(
-                'SELECT COUNT(*) as count FROM bgg_ranks WHERE is_expansion = 1')
-            stats['expansions'] = cursor.fetchone()['count']
+                "SELECT COUNT(*) as count FROM bgg_ranks WHERE is_expansion = 1"
+            )
+            stats["expansions"] = cursor.fetchone()["count"]
 
             # 最近更新時間
-            cursor.execute('SELECT MAX(updated_date) as latest FROM bgg_ranks')
-            stats['last_updated'] = cursor.fetchone()['latest']
+            cursor.execute("SELECT MAX(updated_date) as latest FROM bgg_ranks")
+            stats["last_updated"] = cursor.fetchone()["latest"]
 
             conn.close()
 

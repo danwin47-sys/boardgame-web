@@ -52,7 +52,9 @@ class BoardGameManager:
     def batch_return_games_by_member(self, member_id):
         return self.game_service.batch_return_games_by_member(member_id)
 
-    def update_game_expansion_info(self, game_name, is_expansion, parent_game, storage_mode):
+    def update_game_expansion_info(
+        self, game_name, is_expansion, parent_game, storage_mode
+    ):
         return self.game_service.update_game_expansion_info(
             game_name, is_expansion, parent_game, storage_mode
         )

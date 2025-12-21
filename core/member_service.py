@@ -25,7 +25,7 @@ class MemberService:
         target_id = str(member_id).strip()
 
         for m in members:
-            if str(m.get('id', '')).strip() == target_id:
+            if str(m.get("id", "")).strip() == target_id:
                 return m
         return None
 
@@ -43,6 +43,6 @@ class MemberService:
         target_name = str(name).strip()
 
         for m in members:
-            if str(m.get('name', '')).strip() == target_name:
+            if str(m.get("name", "")).strip() == target_name:
                 return m
         return None

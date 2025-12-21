@@ -16,8 +16,13 @@ logger = logging.getLogger(__name__)
 class EmailNotifier:
     """郵件通知服務"""
 
-    def __init__(self, smtp_server: Optional[str] = None, smtp_port: Optional[int] = None,
-                 username: Optional[str] = None, password: Optional[str] = None):
+    def __init__(
+        self,
+        smtp_server: Optional[str] = None,
+        smtp_port: Optional[int] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+    ):
         """
         初始化郵件通知服務
 
@@ -27,21 +32,17 @@ class EmailNotifier:
             username: 郵件帳號
             password: 郵件密碼
         """
-        self.smtp_server = smtp_server or os.getenv(
-            'SMTP_SERVER', 'smtp.gmail.com')
-        self.smtp_port = smtp_port or int(os.getenv('SMTP_PORT', '587'))
-        self.username = username or os.getenv('EMAIL_USERNAME')
-        self.password = password or os.getenv('EMAIL_PASSWORD')
+        self.smtp_server = smtp_server or os.getenv("SMTP_SERVER", "smtp.gmail.com")
+        self.smtp_port = smtp_port or int(os.getenv("SMTP_PORT", "587"))
+        self.username = username or os.getenv("EMAIL_USERNAME")
+        self.password = password or os.getenv("EMAIL_PASSWORD")
 
         if not self.username or not self.password:
             logger.warning("Email credentials not configured")
 
     def send_notification(
-            self,
-            to_email: str,
-            subject: str,
-            content: str,
-            is_html: bool = False):
+        self, to_email: str, subject: str, content: str, is_html: bool = False
+    ):
         """
         發送郵件通知
 
@@ -60,16 +61,16 @@ class EmailNotifier:
 
         try:
             # 創建郵件
-            msg = MIMEMultipart('alternative')
-            msg['From'] = self.username
-            msg['To'] = to_email
-            msg['Subject'] = subject
+            msg = MIMEMultipart("alternative")
+            msg["From"] = self.username
+            msg["To"] = to_email
+            msg["Subject"] = subject
 
             # 添加內容
             if is_html:
-                msg.attach(MIMEText(content, 'html'))
+                msg.attach(MIMEText(content, "html"))
             else:
-                msg.attach(MIMEText(content, 'plain'))
+                msg.attach(MIMEText(content, "plain"))
 
             # 發送郵件
             # 這裡 self.smtp_server, self.username, self.password 已在上面檢查過不為 None
@@ -86,12 +87,13 @@ class EmailNotifier:
             return False
 
     def send_import_success(
-            self,
-            to_email: str,
-            total_records: int,
-            errors: int,
-            import_time: float,
-            db_stats: Optional[dict] = None):
+        self,
+        to_email: str,
+        total_records: int,
+        errors: int,
+        import_time: float,
+        db_stats: Optional[dict] = None,
+    ):
         """
         發送導入成功通知
 
@@ -154,11 +156,7 @@ BGG Ranks 數據導入失敗！
 
         return self.send_notification(to_email, subject, content)
 
-    def send_download_success(
-            self,
-            to_email: str,
-            filepath: str,
-            file_size: int):
+    def send_download_success(self, to_email: str, filepath: str, file_size: int):
         """
         發送下載成功通知
 
@@ -190,23 +188,17 @@ def main():
     """測試郵件發送"""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description='Send test email notification')
-    parser.add_argument('to_email', help='Recipient email address')
+    parser = argparse.ArgumentParser(description="Send test email notification")
+    parser.add_argument("to_email", help="Recipient email address")
+    parser.add_argument("--subject", default="Test Email", help="Email subject")
     parser.add_argument(
-        '--subject',
-        default='Test Email',
-        help='Email subject')
-    parser.add_argument(
-        '--message',
-        default='This is a test email',
-        help='Email message')
+        "--message", default="This is a test email", help="Email message"
+    )
 
     args = parser.parse_args()
 
     notifier = EmailNotifier()
-    success = notifier.send_notification(
-        args.to_email, args.subject, args.message)
+    success = notifier.send_notification(args.to_email, args.subject, args.message)
 
     if success:
         print("✅ Email sent successfully")
@@ -214,5 +206,5 @@ def main():
         print("❌ Failed to send email")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

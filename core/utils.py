@@ -29,15 +29,14 @@ def format_datetime(timestamp_ms: int) -> str:
     Returns:
         str: 格式化的日期時間字串，格式為 'YYYY-MM-DD HH:MM'
     """
-    return datetime.fromtimestamp(
-        timestamp_ms /
-        MILLISECONDS_PER_SECOND).strftime(DATETIME_FORMAT)
+    return datetime.fromtimestamp(timestamp_ms / MILLISECONDS_PER_SECOND).strftime(
+        DATETIME_FORMAT
+    )
 
 
 def create_history_entry(
-        user_name: str,
-        action: str,
-        timestamp_ms: Optional[int] = None) -> str:
+    user_name: str, action: str, timestamp_ms: Optional[int] = None
+) -> str:
     """
     創建歷史記錄條目
 

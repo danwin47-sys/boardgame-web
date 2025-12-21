@@ -10,7 +10,7 @@ from .constants import (
     GAMES_CACHE_TTL,
     MEMBERS_CACHE_TTL,
     WORKSHEET_GAMES,
-    WORKSHEET_MEMBERS
+    WORKSHEET_MEMBERS,
 )
 from .exceptions import SheetConnectionError
 
@@ -61,28 +61,23 @@ class SheetsClient:
         # 3. 本地開發 Fallback (如果尚未連線成功)
         if not self.valid:
             # 使用相對於專案根目錄的路徑
-            base_dir = os.path.dirname(
-                os.path.dirname(
-                    os.path.abspath(__file__)))
-            local_creds_path = os.path.join(
-                base_dir, 'boardgame-bot-5f6751855184.json')
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            local_creds_path = os.path.join(base_dir, "boardgame-bot-5f6751855184.json")
 
             if os.path.exists(local_creds_path):
-                logger.info(
-                    f"Loading credentials from local file: {local_creds_path}")
+                logger.info(f"Loading credentials from local file: {local_creds_path}")
                 try:
-                    self.gc = gspread.service_account(
-                        filename=local_creds_path)
+                    self.gc = gspread.service_account(filename=local_creds_path)
 
                     if not sheet_url:
                         # 嘗試從 .env 檔案讀取 (dotenv 可能已載入)
                         from dotenv import load_dotenv
+
                         load_dotenv()
                         sheet_url = os.environ.get("SHEET_URL")
 
                         if not sheet_url:
-                            logger.error(
-                                "SHEET_URL 環境變數未設定！請在 .env 檔案中設定 SHEET_URL")
+                            logger.error("SHEET_URL 環境變數未設定！請在 .env 檔案中設定 SHEET_URL")
                             return
 
                     if sheet_url:
@@ -93,8 +88,7 @@ class SheetsClient:
                 except Exception as e:
                     logger.error(f"Local credential load failed: {e}")
             else:
-                logger.warning(
-                    f"Local credentials not found at: {local_creds_path}")
+                logger.warning(f"Local credentials not found at: {local_creds_path}")
 
         if not self.valid:
             logger.error("Failed to initialize Google Sheet connection.")
@@ -120,8 +114,7 @@ class SheetsClient:
             try:
                 self.members_ws = self.sh.worksheet(WORKSHEET_MEMBERS)
             except Exception as e:
-                raise SheetConnectionError(
-                    f"無法取得工作表 '{WORKSHEET_MEMBERS}': {e}")
+                raise SheetConnectionError(f"無法取得工作表 '{WORKSHEET_MEMBERS}': {e}")
         return self.members_ws
 
     def load_games(self) -> List[Dict[str, Any]]:
@@ -138,8 +131,9 @@ class SheetsClient:
 
         current_time = time.time()
         # 檢查快取是否有效
-        if self._games_cache and (current_time -
-                                  self._games_cache_time < GAMES_CACHE_TTL):
+        if self._games_cache and (
+            current_time - self._games_cache_time < GAMES_CACHE_TTL
+        ):
             return self._games_cache
 
         try:
@@ -178,8 +172,8 @@ class SheetsClient:
         current_time = time.time()
         # 檢查快取是否有效
         if self._members_cache and (
-                current_time -
-                self._members_cache_time < MEMBERS_CACHE_TTL):
+            current_time - self._members_cache_time < MEMBERS_CACHE_TTL
+        ):
             return self._members_cache
 
         try:
@@ -211,7 +205,7 @@ class SheetsClient:
     def add_new_game(self, game_data: Dict[str, Any]) -> bool:
         """
         新增遊戲到 Google Sheets
-        
+
         Args:
             game_data: 遊戲資料字典，包含：
                 - name: 遊戲名稱（必填）
@@ -221,46 +215,45 @@ class SheetsClient:
                 - bgg_thumbnail: 縮圖URL（選填）
                 - custodian: 保管人（選填）
                 - status: 狀態（選填，預設為「可用」）
-        
+
         Returns:
             bool: 是否成功
         """
         from .constants import GAME_STATUS_AVAILABLE
-        
+
         logger.info(f"[UPDATE] Adding new game: {game_data.get('name')}")
         if not self.valid:
             return False
-        
+
         try:
             ws = self.get_games_worksheet()
-            
+
             # 獲取標題列
             headers = ws.row_values(1)
-            
+
             # 準備新遊戲的資料行（按照 headers 順序）
             new_row = []
             for header in headers:
                 # 獲取對應的值，如果沒有則使用預設值
-                if header == 'status' and 'status' not in game_data:
+                if header == "status" and "status" not in game_data:
                     new_row.append(GAME_STATUS_AVAILABLE)
                 else:
-                    new_row.append(game_data.get(header, ''))
-            
+                    new_row.append(game_data.get(header, ""))
+
             # 添加到工作表
             ws.append_row(new_row)
-            
+
             # 使快取失效
             self.invalidate_games_cache()
-            
+
             logger.info(f"成功新增遊戲：{game_data.get('name')}")
             return True
-            
+
         except Exception as e:
             logger.error(f"新增遊戲失敗: {e}")
             return False
 
-    def create_batch_update(self, row: int, col_idx: int,
-                            value: Any) -> Dict[str, Any]:
+    def create_batch_update(self, row: int, col_idx: int, value: Any) -> Dict[str, Any]:
         """
         建立單個儲存格的 batch update 請求結構
 
@@ -269,15 +262,16 @@ class SheetsClient:
             col_idx: 欄位索引 (0-based)
             value: 要寫入的值
         """
-        return {
-            'range': rowcol_to_a1(row, col_idx + 1),
-            'values': [[value]]
-        }
+        return {"range": rowcol_to_a1(row, col_idx + 1), "values": [[value]]}
 
-    def update_game_bgg_id(self, game_name: str, bgg_id: Optional[int],
-                           thumbnail_url: Optional[str] = None,
-                           image_url: Optional[str] = None,
-                           players_display: Optional[str] = None) -> bool:
+    def update_game_bgg_id(
+        self,
+        game_name: str,
+        bgg_id: Optional[int],
+        thumbnail_url: Optional[str] = None,
+        image_url: Optional[str] = None,
+        players_display: Optional[str] = None,
+    ) -> bool:
         """
         更新指定桌遊的 BGG ID、縮圖、大圖和玩家數
 
@@ -301,7 +295,7 @@ class SheetsClient:
 
             # 找到對應的桌遊
             for idx, game in enumerate(all_records):
-                if game.get('name') == game_name:
+                if game.get("name") == game_name:
                     # 找到 bgg_id, bgg_thumbnail, image 欄位的索引
                     headers = ws.row_values(1)
 
@@ -315,9 +309,9 @@ class SheetsClient:
                             return col_idx
                         return headers.index(header_name)
 
-                    col_idx_id = get_or_create_col('bgg_id')
-                    col_idx_thumb = get_or_create_col('bgg_thumbnail')
-                    col_idx_image = get_or_create_col('image')
+                    col_idx_id = get_or_create_col("bgg_id")
+                    col_idx_thumb = get_or_create_col("bgg_thumbnail")
+                    col_idx_image = get_or_create_col("image")
 
                     # 更新該桌遊的資料
                     row_num = idx + 2
@@ -336,19 +330,21 @@ class SheetsClient:
 
                     # 更新玩家數（如果提供）
                     if players_display is not None:
-                        col_idx_players = headers.index(
-                            'players') if 'players' in headers else None
+                        col_idx_players = (
+                            headers.index("players") if "players" in headers else None
+                        )
                         if col_idx_players is not None:
                             ws.update_cell(
-                                row_num, col_idx_players + 1, players_display)
-                            logger.info(
-                                f"已更新 '{game_name}' 的玩家數: {players_display}")
+                                row_num, col_idx_players + 1, players_display
+                            )
+                            logger.info(f"已更新 '{game_name}' 的玩家數: {players_display}")
 
                     # 使快取失效
                     self.invalidate_games_cache()
 
                     logger.info(
-                        f"已更新 '{game_name}' - ID: {bgg_id}, Thumb: {bool(thumbnail_url)}, Image: {bool(image_url)}, Players: {players_display or 'N/A'}")
+                        f"已更新 '{game_name}' - ID: {bgg_id}, Thumb: {bool(thumbnail_url)}, Image: {bool(image_url)}, Players: {players_display or 'N/A'}"
+                    )
                     return True
 
             logger.warning(f"找不到桌遊: {game_name}")
@@ -358,30 +354,32 @@ class SheetsClient:
             logger.error(f"更新 BGG 資料失敗: {e}")
             return False
 
-    def update_game_playtime(self, game_name: str, min_playtime: int, max_playtime: int) -> bool:
+    def update_game_playtime(
+        self, game_name: str, min_playtime: int, max_playtime: int
+    ) -> bool:
         """更新遊戲的遊玩時間到 Google Sheets
-        
+
         Args:
             game_name: 遊戲名稱
             min_playtime: 最小遊玩時間（分鐘）
             max_playtime: 最大遊玩時間（分鐘）
-        
+
         Returns:
             bool: 更新成功返回 True，失敗返回 False
         """
         logger.info(f"[UPDATE] Updating playtime for {game_name}")
         if not self.valid:
             return False
-        
+
         try:
             ws = self.get_games_worksheet()
             all_records = ws.get_all_records()
-            
+
             # 找到對應的遊戲
             for idx, game in enumerate(all_records):
-                if game.get('name') == game_name:
+                if game.get("name") == game_name:
                     headers = ws.row_values(1)
-                    
+
                     # Helper function to get or create column index
                     def get_or_create_col(header_name):
                         if header_name not in headers:
@@ -391,54 +389,61 @@ class SheetsClient:
                             logger.info(f"已新增 {header_name} 欄位到 Google Sheets")
                             return col_idx
                         return headers.index(header_name)
-                    
-                    minplaytime_idx = get_or_create_col('minplaytime')
-                    maxplaytime_idx = get_or_create_col('maxplaytime')
-                    
+
+                    minplaytime_idx = get_or_create_col("minplaytime")
+                    maxplaytime_idx = get_or_create_col("maxplaytime")
+
                     # 更新遊玩時間
                     row_num = idx + 2
                     ws.update_cell(row_num, minplaytime_idx + 1, min_playtime)
                     ws.update_cell(row_num, maxplaytime_idx + 1, max_playtime)
-                    
+
                     # 使快取失效
                     self.invalidate_games_cache()
-                    
-                    logger.info(f"已更新 '{game_name}' 的遊玩時間: {min_playtime}-{max_playtime}分鐘")
+
+                    logger.info(
+                        f"已更新 '{game_name}' 的遊玩時間: {min_playtime}-{max_playtime}分鐘"
+                    )
                     return True
-            
+
             logger.warning(f"找不到遊戲: {game_name}")
             return False
-            
+
         except Exception as e:
             logger.error(f"更新遊戲時間失敗: {e}", exc_info=True)
             return False
 
-    def update_game_expansion_info(self, game_name: str, is_expansion: bool, 
-                                  parent_game: str = '', storage_mode: str = '') -> bool:
+    def update_game_expansion_info(
+        self,
+        game_name: str,
+        is_expansion: bool,
+        parent_game: str = "",
+        storage_mode: str = "",
+    ) -> bool:
         """更新遊戲的擴充資訊
-        
+
         Args:
             game_name: 遊戲名稱
             is_expansion: 是否為擴充
             parent_game: 主遊戲名稱 (若非擴充則為空)
             storage_mode: 收納模式 (independent/merged)
-        
+
         Returns:
             bool: 更新成功返回 True，失敗返回 False
         """
         logger.info(f"[UPDATE] Updating expansion info for {game_name}")
         if not self.valid:
             return False
-            
+
         try:
             ws = self.get_games_worksheet()
             all_records = ws.get_all_records()
-            
+
             # 找到對應的遊戲
             for idx, game in enumerate(all_records):
-                if game.get('name') == game_name:
+                if game.get("name") == game_name:
                     headers = ws.row_values(1)
-                    
+
                     # Helper function to get or create column index
                     def get_or_create_col(header_name):
                         if header_name not in headers:
@@ -448,50 +453,56 @@ class SheetsClient:
                             logger.info(f"已新增 {header_name} 欄位到 Google Sheets")
                             return col_idx
                         return headers.index(header_name)
-                    
+
                     from .constants import (
-                        FIELD_IS_EXPANSION, 
-                        FIELD_PARENT_GAME, 
-                        FIELD_STORAGE_MODE
+                        FIELD_IS_EXPANSION,
+                        FIELD_PARENT_GAME,
+                        FIELD_STORAGE_MODE,
                     )
-                    
+
                     is_exp_idx = get_or_create_col(FIELD_IS_EXPANSION)
                     parent_idx = get_or_create_col(FIELD_PARENT_GAME)
                     storage_idx = get_or_create_col(FIELD_STORAGE_MODE)
-                    
+
                     # 準備批量更新
                     row_num = idx + 2
                     updates = []
-                    
+
                     # 更新 is_expansion (存為字串 'TRUE' 或 'FALSE')
-                    updates.append({
-                        'range': rowcol_to_a1(row_num, is_exp_idx + 1),
-                        'values': [['TRUE' if is_expansion else 'FALSE']]
-                    })
-                    
+                    updates.append(
+                        {
+                            "range": rowcol_to_a1(row_num, is_exp_idx + 1),
+                            "values": [["TRUE" if is_expansion else "FALSE"]],
+                        }
+                    )
+
                     # 更新 parent_game
-                    updates.append({
-                        'range': rowcol_to_a1(row_num, parent_idx + 1),
-                        'values': [[parent_game]]
-                    })
-                    
+                    updates.append(
+                        {
+                            "range": rowcol_to_a1(row_num, parent_idx + 1),
+                            "values": [[parent_game]],
+                        }
+                    )
+
                     # 更新 storage_mode
-                    updates.append({
-                        'range': rowcol_to_a1(row_num, storage_idx + 1),
-                        'values': [[storage_mode]]
-                    })
-                    
+                    updates.append(
+                        {
+                            "range": rowcol_to_a1(row_num, storage_idx + 1),
+                            "values": [[storage_mode]],
+                        }
+                    )
+
                     ws.batch_update(updates)
-                    
+
                     # 使快取失效
                     self.invalidate_games_cache()
-                    
+
                     logger.info(f"已更新 '{game_name}' 的擴充資訊")
                     return True
-            
+
             logger.warning(f"找不到遊戲: {game_name}")
             return False
-            
+
         except Exception as e:
             logger.error(f"更新擴充資訊失敗: {e}", exc_info=True)
             return False
@@ -506,30 +517,27 @@ class SheetsClient:
         try:
             # 嘗試取得現有工作表
             try:
-                ws = self.sh.worksheet('BGG推薦快取')
+                ws = self.sh.worksheet("BGG推薦快取")
                 return ws
             except gspread.exceptions.WorksheetNotFound:
                 # 工作表不存在，創建新的
                 logger.info("建立 BGG推薦快取 工作表")
-                ws = self.sh.add_worksheet(title='BGG推薦快取', rows=100, cols=52)
+                ws = self.sh.add_worksheet(title="BGG推薦快取", rows=100, cols=52)
 
                 # 設定標題列 - 擴展到50個遊戲ID
-                headers = ['分類']
+                headers = ["分類"]
                 for i in range(1, 51):
-                    headers.append(f'BGG_ID_{i}')
-                headers.append('更新時間')
+                    headers.append(f"BGG_ID_{i}")
+                headers.append("更新時間")
 
-                ws.update('A1:AZ1', [headers])
+                ws.update("A1:AZ1", [headers])
 
                 return ws
         except Exception as e:
             logger.error(f"取得 BGG 快取工作表失敗: {e}")
             return None
 
-    def save_bgg_recommendations(
-            self,
-            category: str,
-            game_ids: List[int]) -> bool:
+    def save_bgg_recommendations(self, category: str, game_ids: List[int]) -> bool:
         """
         儲存 BGG 推薦快取
 
@@ -555,20 +563,21 @@ class SheetsClient:
             # 準備資料（補齊到50個ID）
             padded_ids = (game_ids + [0] * 50)[:50]
             from datetime import datetime
-            update_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            update_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             row_data = [category] + padded_ids + [update_time]
 
             # 查找是否已有此分類的記錄
             row_num = None
             for idx, record in enumerate(records):
-                if record.get('分類') == category:
+                if record.get("分類") == category:
                     row_num = idx + 2  # +2 因為第1行是標題，索引從0開始
                     break
 
             if row_num:
                 # 更新現有記錄
-                ws.update(f'A{row_num}:AZ{row_num}', [row_data])
+                ws.update(f"A{row_num}:AZ{row_num}", [row_data])
             else:
                 # 新增記錄
                 ws.append_row(row_data)
@@ -601,11 +610,11 @@ class SheetsClient:
             records = ws.get_all_records()
 
             for record in records:
-                if record.get('分類') == category:
+                if record.get("分類") == category:
                     # 提取所有 BGG ID（排除 0，擴展到50）
                     game_ids = []
                     for i in range(1, 51):
-                        game_id = record.get(f'BGG_ID_{i}', 0)
+                        game_id = record.get(f"BGG_ID_{i}", 0)
                         if game_id and int(game_id) > 0:
                             game_ids.append(int(game_id))
 
@@ -618,8 +627,7 @@ class SheetsClient:
             logger.error(f"讀取 BGG 推薦快取失敗: {e}")
             return None
 
-    def get_bgg_recommendations_update_time(
-            self, category: str) -> Optional[str]:
+    def get_bgg_recommendations_update_time(self, category: str) -> Optional[str]:
         """
         取得 BGG 推薦的上次更新時間
 
@@ -640,8 +648,8 @@ class SheetsClient:
             records = ws.get_all_records()
 
             for record in records:
-                if record.get('分類') == category:
-                    return record.get('更新時間')
+                if record.get("分類") == category:
+                    return record.get("更新時間")
 
             return None
 

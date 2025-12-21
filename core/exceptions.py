@@ -13,35 +13,33 @@ from typing import Dict, Any
 
 class BoardGameException(Exception):
     """桌遊系統基礎異常
-    
+
     所有專案自定義異常的基類。提供統一的錯誤回應格式。
-    
+
     Attributes:
         http_status_code: HTTP 狀態碼，預設 500
         error_code: 錯誤代碼，用於前端識別錯誤類型
     """
+
     http_status_code: int = 500
     error_code: str = "INTERNAL_ERROR"
 
     def to_dict(self) -> Dict[str, Any]:
         """轉換為 JSON 回應格式
-        
+
         Returns:
             統一格式的錯誤回應字典
         """
-        return {
-            'success': False,
-            'error_code': self.error_code,
-            'message': str(self)
-        }
+        return {"success": False, "error_code": self.error_code, "message": str(self)}
 
 
 class GameNotFoundException(BoardGameException):
     """找不到指定的桌遊
-    
+
     Attributes:
         game_name: 找不到的遊戲名稱
     """
+
     http_status_code = 404
     error_code = "GAME_NOT_FOUND"
 
@@ -52,11 +50,12 @@ class GameNotFoundException(BoardGameException):
 
 class GameAlreadyBorrowedException(BoardGameException):
     """桌遊已被借出
-    
+
     Attributes:
         game_name: 遊戲名稱
         borrower: 目前借閱者
     """
+
     http_status_code = 409
     error_code = "GAME_ALREADY_BORROWED"
 
@@ -68,10 +67,11 @@ class GameAlreadyBorrowedException(BoardGameException):
 
 class GameNotBorrowedException(BoardGameException):
     """桌遊未被借出（嘗試歸還未借出的遊戲）
-    
+
     Attributes:
         game_name: 遊戲名稱
     """
+
     http_status_code = 400
     error_code = "GAME_NOT_BORROWED"
 
@@ -82,10 +82,11 @@ class GameNotBorrowedException(BoardGameException):
 
 class MemberNotFoundException(BoardGameException):
     """找不到指定的社員
-    
+
     Attributes:
         member_identifier: 社員識別碼（ID 或姓名）
     """
+
     http_status_code = 404
     error_code = "MEMBER_NOT_FOUND"
 
@@ -96,6 +97,7 @@ class MemberNotFoundException(BoardGameException):
 
 class SheetConnectionError(BoardGameException):
     """Google Sheets 連線錯誤"""
+
     http_status_code = 503
     error_code = "SHEET_CONNECTION_ERROR"
 
@@ -105,6 +107,7 @@ class SheetConnectionError(BoardGameException):
 
 class InvalidDataError(BoardGameException):
     """資料格式錯誤"""
+
     http_status_code = 400
     error_code = "INVALID_DATA"
 
@@ -114,6 +117,7 @@ class InvalidDataError(BoardGameException):
 
 class ValidationError(BoardGameException):
     """請求驗證錯誤"""
+
     http_status_code = 400
     error_code = "VALIDATION_ERROR"
 
@@ -123,6 +127,7 @@ class ValidationError(BoardGameException):
 
 class DuplicateGameError(BoardGameException):
     """遊戲重複錯誤"""
+
     http_status_code = 409
     error_code = "DUPLICATE_GAME"
 

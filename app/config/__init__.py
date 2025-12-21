@@ -9,10 +9,16 @@ from .production import ProductionConfig
 
 # 配置字典，用於工廠函數選擇配置
 config = {
-    'development': DevelopmentConfig,
-    'testing': TestingConfig,
-    'production': ProductionConfig,
-    'default': DevelopmentConfig
+    "development": DevelopmentConfig,
+    "testing": TestingConfig,
+    "production": ProductionConfig,
+    "default": DevelopmentConfig,
 }
 
-__all__ = ['config', 'BaseConfig', 'DevelopmentConfig', 'TestingConfig', 'ProductionConfig']
+__all__ = [
+    "config",
+    "BaseConfig",
+    "DevelopmentConfig",
+    "TestingConfig",
+    "ProductionConfig",
+]

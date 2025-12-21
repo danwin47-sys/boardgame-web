@@ -7,7 +7,7 @@ API 文件模組
 from flask import Blueprint, jsonify
 from typing import Dict, Any
 
-api_docs_bp = Blueprint('api_docs', __name__, url_prefix='/api')
+api_docs_bp = Blueprint("api_docs", __name__, url_prefix="/api")
 
 
 def get_api_spec() -> Dict[str, Any]:
@@ -18,21 +18,15 @@ def get_api_spec() -> Dict[str, Any]:
             "title": "Boardgame-Web API",
             "description": "桌遊管理系統 API 文件",
             "version": "3.0.0",
-            "contact": {
-                "name": "Boardgame-Web Team"
-            }
+            "contact": {"name": "Boardgame-Web Team"},
         },
-        "servers": [
-            {"url": "/", "description": "本地伺服器"}
-        ],
+        "servers": [{"url": "/", "description": "本地伺服器"}],
         "paths": {
             "/api/games": {
                 "get": {
                     "summary": "取得所有遊戲",
                     "tags": ["Games"],
-                    "responses": {
-                        "200": {"description": "遊戲列表"}
-                    }
+                    "responses": {"200": {"description": "遊戲列表"}},
                 }
             },
             "/api/games/borrow": {
@@ -47,9 +41,9 @@ def get_api_spec() -> Dict[str, Any]:
                                     "properties": {
                                         "name": {"type": "string"},
                                         "user_name": {"type": "string"},
-                                        "user_id": {"type": "string"}
+                                        "user_id": {"type": "string"},
                                     },
-                                    "required": ["name", "user_name", "user_id"]
+                                    "required": ["name", "user_name", "user_id"],
                                 }
                             }
                         }
@@ -57,8 +51,8 @@ def get_api_spec() -> Dict[str, Any]:
                     "responses": {
                         "200": {"description": "借用成功"},
                         "400": {"description": "請求錯誤"},
-                        "404": {"description": "遊戲不存在"}
-                    }
+                        "404": {"description": "遊戲不存在"},
+                    },
                 }
             },
             "/api/games/return": {
@@ -70,26 +64,20 @@ def get_api_spec() -> Dict[str, Any]:
                             "application/json": {
                                 "schema": {
                                     "type": "object",
-                                    "properties": {
-                                        "name": {"type": "string"}
-                                    },
-                                    "required": ["name"]
+                                    "properties": {"name": {"type": "string"}},
+                                    "required": ["name"],
                                 }
                             }
                         }
                     },
-                    "responses": {
-                        "200": {"description": "歸還成功"}
-                    }
+                    "responses": {"200": {"description": "歸還成功"}},
                 }
             },
             "/api/members": {
                 "get": {
                     "summary": "取得所有會員",
                     "tags": ["Members"],
-                    "responses": {
-                        "200": {"description": "會員列表"}
-                    }
+                    "responses": {"200": {"description": "會員列表"}},
                 }
             },
             "/api/bgg/search": {
@@ -102,21 +90,17 @@ def get_api_spec() -> Dict[str, Any]:
                             "in": "query",
                             "required": True,
                             "schema": {"type": "string"},
-                            "description": "搜尋關鍵字"
+                            "description": "搜尋關鍵字",
                         }
                     ],
-                    "responses": {
-                        "200": {"description": "搜尋結果"}
-                    }
+                    "responses": {"200": {"description": "搜尋結果"}},
                 }
             },
             "/api/bgg/hot": {
                 "get": {
                     "summary": "取得 BGG 熱門遊戲",
                     "tags": ["BGG"],
-                    "responses": {
-                        "200": {"description": "熱門遊戲列表"}
-                    }
+                    "responses": {"200": {"description": "熱門遊戲列表"}},
                 }
             },
             "/api/bgg/add-to-collection": {
@@ -131,17 +115,17 @@ def get_api_spec() -> Dict[str, Any]:
                                     "properties": {
                                         "game_id": {"type": "integer"},
                                         "custodian": {"type": "string"},
-                                        "force": {"type": "boolean"}
+                                        "force": {"type": "boolean"},
                                     },
-                                    "required": ["game_id"]
+                                    "required": ["game_id"],
                                 }
                             }
                         }
                     },
                     "responses": {
                         "200": {"description": "加入成功"},
-                        "409": {"description": "遊戲已存在"}
-                    }
+                        "409": {"description": "遊戲已存在"},
+                    },
                 }
             },
             "/api/gallery/games": {
@@ -153,38 +137,34 @@ def get_api_spec() -> Dict[str, Any]:
                             "name": "status",
                             "in": "query",
                             "schema": {"type": "string"},
-                            "description": "狀態過濾"
+                            "description": "狀態過濾",
                         }
                     ],
-                    "responses": {
-                        "200": {"description": "遊戲列表"}
-                    }
+                    "responses": {"200": {"description": "遊戲列表"}},
                 }
             },
             "/health": {
                 "get": {
                     "summary": "健康檢查",
                     "tags": ["System"],
-                    "responses": {
-                        "200": {"description": "服務正常"}
-                    }
+                    "responses": {"200": {"description": "服務正常"}},
                 }
-            }
+            },
         },
         "tags": [
             {"name": "Games", "description": "遊戲管理 API"},
             {"name": "Members", "description": "會員管理 API"},
             {"name": "BGG", "description": "BoardGameGeek 整合 API"},
             {"name": "Gallery", "description": "圖庫 API"},
-            {"name": "System", "description": "系統 API"}
-        ]
+            {"name": "System", "description": "系統 API"},
+        ],
     }
 
 
-@api_docs_bp.route('/docs')
+@api_docs_bp.route("/docs")
 def api_docs():
     """API 文件頁面（Swagger UI）"""
-    return '''
+    return """
 <!DOCTYPE html>
 <html>
 <head>
@@ -204,10 +184,10 @@ def api_docs():
     </script>
 </body>
 </html>
-'''
+"""
 
 
-@api_docs_bp.route('/openapi.json')
+@api_docs_bp.route("/openapi.json")
 def openapi_spec():
     """取得 OpenAPI JSON 規格"""
     return jsonify(get_api_spec())
