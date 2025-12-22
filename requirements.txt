@@ -1,0 +1,11 @@
+flask==3.0.3
+flask-cors==5.0.0
+gunicorn
+gspread
+oauth2client
+requests
+waitress
+python-dotenv
+pydantic
+redis>=7.0.0
+flask-caching>=2.3.0
