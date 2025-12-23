@@ -44,7 +44,6 @@ def register_blueprints(app):
 
     # 啟用指標收集中介軟體
     from .api.metrics import setup_metrics_middleware
-
     setup_metrics_middleware(app)
 
     # 註冊管理員 Blueprint
