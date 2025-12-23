@@ -1,0 +1,54 @@
+name: Dependency Check
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # 每週一午夜
+  workflow_dispatch:  # 允許手動觸發
+
+jobs:
+  check-dependencies:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install safety
+      
+      - name: Check outdated packages
+        run: |
+          echo "## 📦 過期套件檢查" >> $GITHUB_STEP_SUMMARY
+          pip list --outdated | tee outdated.txt
+          if [ -s outdated.txt ]; then
+            echo "⚠️ 發現過期套件" >> $GITHUB_STEP_SUMMARY
+            cat outdated.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ 所有套件都是最新版本" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Security check with Safety
+        run: |
+          echo "## 🔒 安全性檢查" >> $GITHUB_STEP_SUMMARY
+          safety check --json > safety-report.json || true
+          if [ -f safety-report.json ]; then
+            echo "安全性掃描完成" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-reports
+          path: |
+            outdated.txt
+            safety-report.json
+          retention-days: 30
