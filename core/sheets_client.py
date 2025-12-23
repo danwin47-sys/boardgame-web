@@ -316,17 +316,29 @@ class SheetsClient:
                     # 更新該桌遊的資料
                     row_num = idx + 2
 
+                    # 準備批次更新（一次 API 呼叫完成所有更新）
+                    updates = []
+
                     # 更新 ID
                     value_id = bgg_id if bgg_id is not None else ""
-                    ws.update_cell(row_num, col_idx_id + 1, value_id)
+                    updates.append({
+                        "range": rowcol_to_a1(row_num, col_idx_id + 1),
+                        "values": [[value_id]]
+                    })
 
                     # 更新 Thumbnail
                     value_thumb = thumbnail_url if thumbnail_url is not None else ""
-                    ws.update_cell(row_num, col_idx_thumb + 1, value_thumb)
+                    updates.append({
+                        "range": rowcol_to_a1(row_num, col_idx_thumb + 1),
+                        "values": [[value_thumb]]
+                    })
 
                     # 更新 Image
                     value_image = image_url if image_url is not None else ""
-                    ws.update_cell(row_num, col_idx_image + 1, value_image)
+                    updates.append({
+                        "range": rowcol_to_a1(row_num, col_idx_image + 1),
+                        "values": [[value_image]]
+                    })
 
                     # 更新玩家數（如果提供）
                     if players_display is not None:
@@ -334,10 +346,14 @@ class SheetsClient:
                             headers.index("players") if "players" in headers else None
                         )
                         if col_idx_players is not None:
-                            ws.update_cell(
-                                row_num, col_idx_players + 1, players_display
-                            )
+                            updates.append({
+                                "range": rowcol_to_a1(row_num, col_idx_players + 1),
+                                "values": [[players_display]]
+                            })
                             logger.info(f"已更新 '{game_name}' 的玩家數: {players_display}")
+
+                    # 批次更新（1 次 API 呼叫）
+                    ws.batch_update(updates)
 
                     # 使快取失效
                     self.invalidate_games_cache()
@@ -393,10 +409,19 @@ class SheetsClient:
                     minplaytime_idx = get_or_create_col("minplaytime")
                     maxplaytime_idx = get_or_create_col("maxplaytime")
 
-                    # 更新遊玩時間
+                    # 準備批次更新（一次 API 呼叫）
                     row_num = idx + 2
-                    ws.update_cell(row_num, minplaytime_idx + 1, min_playtime)
-                    ws.update_cell(row_num, maxplaytime_idx + 1, max_playtime)
+                    updates = [
+                        {
+                            "range": rowcol_to_a1(row_num, minplaytime_idx + 1),
+                            "values": [[min_playtime]]
+                        },
+                        {
+                            "range": rowcol_to_a1(row_num, maxplaytime_idx + 1),
+                            "values": [[max_playtime]]
+                        }
+                    ]
+                    ws.batch_update(updates)
 
                     # 使快取失效
                     self.invalidate_games_cache()
