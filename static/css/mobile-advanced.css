@@ -1,0 +1,359 @@
+/* Phase 2 & 3: 進階互動優化與細節打磨 */
+
+/* ==================== 篩選面板優化 ==================== */
+@media (max-width: 768px) {
+
+    /* 可摺疊的篩選面板 */
+    .filter-panel-toggle {
+        display: block;
+        width: 100%;
+        padding: 12px 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+    }
+
+    .filter-panel-toggle:active {
+        transform: scale(0.98);
+    }
+
+    .filter-panel-toggle .icon {
+        transition: transform 0.3s ease;
+    }
+
+    .filter-panel-toggle.active .icon {
+        transform: rotate(180deg);
+    }
+
+    /* 篩選面板內容 */
+    .filter-buttons {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+
+    .filter-buttons.show {
+        max-height: 500px;
+    }
+
+    /* 資訊列優化 */
+    .info-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 0.85em;
+    }
+
+    .bgg-notice-inline {
+        font-size: 0.75em;
+    }
+}
+
+/* ==================== 搜尋優化 ==================== */
+@media (max-width: 768px) {
+    .search {
+        font-size: 16px;
+        /* 防止 iOS 自動縮放 */
+        padding: 14px 16px;
+    }
+
+    .search:focus {
+        position: relative;
+        z-index: 1000;
+    }
+}
+
+/* ==================== 動畫優化 ==================== */
+@media (max-width: 768px) {
+
+    /* 卡片進入動畫 */
+    @keyframes cardFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .game-card {
+        animation: cardFadeIn 0.3s ease forwards;
+    }
+
+    .game-card:nth-child(1) {
+        animation-delay: 0.05s;
+    }
+
+    .game-card:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+
+    .game-card:nth-child(3) {
+        animation-delay: 0.15s;
+    }
+
+    .game-card:nth-child(4) {
+        animation-delay: 0.2s;
+    }
+
+    .game-card:nth-child(5) {
+        animation-delay: 0.25s;
+    }
+
+    /* 展開動畫 */
+    .game-card-details {
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            max-height: 0;
+        }
+
+        to {
+            opacity: 1;
+            max-height: 300px;
+        }
+    }
+}
+
+/* ==================== 載入狀態優化 ==================== */
+@media (max-width: 768px) {
+    .mobile-cards-loading {
+        position: relative;
+    }
+
+    .mobile-cards-loading::before {
+        content: '';
+        display: block;
+        width: 40px;
+        height: 40px;
+        margin: 0 auto 16px;
+        border: 4px solid #e2e8f0;
+        border-top-color: #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+}
+
+/* ==================== 下拉刷新提示 ==================== */
+@media (max-width: 768px) {
+    .pull-to-refresh {
+        position: fixed;
+        top: -60px;
+        left: 0;
+        right: 0;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: top 0.3s ease;
+        z-index: 999;
+    }
+
+    .pull-to-refresh.show {
+        top: 0;
+    }
+
+    .pull-to-refresh-icon {
+        width: 24px;
+        height: 24px;
+        border: 3px solid #e2e8f0;
+        border-top-color: #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+}
+
+/* ==================== 底部安全區域 ==================== */
+@media (max-width: 768px) {
+    body {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .mobile-cards-container {
+        padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+}
+
+/* ==================== 橫向模式優化 ==================== */
+@media (max-width: 768px) and (orientation: landscape) {
+    .stats-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .stat-card {
+        padding: 8px;
+    }
+
+    .stat-value {
+        font-size: 1.2em;
+    }
+
+    .game-card {
+        padding: 12px;
+    }
+
+    .game-card-header {
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+    }
+}
+
+/* ==================== 小手機優化 (375px 以下) ==================== */
+@media (max-width: 375px) {
+    h1 {
+        font-size: 1.5em;
+    }
+
+    .stat-value {
+        font-size: 1.2em;
+    }
+
+    .stat-label {
+        font-size: 0.8em;
+    }
+
+    .game-card {
+        padding: 12px;
+    }
+
+    .game-card-title {
+        font-size: 15px;
+    }
+
+    .game-card-content {
+        grid-template-columns: 1fr;
+    }
+
+    .bgg-buttons-inline .btn {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+}
+
+/* ==================== 觸控手勢支援 ==================== */
+@media (hover: none) and (pointer: coarse) {
+
+    /* 增強觸控反饋 */
+    .game-card:active {
+        background: #f7fafc;
+    }
+
+    .filter-btn:active,
+    .player-btn:active {
+        transform: scale(0.95);
+    }
+
+    /* 禁用長按選單（避免干擾） */
+    .game-card,
+    .game-card * {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    /* 但允許選擇文字內容 */
+    .game-card-title,
+    .game-card-value,
+    .game-card-detail-value {
+        -webkit-user-select: text;
+        user-select: text;
+    }
+}
+
+/* ==================== 暗色模式支援 ==================== */
+@media (max-width: 768px) and (prefers-color-scheme: dark) {
+    .game-card {
+        background: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+
+    .game-card-title {
+        color: #f7fafc;
+    }
+
+    .game-card-label {
+        color: #a0aec0;
+    }
+
+    .game-card-value {
+        color: #e2e8f0;
+    }
+
+    .game-card-btn-secondary {
+        background: #4a5568;
+        color: #e2e8f0;
+    }
+
+    .mobile-cards-empty {
+        color: #718096;
+    }
+}
+
+/* ==================== 效能優化 ==================== */
+@media (max-width: 768px) {
+
+    /* 使用 GPU 加速 */
+    .game-card,
+    .game-card-btn,
+    .filter-panel-toggle {
+        will-change: transform;
+        transform: translateZ(0);
+    }
+
+    /* 減少重繪 */
+    .game-card-details {
+        contain: layout style paint;
+    }
+}
+
+/* ==================== 可訪問性優化 ==================== */
+@media (max-width: 768px) {
+
+    /* 焦點指示器 */
+    .game-card-btn:focus,
+    .game-card-expand-btn:focus,
+    .filter-panel-toggle:focus {
+        outline: 2px solid #667eea;
+        outline-offset: 2px;
+    }
+
+    /* 跳過導航連結 */
+    .skip-to-content {
+        position: fixed;
+        top: -100px;
+        left: 0;
+        background: #667eea;
+        color: white;
+        padding: 12px 16px;
+        z-index: 9999;
+        transition: top 0.3s ease;
+    }
+
+    .skip-to-content:focus {
+        top: 0;
+    }
+}
