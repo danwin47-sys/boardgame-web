@@ -5,313 +5,189 @@
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)](https://flask.palletsprojects.com/)
 [![Redis](https://img.shields.io/badge/Redis-8.0+-red.svg)](https://redis.io/)
+[![Coverage](https://img.shields.io/badge/Coverage-80%25-brightgreen.svg)](tests/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
 ## 📊 專案概覽
 
-Boardgame-Web 是一個功能完整的桌遊管理系統，提供：
+Boardgame-Web 是一個現代化、高效能的桌遊管理系統，專為桌遊社團設計。它結合了強大的庫存管理功能與流暢的使用者體驗，並針對行動裝置進行了深度優化。
 
-- 📚 **桌遊庫存管理** - 完整的遊戲資料管理
-- 🔍 **BGG 整合** - 自動獲取 BoardGameGeek 遊戲資訊
-- 👥 **會員管理** - 借閱記錄和會員資料
-- 📊 **效能監控** - 即時系統和快取統計
-- 🖼️ **圖片展示** - 美觀的遊戲圖庫
-- 🚀 **高效能** - 多層快取和並發優化
+- 📚 **桌遊庫存管理** - 完整的遊戲資料庫與分類系統
+- 📱 **行動優先設計** - 專為手機優化的卡片式介面與操作體驗
+- 🔍 **BGG 整合** - 自動同步 BoardGameGeek 全球桌遊資料
+- 👥 **會員與借閱** - 實時借還系統與歷史記錄追蹤
+- 📊 **效能監控** - 內建系統資源與 Redis 快取監控面板
+- 🚀 **高效能架構** - 多層快取設計，確保秒級回應
 
 ---
 
-## ✨ 主要特性
+## ✨ 最新亮點 (v1.1)
+
+### 📱 手機版 UI 全面進化
+- **卡片式佈局**: 手機瀏覽時自動切換為精美的資訊卡片，告別擁擠的表格。
+- **2x2 統計網格**: 關鍵數據一目了然，空間利用率最大化。
+- **智慧摺疊面板**: 篩選器自動收合，釋放寶貴的螢幕空間。
+- **觸控友善設計**: 全面優化按鈕尺寸 (44px+) 與間距，操作不再誤觸。
+
+### 🧪 測試覆蓋率 80%
+- **穩健可靠**: 通過 390+ 個自動化測試案例。
+- **全面防護**: 核心邏輯、API 端點與擴充服務皆有完整測試保護。
+
+---
+
+## 🚀 主要特性
 
 ### 🎯 核心功能
 
-- ✅ Google Sheets 整合作為資料來源
-- ✅ BoardGameGeek API 整合
-- ✅ 批次借用/歸還功能
-- ✅ 進階搜尋和篩選
-- ✅ 響應式設計（支援手機、平板、桌面）
-- ✅ 管理員後台
+- ✅ **Google Sheets 同步** - 作為易於維護的後端資料來源
+- ✅ **BoardGameGeek API** - 自動獲取遊戲評分、機制與難度資訊
+- ✅ **批次借還系統** - 支援快速借出與歸還流程
+- ✅ **進階搜尋過濾** - 依人數、時間、難度、類別快速篩選
+- ✅ **擴充遊戲支援** - 完整的基礎遊戲與擴充包關聯管理
+- ✅ **管理員後台** - 便捷的增刪改查 (CRUD) 介面
 
-### ⚡ 效能優化
+### ⚡ 效能優化成果
 
-- ✅ **前端分頁** - DOM 節點減少 75%
-- ✅ **圖片懶載入** - 首屏圖片減少 89%
-- ✅ **Redis 快取** - API 呼叫減少 80%
-- ✅ **並發請求** - 推薦頁面速度提升 400%
-- ✅ **HTTP 快取** - 重複訪問速度提升 90%
-- ✅ **資料庫索引** - 查詢速度提升 500%
-
-### 📊 效能成果
-
-| 指標 | 優化前 | 優化後 | 改善 |
-|------|--------|--------|------|
-| 頁面載入時間 | 3s | 680ms | **-77%** |
-| DOM 節點數 | 4,140 | 1,018 | **-75%** |
-| 首屏圖片數 | 414 | 46 | **-89%** |
-| 推薦頁面載入 | 30s | 6s | **+400%** |
-| 資料庫查詢 | 全表掃描 | 索引查詢 | **+500%** |
+| 指標           | 優化前   | 優化後       | 改善幅度    |
+| -------------- | -------- | ------------ | ----------- |
+| **頁面載入**   | 3.0s     | **680ms**    | 🚀 **-77%**  |
+| **DOM 節點**   | 4,140    | **1,018**    | 📉 **-75%**  |
+| **首屏請求**   | 414      | **46**       | 📉 **-89%**  |
+| **資料庫查詢** | 全表掃描 | **索引查詢** | ⚡ **+500%** |
+| **測試覆蓋率** | 0%       | **80%**      | 🛡️ **+80%**  |
 
 ---
 
-## 🚀 快速開始
+## 🛠️ 安裝與啟動
 
 ### 環境需求
 
 - Python 3.9+
 - Redis 8.0+
-- Google Sheets API 憑證
+- Google Cloud Service Account (用於 Sheets API)
 
-### 安裝步驟
+### 快速開始
+
+1. **克隆專案**
+   ```bash
+   git clone <repository-url>
+   cd boardgame-web
+   ```
+
+2. **安裝依賴**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **環境配置**
+   建立 `.env` 檔案並填入以下資訊：
+   ```env
+   SHEET_URL=https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID
+   GOOGLE_CREDENTIALS={"type":"service_account",...}
+   REDIS_HOST=localhost
+   REDIS_PORT=6379
+   SECRET_KEY=your-secret-key
+   ADMIN_PASSWORD=admin
+   ```
+
+4. **啟動服務**
+   ```bash
+   # 啟動 Redis (如尚未啟動)
+   redis-server
+
+   # 啟動應用程式
+   python serve.py
+   ```
+
+### 🐳 Docker 部署 (推薦)
 
 ```bash
-# 1. 克隆專案
-git clone <repository-url>
-cd boardgame-web
-
-# 2. 安裝依賴
-pip install -r requirements.txt
-
-# 3. 配置環境變數
-cp .env.example .env
-# 編輯 .env 檔案，設置必要的環境變數
-
-# 4. 啟動 Redis（如果尚未運行）
-redis-server
-
-# 5. 啟動應用程式
-python serve.py
-```
-
-### Docker 部署
-
-```bash
-# 使用 Docker Compose 一鍵啟動
+# 一鍵啟動所有服務
 docker-compose up -d
 
-# 查看日誌
+# 查看即時日誌
 docker-compose logs -f
-
-# 停止服務
-docker-compose down
 ```
 
 ---
 
-## 📖 使用指南
+## 📖 API 文檔
 
-### 訪問應用程式
+系統提供 RESTful API 供前端與外部系統串接。
 
-- **主頁**: http://localhost:5001/
-- **管理頁面**: http://localhost:5001/admin.html
-- **圖庫**: http://localhost:5001/gallery.html
-- **監控儀表板**: http://localhost:5001/monitoring.html
-- **API 文檔**: http://localhost:5001/api/docs
+|  方法  | 端點                     | 描述                        |
+| :----: | :----------------------- | :-------------------------- |
+| `GET`  | `/api/games`             | 獲取所有遊戲列表 (支援篩選) |
+| `POST` | `/api/borrow`            | 借出遊戲                    |
+| `POST` | `/api/return`            | 歸還遊戲                    |
+| `GET`  | `/api/bgg/search`        | 搜尋 BGG 資料庫             |
+| `GET`  | `/api/monitoring/health` | 系統健康檢查                |
+| `GET`  | `/api/metrics/summary`   | 獲取系統統計指標            |
 
-### API 端點
-
-```bash
-# 獲取遊戲列表
-GET /api/games
-
-# 借用遊戲
-POST /api/borrow
-{
-  "name": "卡坦島",
-  "borrower": "張三",
-  "borrower_id": "A001"
-}
-
-# 搜尋 BGG 遊戲
-GET /api/bgg/search?q=卡坦島
-
-# 健康檢查
-GET /api/monitoring/health
-```
+完整 API 文檔請參考：`docs/api/api_reference.md`
 
 ---
 
-## 🏗️ 專案結構
+## 🏗️ 專案架構
 
 ```
 boardgame-web/
-├── app/                    # Flask 應用程式
-│   ├── blueprints/        # Blueprint 路由
-│   │   ├── main/         # 主要頁面
-│   │   ├── api/          # API 端點
-│   │   └── admin/        # 管理員功能
-│   ├── middleware/        # 中介軟體
-│   └── config.py         # 配置
-├── core/                  # 核心業務邏輯
-│   ├── facade.py         # Facade 模式
-│   ├── game_service.py   # 遊戲服務
-│   ├── bgg_service.py    # BGG 服務
-│   ├── redis_cache.py    # Redis 快取
-│   └── ...
-├── static/               # 靜態資源
-│   ├── css/             # 樣式表
-│   ├── js/              # JavaScript
-│   └── html/            # HTML 頁面
-├── docs/                 # 文檔
-│   ├── codebase/        # 程式碼文檔
-│   ├── architecture/    # 架構文檔
-│   └── api/             # API 文檔
-├── tests/                # 測試
+├── app/                    # Flask 應用程式核心
+│   ├── blueprints/        # 路由模組 (Main, API, Admin)
+│   ├── templates/         # Jinja2 模板 (HTML)
+│   └── static/            # 靜態資源 (CSS, JS)
+├── core/                  # 核心業務邏輯 (Service Layer)
+│   ├── game_service.py   # 遊戲管理服務
+│   ├── bgg_service.py    # BGG 整合服務
+│   └── redis_cache.py    # 快取管理服務
+├── tests/                # 自動化測試
 │   ├── unit/            # 單元測試
 │   └── integration/     # 整合測試
-├── Dockerfile           # Docker 配置
-├── docker-compose.yml   # Docker Compose
-└── serve.py            # 應用程式入口
+├── docs/                 # 專案文檔
+└── serve.py             # 程式進入點
 ```
 
 ---
 
-## 📚 文檔
+## 🧪 測試與驗證
 
-### 完整文檔
-
-- [程式碼庫文檔](docs/codebase/README.md) - 完整的程式碼說明
-- [測試指南](docs/codebase/testing_guide.md) - 346 個測試的說明
-- [資料流程](docs/architecture/data_flow.md) - 系統資料流程圖
-- [系統設計](docs/architecture/system_design.md) - 架構決策和設計模式
-- [API 參考](docs/api/api_reference.md) - 33 個 API 端點文檔
-- [部署指南](docs/deployment.md) - Docker 部署完整指南
-
-### 快速參考
-
-- **測試**: 346 個測試（253 單元 + 93 整合）
-- **API 端點**: 33 個
-- **文檔頁數**: 12 份專案文檔
-
----
-
-## 🧪 測試
+我們採用 `pytest` 進行全方位測試。
 
 ```bash
 # 執行所有測試
 pytest
 
-# 執行單元測試
-pytest tests/unit/
-
-# 執行整合測試
-pytest tests/integration/
-
-# 測試覆蓋率
+# 產生覆蓋率報告
 pytest --cov=core --cov=app --cov-report=html
 ```
 
----
-
-## 🔧 技術棧
-
-### 後端
-
-- **Flask** 3.0+ - Web 框架
-- **Python** 3.9+ - 程式語言
-- **Redis** 8.0+ - 快取
-- **SQLite** - 本地資料庫
-- **Waitress** - WSGI 伺服器
-
-### 前端
-
-- **Vanilla JavaScript** - 無依賴
-- **CSS3** - 現代化樣式
-- **HTML5** - 語義化標記
-
-### 外部服務
-
-- **Google Sheets** - 資料儲存
-- **BoardGameGeek API** - 遊戲資訊
+目前測試覆蓋率已達 **80%**，包含以下關鍵模組：
+- `expansion_service`: 93%
+- `monitoring`: 87%
+- `metrics`: 86%
+- `games_api`: 83%
 
 ---
 
-## 📊 效能監控
+## 🤝 貢獻指南
 
-訪問 http://localhost:5001/monitoring.html 查看：
+歡迎任何形式的貢獻！
 
-- Redis 統計（版本、記憶體、鍵數）
-- 快取命中率
-- 系統資源使用（CPU、記憶體、磁碟）
-- 健康檢查狀態
-
-監控頁面每 5 秒自動刷新。
-
----
-
-## 🐳 Docker 部署
-
-### 服務架構
-
-```
-┌─────────────┐
-│   使用者     │
-└──────┬──────┘
-       │
-┌──────▼──────┐      ┌──────────┐
-│  Flask App  │◄────►│  Redis   │
-│  (port 5001)│      │  (快取)  │
-└─────────────┘      └──────────┘
-```
-
-### 環境變數
-
-在 `.env` 檔案中配置：
-
-```bash
-SHEET_URL=https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID
-GOOGLE_CREDENTIALS={"type":"service_account",...}
-REDIS_HOST=redis
-REDIS_PORT=6379
-SECRET_KEY=your-secret-key
-ADMIN_PASSWORD=your-admin-password
-```
-
----
-
-## 🎯 設計模式
-
-- **Facade Pattern** - 統一的服務介面
-- **Service Layer** - 業務邏輯分離
-- **Repository Pattern** - 資料存取抽象
-- **Decorator Pattern** - 快取和認證
-- **Singleton Pattern** - Redis 連線管理
-
----
-
-## 🤝 貢獻
-
-歡迎貢獻！請遵循以下步驟：
-
-1. Fork 專案
-2. 建立功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交變更 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 開啟 Pull Request
+1. Fork 本專案
+2. 建立功能分支 (`git checkout -b feature/NewFeature`)
+3. 提交變更 (`git commit -m 'Add NewFeature'`)
+4. 推送至分支 (`git push origin feature/NewFeature`)
+5. 提交 Pull Request
 
 ---
 
 ## 📝 授權
 
-本專案採用 MIT 授權 - 詳見 [LICENSE](LICENSE) 檔案
+本專案採用 [MIT License](LICENSE) 授權。
 
 ---
 
-## 🙏 致謝
-
-- [BoardGameGeek](https://boardgamegeek.com/) - 遊戲資料來源
-- [Google Sheets API](https://developers.google.com/sheets/api) - 資料儲存
-- [Redis](https://redis.io/) - 快取解決方案
-- [Flask](https://flask.palletsprojects.com/) - Web 框架
-
----
-
-## 📧 聯絡方式
-
-如有問題或建議，請開啟 Issue 或聯絡專案維護者。
-
----
-
-**專案狀態**: ✅ 生產就緒  
-**版本**: 1.0.0  
-**最後更新**: 2025-12-21
+**最後更新**: 2025-12-25
+**維護者**: Derek Shih
