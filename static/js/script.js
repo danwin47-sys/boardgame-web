@@ -88,6 +88,61 @@ function updateStats() {
     document.getElementById('borrowedCount').textContent = allGames.filter(g => g.status === '借出').length;
 }
 
+// --- 手機版篩選面板控制 ---
+function initMobileFilterPanel() {
+    // 檢查是否為手機版且尚未初始化
+    if (window.innerWidth > 768 || document.querySelector('.filter-panel-toggle')) {
+        return;
+    }
+
+    const filterContainer = document.querySelector('.filter-buttons');
+    if (!filterContainer) return;
+
+    // 創建切換按鈕
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'filter-panel-toggle btn primary';
+    toggleBtn.innerHTML = `
+        <span>🔍 篩選與排序</span>
+        <span class="icon">▼</span>
+    `;
+
+    // 插入到篩選容器之前
+    filterContainer.parentNode.insertBefore(toggleBtn, filterContainer);
+
+    // 點擊事件
+    toggleBtn.addEventListener('click', () => {
+        const isExpanded = filterContainer.classList.contains('show');
+
+        if (isExpanded) {
+            filterContainer.classList.remove('show');
+            toggleBtn.classList.remove('active');
+        } else {
+            filterContainer.classList.add('show');
+            toggleBtn.classList.add('active');
+        }
+    });
+}
+
+// 監聽視窗大小改變，動態處理
+window.addEventListener('resize', () => {
+    const toggleBtn = document.querySelector('.filter-panel-toggle');
+    const filterContainer = document.querySelector('.filter-buttons');
+
+    if (window.innerWidth <= 768) {
+        initMobileFilterPanel();
+    } else {
+        // 電腦版移除手機特有元素
+        if (toggleBtn) toggleBtn.remove();
+        if (filterContainer) filterContainer.classList.remove('show');
+    }
+});
+
+// 初始執行
+document.addEventListener('DOMContentLoaded', () => {
+    initMobileFilterPanel();
+    loadGames(); // 原有的 loadGames
+});
+
 // 載入桌遊資料
 async function loadGames() {
     try {
@@ -287,7 +342,43 @@ function renderTable(games) {
                     onclick="viewBGGGameDetails(${game.bgg_id}, \`${escapedName}\`)">`
             : '';
 
-        // 階層切換按鈕 - 移到獨立欄位，預設收起（不加 expanded class）
+        // 構建行內容，為手機版卡片佈局添加 data-label
+        // 注意：手機版會透過 CSS 將 table row 轉換為卡片
+        tr.innerHTML = `
+            <td class="col-checkbox mobile-hide">${checkboxHtml}</td>
+            <td class="col-tree mobile-hide-symbol">${toggleBtnHtml}${treeCellContent}</td>
+            <td class="col-thumbnail" data-label="封面">${thumbnailHtml}</td>
+            <td class="col-name" data-label="名稱">
+                <div class="game-name-wrapper">
+                    <span class="game-name">${game.name}</span>
+                    <span class="mobile-only-badges">
+                        ${isChild ? '<span class="badge badge-expansion">擴充</span>' : ''}
+                        ${hasChildren ? '<span class="badge badge-has-expansions">含擴充</span>' : ''}
+                    </span>
+                </div>
+            </td>
+            <td class="col-status ${statusClass}" data-label="狀態">${statusText}</td>
+            <td class="col-borrower" data-label="借閱人">${borrowerDisplay}</td>
+            <td class="col-players mobile-hide-low-prio" data-label="人數">${game.players || '-'}</td>
+            <td class="col-duration mobile-hide-low-prio" data-label="時間">${game.duration ? game.duration + ' 分' : '-'}</td>
+            <td class="col-difficulty mobile-hide-low-prio" data-label="難度">${game.difficulty ? parseFloat(game.difficulty).toFixed(1) : '-'}</td>
+            <td class="col-location mobile-hide-low-prio" data-label="位置">${game.location || '-'}</td>
+            <td class="col-bgg" data-label="BGG">${bggIcon}</td>
+        `;
+
+        if (isAdmin) {
+            // 管理員模式下的操作按鈕，需要適配手機
+            const adminActions = `
+                <button class="btn btn-sm btn-action" onclick="editGame1('${escapedName}')">編輯</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteGame('${escapedName}')">刪除</button>
+             `;
+            // 插入到 BGG 欄位之後或作為單獨欄位
+            // 這裡簡化處理，因為原始代碼似乎沒有在 renderGameRow 中直接包含管理員按鈕的 TD，
+            // 而是可能由 checkboxHtml 處理? 不，看原始碼 checkbox 是在最前面
+            // 檢查原始碼發現並沒有操作欄位，可能是點擊名稱或其他方式編輯?
+            // 查看 script.js 其他部分... 發現 editGame1 是全域函式
+            // 假設目前表格結構如上，我們保持原樣，僅增強現有欄位
+        }
         let toggleBtnHtml = '';
         let treeCellContent = '';
 

@@ -1,0 +1,194 @@
+/* ==================== 核心卡片式佈局 (768px 以下) ==================== */
+@media (max-width: 768px) {
+
+    /* 隱藏原生表格標頭 */
+    .table thead {
+        display: none;
+    }
+
+    /* 將表格行轉換為卡片 */
+    .table tbody tr {
+        display: block;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        margin-bottom: 16px;
+        padding: 16px;
+        position: relative;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* 處理儲存格佈局 */
+    .table td {
+        display: block;
+        padding: 8px 0;
+        border: none;
+        text-align: left;
+        position: relative;
+    }
+
+    /* 隱藏不需要的手機版欄位 */
+    .mobile-hide,
+    .mobile-hide-symbol,
+    .mobile-hide-low-prio {
+        display: none;
+    }
+
+    /* 卡片頭部：封面與名稱 */
+    .col-thumbnail {
+        text-align: center;
+        margin-bottom: 12px;
+    }
+
+    .col-thumbnail img {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
+    .col-name {
+        font-size: 1.25em;
+        font-weight: 700;
+        color: #2d3748;
+        text-align: center;
+        padding-bottom: 12px !important;
+        border-bottom: 1px solid #edf2f7 !important;
+        margin-bottom: 12px;
+    }
+
+    /* 卡片內容：使用 Grid 佈局顯示資訊 */
+    .col-status,
+    .col-borrower,
+    .col-bgg {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        font-size: 0.95em;
+    }
+
+    /* 使用 data-label 添加標籤 */
+    .table td:not(.col-thumbnail):not(.col-name):before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #718096;
+        margin-right: 12px;
+        min-width: 80px;
+        display: inline-block;
+    }
+
+    /* BGG 連結樣式優化 */
+    .col-bgg {
+        text-align: right;
+    }
+
+    .col-bgg:before {
+        line-height: 24px;
+        /* 垂直置中標籤 */
+    }
+
+    /* 狀態樣式強化 */
+    .status-available {
+        color: #48bb78;
+        font-weight: 600;
+    }
+
+    .status-borrowed {
+        background: none !important;
+        /* 覆蓋原有背景色 */
+        color: #ed8936;
+        font-weight: 600;
+    }
+
+    /* 擴充遊戲標記 */
+    .badge-expansion {
+        font-size: 0.75em;
+        padding: 2px 6px;
+        background: #ebf4ff;
+        color: #5a67d8;
+        border-radius: 4px;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+}
+
+/* ==================== 統計卡片 2x2 網格佈局 (手機優化) ==================== */
+@media (max-width: 768px) {
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        padding: 12px 8px;
+        min-width: auto;
+        /* 確保卡片高度一致 */
+        height: 100%;
+    }
+
+    .stat-value {
+        font-size: 1.5em;
+    }
+
+    .stat-label {
+        font-size: 0.85em;
+    }
+
+    /* 標題與統計容器調整 */
+    .header-stats-wrapper {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .header-stats-wrapper>div:first-child {
+        width: 100%;
+    }
+}
+
+/* ==================== 按鈕與互動優化 (觸控友善) ==================== */
+@media (max-width: 768px) {
+
+    /* 增大按鈕點擊區域 */
+    .btn {
+        padding: 10px 16px;
+        min-height: 44px;
+        /* Apple Human Interface Guidelines */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 8px;
+        /* 手機上按鈕換行時的間距 */
+        width: 100%;
+        /* 全寬按鈕更易點擊 */
+    }
+
+    /* 調整篩選按鈕群組 */
+    .filter-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .filter-buttons .btn {
+        width: 100%;
+        margin-bottom: 0;
+        font-size: 14px;
+    }
+
+    /* 搜尋框優化 */
+    .search-filter-container {
+        padding: 16px;
+    }
+
+    .search {
+        height: 48px;
+        /* 更大的輸入框 */
+        font-size: 16px;
+        /* 防止 iOS 自動縮放 */
+        margin-bottom: 16px;
+    }
+}

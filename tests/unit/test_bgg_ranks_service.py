@@ -128,8 +128,9 @@ class TestBGGRanksServiceGetTopGames:
 class TestBGGRanksServiceGetStats:
     """測試 get_stats 方法"""
     
+    @patch.object(BGGRanksService, '_ensure_indexes')
     @patch.object(BGGRanksService, '_get_connection')
-    def test_get_stats(self, mock_conn):
+    def test_get_stats(self, mock_conn, mock_ensure_idx):
         """測試取得統計資訊"""
         mock_cursor = MagicMock()
         # 設定 fetchone 返回值序列
