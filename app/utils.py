@@ -67,7 +67,7 @@ def error_response(
     log_data = {
         'request_id': request_id,
         'error_code': error_code,
-        'message': message,
+        'error_message': message,  # 改名避免與 logging 衝突
         'status_code': status_code
     }
     
