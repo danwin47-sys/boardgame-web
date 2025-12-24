@@ -290,31 +290,17 @@ h1 {
     color: #4a5568;
 }
 
-/* 表格包裝器 */
-.table-wrapper {
-    position: relative;
-    margin-bottom: 25px;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e2e8f0;
-    background: white;
-}
-
 /* 表格樣式 */
 table {
     width: 100%;
     background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 25px;
     border-collapse: separate;
     border-spacing: 0;
-}
-
-/* 確保 thead 在整個頁面滾動時保持固定 */
-thead {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: #667eea;
+    border: 1px solid #e2e8f0;
 }
 
 th {
@@ -324,9 +310,11 @@ th {
     text-align: center;
     font-weight: 600;
     cursor: pointer;
+    position: sticky;
+    top: 0;
+    z-index: 10;
     user-select: none;
     font-size: 14px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 th:hover {
@@ -591,41 +579,26 @@ tbody tr:last-child td {
 }
 
 /* 層級化 UI 樣式 */
-
-/* 樹狀結構欄位 */
-.tree-column {
-    width: 40px;
-    min-width: 40px;
-    max-width: 40px;
-    padding: 16px 8px !important;
-}
-
-.tree-cell {
-    width: 40px;
-    min-width: 40px;
-    max-width: 40px;
-    padding: 14px 8px !important;
-    text-align: center !important;
-}
-
-/* 樹狀符號樣式 */
-.tree-symbol {
-    color: #cbd5e0;
-    font-family: monospace;
-    font-size: 14px;
-    display: inline-block;
-}
-
-/* 擴充行樣式 */
 .expansion-row {
     background-color: #fafbfc !important;
-    display: none;
-    /* 預設隱藏擴充 */
 }
 
-/* 當父遊戲展開時，顯示擴充 */
-.expansion-row.visible {
-    display: table-row;
+.expansion-row td:first-child,
+.expansion-row td:nth-child(2) {
+    padding-left: 20px;
+}
+
+.expansion-row .game-name-wrapper {
+    padding-left: 20px;
+    position: relative;
+}
+
+.expansion-row .game-name-wrapper::before {
+    content: '└─';
+    position: absolute;
+    left: 0;
+    color: #cbd5e0;
+    font-family: monospace;
 }
 
 .expansion-row td {
@@ -639,10 +612,11 @@ tbody tr:last-child td {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     background: #edf2f7;
     border-radius: 4px;
+    margin-right: 8px;
     font-size: 10px;
     color: #4a5568;
     transition: all 0.2s ease;
@@ -653,7 +627,6 @@ tbody tr:last-child td {
 .toggle-expansions-btn:hover {
     background: #e2e8f0;
     color: #2d3748;
-    transform: scale(1.1);
 }
 
 .toggle-expansions-btn.expanded::after {
@@ -755,46 +728,21 @@ tbody tr:last-child td {
     background: #a0aec0;
 }
 
-/* 操作欄位樣式 */
-.action-column {
-    width: 80px;
-    min-width: 80px;
-}
-
-.action-cell {
-    text-align: center !important;
-    padding: 8px !important;
-}
-
 /* 管理員表格按鈕 */
 .btn-edit {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #4299e1;
     color: white;
     border: none;
-    border-radius: 6px;
-    padding: 8px 12px;
+    border-radius: 4px;
+    padding: 4px 8px;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
+    font-size: 12px;
+    margin-left: 8px;
 }
 
 .btn-edit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
-    background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+    background: #3182ce;
 }
-
-.btn-edit svg {
-    width: 16px;
-    height: 16px;
-}
-
 /* 分頁控制樣式 */
 .pagination {
     display: flex;
@@ -842,7 +790,6 @@ tbody tr:last-child td {
     transform: none;
 }
 
-
 .pagination .page-info {
     font-weight: 600;
     color: #2d3748;
@@ -852,136 +799,13 @@ tbody tr:last-child td {
     text-align: center;
 }
 
-/* JavaScript 固定標題樣式 */
-.sticky-table-header {
-    position: fixed;
-    top: 0;
-    z-index: 1000;
-    background: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.sticky-table-header table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 0;
-    table-layout: fixed;
-}
-
-.sticky-table-header th {
-    background: #667eea;
-    color: white;
-    padding: 16px 12px;
-    text-align: center;
-    font-weight: 600;
-    font-size: 14px;
-    border: none;
-    box-sizing: border-box;
-}
-
 @media (max-width: 768px) {
     .pagination {
         flex-wrap: wrap;
         gap: 10px;
     }
-
+    
     .pagination .page-btn-small {
         display: none;
     }
-}
-
-/* BGG 功能按鈕內聯樣式 */
-.bgg-buttons-inline {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: center;
-    flex: 1;
-    justify-content: flex-end;
-    margin: 0 15px;
-}
-
-.bgg-buttons-inline .btn {
-    padding: 8px 16px;
-    font-size: 13px;
-    white-space: nowrap;
-    min-width: auto;
-}
-
-.bgg-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.bgg-header h2 {
-    margin: 0;
-    flex-shrink: 0;
-}
-
-.bgg-attribution {
-    flex-shrink: 0;
-}
-
-/* BGG 說明文字內聯樣式 */
-.bgg-notice-inline {
-    font-size: 0.85em;
-    color: #718096;
-    font-style: italic;
-}
-
-.bgg-notice-inline a {
-    color: #667eea;
-    text-decoration: none;
-}
-
-.bgg-notice-inline a:hover {
-    text-decoration: underline;
-}
-
-/* 搜尋和篩選同一行 */
-.search-filter-row {
-    display: flex;
-    gap: 15px;
-    align-items: flex-start;
-}
-
-.search-filter-row .table-search-wrapper {
-    flex: 0 0 300px;
-    margin-bottom: 0;
-}
-
-.search-filter-row .filter-buttons {
-    flex: 1;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-/* 調整搜尋框樣式 */
-.search-filter-container {
-    padding: 15px 20px;
-}
-
-@media (max-width: 1024px) {
-    .search-filter-row {
-        flex-direction: column;
-    }
-    
-    .search-filter-row .table-search-wrapper {
-        flex: 1;
-        width: 100%;
-    }
-}
-
-/* 調整 BGG 按鈕間距，讓它們更靠近標題 */
-.bgg-buttons-inline {
-    margin: 0 10px 0 20px;
-}
-
-.bgg-header {
-    padding: 10px 0;
 }

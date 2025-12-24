@@ -27,10 +27,6 @@ async function openEditGameModal(gameName) {
         const response = await fetch(`/api/games/${encodeURIComponent(gameName)}/family`);
         const data = await response.json();
 
-        console.log('[DEBUG] openEditGameModal - API response:', data);
-        console.log('[DEBUG] openEditGameModal - parent:', data.parent);
-        console.log('[DEBUG] openEditGameModal - expansions:', data.expansions);
-
         if (data.success) {
             populateEditForm(data);
         } else {
@@ -58,14 +54,14 @@ function closeEditGameModal() {
 /**
  * 填充編輯表單
  */
-async function populateEditForm(data) {
+function populateEditForm(data) {
     // 找到當前編輯的遊戲物件
     let game = null;
 
     // 先檢查是否為主遊戲
     if (data.parent && data.parent.name === currentEditingGame) {
         game = data.parent;
-    } else if (data.expansions && data.expansions.length > 0) {
+    } else {
         // 在擴充列表中尋找
         game = data.expansions.find(e => e.name === currentEditingGame);
     }
@@ -73,20 +69,6 @@ async function populateEditForm(data) {
     // 如果都找不到，使用預設物件
     if (!game) {
         game = { name: currentEditingGame };
-    }
-
-    // 如果找到的遊戲物件資料不完整（只有 name），從完整遊戲列表重新載入
-    if (game && Object.keys(game).length <= 2) {
-        console.log('[DEBUG] Game object incomplete, fetching from full list');
-        try {
-            const response = await fetch('/api/games');
-            const allGames = await response.json();
-            const foundGame = allGames.find(g => g.name === currentEditingGame);
-            game = foundGame || game;
-        } catch (e) {
-            console.error('Failed to fetch full game list:', e);
-            alert('載入完整遊戲列表失敗: ' + e.message);
-        }
     }
 
     // 設定遊戲類型 (主遊戲/擴充)
@@ -105,17 +87,24 @@ async function populateEditForm(data) {
         document.getElementById('storageMode').value = storageMode;
     }
 
-    // 處理 BGG 載入按鈕
+    // 處理 BGG 載入按鈕 - 確保按鈕總是顯示如果有 bgg_id
     const bggBtn = document.getElementById('loadBggBtn');
+    console.log('[DEBUG] populateEditForm - game object:', game);
+    console.log('[DEBUG] populateEditForm - bgg_id:', game.bgg_id);
+    console.log('[DEBUG] populateEditForm - bggBtn element:', bggBtn);
 
     if (bggBtn) {
         const bggId = game.bgg_id;
         if (bggId && bggId !== '' && bggId !== '0') {
+            console.log('[DEBUG] Showing BGG button with ID:', bggId);
             bggBtn.style.display = 'inline-block';
             bggBtn.onclick = () => loadBggInfo(bggId);
         } else {
+            console.log('[DEBUG] Hiding BGG button - no valid bgg_id');
             bggBtn.style.display = 'none';
         }
+    } else {
+        console.error('[ERROR] loadBggBtn element not found!');
     }
 }
 
@@ -140,27 +129,10 @@ async function loadBggInfo(bggId) {
                 }
                 updateFormVisibility();
 
-                // 填入主遊戲 - 優先使用 parent_game_id 來查找中文名稱
-                let parentGameName = game.parent_game || '';
-
-                if (game.parent_game_id) {
-                    // 嘗試從遊戲列表中找到對應 BGG ID 的中文名稱
-                    try {
-                        const gamesResp = await fetch('/api/games');
-                        const allGames = await gamesResp.json();
-                        const parentGame = allGames.find(g => String(g.bgg_id) === String(game.parent_game_id));
-                        if (parentGame) {
-                            parentGameName = parentGame.name;
-                            console.log(`[BGG] 找到主遊戲中文名稱: ${parentGameName} (BGG ID: ${game.parent_game_id})`);
-                        } else {
-                            console.warn(`[BGG] 找不到 BGG ID ${game.parent_game_id} 的遊戲，使用英文名稱: ${parentGameName}`);
-                        }
-                    } catch (e) {
-                        console.error('[BGG] 載入遊戲列表失敗:', e);
-                    }
+                // 填入主遊戲
+                if (game.parent_game) {
+                    document.getElementById('parentGameInput').value = game.parent_game;
                 }
-
-                document.getElementById('parentGameInput').value = parentGameName;
 
                 showToast('已從 BGG 載入擴充資訊');
             } else {
@@ -170,11 +142,6 @@ async function loadBggInfo(bggId) {
                     mainRadio.checked = true;
                 }
                 updateFormVisibility();
-
-                // 清空擴充相關欄位
-                document.getElementById('parentGameInput').value = '';
-                document.getElementById('storageMode').value = 'independent';
-
                 showToast('BGG 顯示此遊戲為主遊戲');
             }
         } else {
@@ -214,7 +181,6 @@ async function saveGameChanges() {
         storage_mode: isExpansion ? document.getElementById('storageMode').value : ''
     };
 
-
     try {
         const response = await fetch('/api/admin/games/update', {
             method: 'POST',
@@ -223,7 +189,6 @@ async function saveGameChanges() {
         });
 
         const data = await response.json();
-
 
         if (data.success) {
             showToast('儲存成功');

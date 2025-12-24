@@ -3,7 +3,7 @@
 處理首頁、靜態資源、健康檢查等基本路由
 """
 from typing import Tuple, Dict, Any
-from flask import Blueprint, send_from_directory, jsonify, Response
+from flask import Blueprint, send_from_directory, jsonify, Response, render_template
 import logging
 
 from app.utils import get_manager
@@ -23,7 +23,7 @@ def home() -> Response:
     Returns:
         Response: index.html 文件響應
     """
-    return send_from_directory("../static/html", "index.html")
+    return render_template("index.html")
 
 
 @main_bp.route("/admin.html")
@@ -35,7 +35,7 @@ def admin_page() -> Response:
     Returns:
         Response: admin.html 文件響應
     """
-    return send_from_directory("../static/html", "admin.html")
+    return render_template("admin.html")
 
 
 @main_bp.route("/gallery.html")
@@ -47,7 +47,19 @@ def gallery_page() -> Response:
     Returns:
         Response: gallery.html 文件響應
     """
-    return send_from_directory("../static/html", "gallery.html")
+    return render_template("gallery.html")
+
+
+@main_bp.route("/monitoring.html")
+def monitoring_page() -> Response:
+    """效能監控頁面
+
+    返回系統效能監控 HTML 文件。
+
+    Returns:
+        Response: monitoring.html 文件響應
+    """
+    return render_template("monitoring.html")
 
 
 @main_bp.route("/favicon.ico")

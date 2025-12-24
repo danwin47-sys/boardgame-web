@@ -317,10 +317,12 @@ class BGGApiClient:
             # 方法2: 檢查是否有 inbound 的 boardgameexpansion link（更可靠）
             # 有些擴充的 type 是 'boardgame'，但會有指向主遊戲的 inbound link
             parent_game = None
+            parent_game_id = None
             for link in item.findall("link[@type='boardgameexpansion']"):
                 if link.get("inbound") == "true":
                     is_expansion = True  # 有 inbound expansion link 就是擴充
                     parent_game = link.get("value")
+                    parent_game_id = link.get("id")  # 提取主遊戲的 BGG ID
                     break  # 取第一個主遊戲
 
             # 方法3: 檢查類別中是否有 "Expansion for Base-game"
@@ -345,6 +347,7 @@ class BGGApiClient:
                 "type": game_type,
                 "is_expansion": is_expansion,
                 "parent_game": parent_game,
+                "parent_game_id": parent_game_id,  # 新增：主遊戲的 BGG ID
                 "year": year,
                 "description": description,
                 "image": image,

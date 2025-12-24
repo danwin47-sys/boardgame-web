@@ -119,7 +119,7 @@ class SheetsClient:
 
     def load_games(self) -> List[Dict[str, Any]]:
         """
-        讀取所有桌遊資料 (含快取)
+        讀取所有桌遊資料 (已停用快取，每次都從 Google Sheets 讀取最新資料)
         """
         # 如果未連線，嘗試重新連線
         if not self.valid:
@@ -129,18 +129,22 @@ class SheetsClient:
         if not self.valid:
             return []
 
-        current_time = time.time()
-        # 檢查快取是否有效
-        if self._games_cache and (
-            current_time - self._games_cache_time < GAMES_CACHE_TTL
-        ):
-            return self._games_cache
+        # 停用快取機制 - 每次都直接從 Google Sheets 讀取最新資料
+        # current_time = time.time()
+        # # 檢查快取是否有效
+        # if self._games_cache and (
+        #     current_time - self._games_cache_time < GAMES_CACHE_TTL
+        # ):
+        #     return self._games_cache
 
         try:
             ws = self.get_games_worksheet()
-            records = ws.get_all_records()
+            # 使用 value_render_option='FORMATTED_VALUE' 來保持字串格式
+            # 避免 gspread 自動將 "FALSE"/"TRUE" 轉換為布林值
+            records = ws.get_all_records(value_render_option='FORMATTED_VALUE')
             self._games_cache = records if records is not None else []
-            self._games_cache_time = current_time
+            self._games_cache_time = time.time()
+            logger.info(f"從 Google Sheets 讀取了 {len(self._games_cache)} 筆遊戲資料")
             return self._games_cache
         except Exception as e:
             logger.error(f"讀取 games 失敗: {e}")

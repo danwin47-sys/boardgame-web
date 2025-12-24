@@ -1,0 +1,174 @@
+/* 行動裝置優化樣式 */
+
+/* 觸控優化 */
+@media (hover: none) and (pointer: coarse) {
+
+    /* 增大可點擊區域 */
+    button,
+    a,
+    .clickable {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* 移除 hover 效果 */
+    *:hover {
+        /* 在觸控裝置上禁用 hover */
+    }
+
+    /* 觸控反饋 */
+    button:active,
+    a:active,
+    .clickable:active {
+        opacity: 0.7;
+        transform: scale(0.98);
+    }
+}
+
+/* 響應式斷點優化 */
+@media (max-width: 768px) {
+
+    /* 主題切換按鈕 */
+    .theme-toggle {
+        top: 10px;
+        right: 10px;
+        width: 44px;
+        height: 44px;
+    }
+
+    /* 搜尋容器 */
+    .search-container {
+        max-width: 100%;
+    }
+
+    /* 遊戲卡片 */
+    .game-card {
+        margin: 8px 0;
+    }
+
+    /* 表格優化 */
+    table {
+        font-size: 14px;
+    }
+
+    th,
+    td {
+        padding: 8px 4px;
+    }
+
+    /* 隱藏不重要的欄位 */
+    .hide-mobile {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+
+    /* 更小螢幕的優化 */
+    body {
+        font-size: 14px;
+    }
+
+    h1 {
+        font-size: 20px;
+    }
+
+    .stat-card {
+        min-width: 70px;
+    }
+
+    .filter-btn,
+    .player-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}
+
+/* 橫向模式優化 */
+@media (max-width: 768px) and (orientation: landscape) {
+    .header-stats-wrapper {
+        padding: 10px;
+    }
+
+    .stats-container {
+        gap: 8px;
+    }
+}
+
+/* 觸控滑動提示 */
+.swipe-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.swipe-hint.show {
+    opacity: 1;
+}
+
+/* 長按選單 */
+.context-menu {
+    position: fixed;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    padding: 8px 0;
+    min-width: 150px;
+    z-index: 9999;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+}
+
+.context-menu.show {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+.context-menu-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.context-menu-item:hover {
+    background-color: var(--card-hover);
+}
+
+/* 防止文字選取（在手勢操作時） */
+.no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* 平滑滾動 */
+html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 觸控裝置上的表單優化 */
+@media (hover: none) {
+
+    input,
+    select,
+    textarea {
+        font-size: 16px;
+        /* 防止 iOS 自動縮放 */
+    }
+}

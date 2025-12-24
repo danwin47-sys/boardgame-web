@@ -177,6 +177,9 @@ class BGGService:
                 "designers": game.get("designers", []),
                 "artists": game.get("artists", []),
                 "publishers": game.get("publishers", []),
+                "is_expansion": game.get("is_expansion", False),
+                "parent_game": game.get("parent_game"),
+                "parent_game_id": game.get("parent_game_id"),  # 新增：主遊戲的 BGG ID
             }
 
             logger.info(f"Retrieved details for game: {game['name']} (ID: {game_id})")

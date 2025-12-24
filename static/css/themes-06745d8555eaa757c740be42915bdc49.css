@@ -1,0 +1,144 @@
+/* 主題系統 - 深色/淺色模式 */
+
+:root {
+    /* 淺色模式（預設） */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --bg-tertiary: #e0e0e0;
+
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --text-tertiary: #999999;
+
+    --border-color: #e0e0e0;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+
+    --accent-color: #4CAF50;
+    --accent-hover: #45a049;
+
+    --card-bg: #ffffff;
+    --card-hover: #f9f9f9;
+
+    --input-bg: #ffffff;
+    --input-border: #e0e0e0;
+
+    --success-color: #4CAF50;
+    --warning-color: #ff9800;
+    --error-color: #f44336;
+    --info-color: #2196F3;
+}
+
+[data-theme="dark"] {
+    /* 深色模式 */
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #3d3d3d;
+
+    --text-primary: #e0e0e0;
+    --text-secondary: #b0b0b0;
+    --text-tertiary: #808080;
+
+    --border-color: #404040;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+
+    --accent-color: #66bb6a;
+    --accent-hover: #81c784;
+
+    --card-bg: #2d2d2d;
+    --card-hover: #353535;
+
+    --input-bg: #2d2d2d;
+    --input-border: #404040;
+
+    --success-color: #66bb6a;
+    --warning-color: #ffa726;
+    --error-color: #ef5350;
+    --info-color: #42a5f5;
+}
+
+/* 主題過渡動畫 */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 主題切換按鈕 */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.theme-toggle-icon {
+    font-size: 24px;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover .theme-toggle-icon {
+    transform: rotate(20deg);
+}
+
+/* 深色模式下的特殊樣式調整 */
+[data-theme="dark"] img {
+    opacity: 0.9;
+}
+
+[data-theme="dark"] .game-card,
+[data-theme="dark"] .search-item,
+[data-theme="dark"] .stat-card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] table {
+    background-color: var(--card-bg);
+}
+
+[data-theme="dark"] th {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] tr:hover {
+    background-color: var(--card-hover);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .theme-toggle {
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+    }
+
+    .theme-toggle-icon {
+        font-size: 20px;
+    }
+}

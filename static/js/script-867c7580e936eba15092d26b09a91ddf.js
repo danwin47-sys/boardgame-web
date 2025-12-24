@@ -11,60 +11,6 @@ let currentPage = 1;
 let totalPages = 1;
 let currentFilteredGames = []; // 儲存當前篩選後的遊戲列表
 
-// 固定表格標題
-function initStickyHeader() {
-    const table = document.getElementById('gameTable');
-    const thead = table.querySelector('thead');
-    const theadClone = thead.cloneNode(true);
-
-    // 創建固定標題容器
-    const stickyHeader = document.createElement('div');
-    stickyHeader.id = 'stickyTableHeader';
-    stickyHeader.className = 'sticky-table-header';
-    stickyHeader.style.display = 'none';
-
-    const stickyTable = document.createElement('table');
-    stickyTable.appendChild(theadClone);
-    stickyHeader.appendChild(stickyTable);
-    document.body.appendChild(stickyHeader);
-
-    // 監聽滾動事件
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-        if (!ticking) {
-            window.requestAnimationFrame(() => {
-                const tableRect = table.getBoundingClientRect();
-                const tableTop = tableRect.top;
-                const tableBottom = tableRect.bottom;
-
-                // 當表格頂部滾出視窗且底部還在視窗內時，顯示固定標題
-                if (tableTop < 0 && tableBottom > 100) {
-                    stickyHeader.style.display = 'block';
-                    stickyHeader.style.left = tableRect.left + 'px';
-                    stickyHeader.style.width = tableRect.width + 'px';
-
-                    // 同步列寬 - 使用精確寬度
-                    const originalCells = thead.querySelectorAll('th');
-                    const clonedCells = theadClone.querySelectorAll('th');
-                    originalCells.forEach((cell, index) => {
-                        if (clonedCells[index]) {
-                            const width = cell.getBoundingClientRect().width;
-                            clonedCells[index].style.width = width + 'px';
-                            clonedCells[index].style.minWidth = width + 'px';
-                            clonedCells[index].style.maxWidth = width + 'px';
-                        }
-                    });
-                } else {
-                    stickyHeader.style.display = 'none';
-                }
-
-                ticking = false;
-            });
-            ticking = true;
-        }
-    });
-}
-
 // Toast 通知系統
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
@@ -76,16 +22,9 @@ function showToast(message, type = 'success') {
 // 更新統計資訊
 function updateStats() {
     document.getElementById('totalCount').textContent = allGames.length;
-
-    // 計算主遊戲數量（排除擴充）
-    const mainGames = allGames.filter(g => {
-        const isExpansion = String(g.is_expansion || '').trim();
-        return !(isExpansion === '1' || isExpansion.toLowerCase() === 'true');
-    });
-    document.getElementById('mainGameCount').textContent = mainGames.length;
-
     document.getElementById('availableCount').textContent = allGames.filter(g => g.status !== '借出').length;
     document.getElementById('borrowedCount').textContent = allGames.filter(g => g.status === '借出').length;
+    document.getElementById('unstockedCount').textContent = allGames.filter(g => g.status === '未入庫').length;
 }
 
 // 載入桌遊資料
@@ -202,13 +141,8 @@ function renderTable(games) {
         let isExp = String(game.is_expansion || '').trim().toLowerCase() === 'true' || game.is_expansion === '1';
         let parentName = String(game.parent_game || '').trim();
 
-        // 檢查資料庫是否有明確設定 is_expansion
-        const hasExplicitExpansionValue = game.is_expansion !== undefined &&
-            game.is_expansion !== null &&
-            String(game.is_expansion).trim() !== '';
-
-        // --- 智慧偵測:只在資料庫沒有明確設定時才嘗試從名稱推斷 ---
-        if (!hasExplicitExpansionValue && !isExp && !parentName) {
+        // --- 智慧偵測:如果資料庫沒寫，嘗試從名稱推斷 ---
+        if (!isExp && !parentName) {
             // 模式 1: "主遊戲名稱: 擴充名稱"
             if (game.name.includes(':')) {
                 const potentialParent = game.name.split(':')[0].trim();
@@ -219,7 +153,7 @@ function renderTable(games) {
             }
             // 模式 2: "主遊戲名稱 (擴充名稱)" 或 "主遊戲名稱 - 擴充"
             else if (game.name && (game.name.includes('(') || game.name.includes('-'))) {
-                const potentialParent = game.name.split(/[()-]/)[0].trim();
+                const potentialParent = game.name.split(/[()\-]/)[0].trim();
                 // 只有當主遊戲長度夠長且真的存在時才判定
                 if (potentialParent.length >= 2 && gameMap[potentialParent] && potentialParent !== game.name) {
                     isExp = true;
@@ -287,25 +221,18 @@ function renderTable(games) {
                     onclick="viewBGGGameDetails(${game.bgg_id}, \`${escapedName}\`)">`
             : '';
 
-        // 階層切換按鈕 - 移到獨立欄位，預設收起（不加 expanded class）
+        // 階層切換按鈕
         let toggleBtnHtml = '';
-        let treeCellContent = '';
-
-        if (isChild) {
-            // 擴充遊戲：顯示樹狀符號
-            treeCellContent = '<span class="tree-symbol">└─</span>';
-        } else if (hasChildren) {
-            // 主遊戲有擴充：顯示展開按鈕
-            toggleBtnHtml = `<span class="toggle-expansions-btn" onclick="toggleExpansionRows(event, this, '${escapedName.replace(/'/g, "\\'")}')" title="展開/收起擴充"></span>`;
+        if (hasChildren) {
+            toggleBtnHtml = `<span class="toggle-expansions-btn expanded" onclick="toggleExpansionRows(event, this, '${escapedName.replace(/'/g, "\\'")}')"></span>`;
             tr.classList.add('has-expansions');
-            treeCellContent = toggleBtnHtml;
         }
 
         tr.innerHTML = `
             ${checkboxHtml}
-            <td class="tree-cell">${treeCellContent}</td>
             <td class="game-name-cell">
                 <div class="game-name-wrapper">
+                    ${toggleBtnHtml}
                     ${thumbnailHtml}
                     ${bggIcon}
                     <span>${game.name}</span>
@@ -313,7 +240,6 @@ function renderTable(games) {
             </td>
             <td>${(() => {
                 const isExpansion = String(game.is_expansion || '').trim();
-
                 if (isExpansion === '1' || isExpansion.toLowerCase() === 'true') {
                     return '<span class="expansion-badge">🧩 擴充</span>';
                 }
@@ -333,9 +259,8 @@ function renderTable(games) {
             <td>${formatDate(game.mdate)}</td>
             <td>${game.location || ''}</td>
             <td>${game.diff || ''}</td>
-            <td>${game.players || ''}</td>
-            <td class="action-cell">
-                ${isAdmin ? `<button class="btn-edit" onclick="openEditGameModal('${escapeHtml(game.name)}')" title="編輯遊戲資訊"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg></button>` : ''}
+            <td>${game.players || ''}
+                ${isAdmin ? `<button class="btn-edit" onclick="openEditGameModal('${escapeHtml(game.name)}')">編輯</button>` : ''}
             </td>
         `;
 
@@ -441,13 +366,7 @@ function toggleExpansionRows(event, btn, parentName) {
     if (event) event.stopPropagation();
 
     const isExpanded = btn.classList.contains('expanded');
-
-    // 切換按鈕狀態
-    if (isExpanded) {
-        btn.classList.remove('expanded');
-    } else {
-        btn.classList.add('expanded');
-    }
+    btn.classList.toggle('expanded', !isExpanded);
 
     // 找到所有對應的子列
     const tbody = btn.closest('tbody');
@@ -455,11 +374,9 @@ function toggleExpansionRows(event, btn, parentName) {
 
     rows.forEach(row => {
         if (isExpanded) {
-            // 收起：移除 visible class
-            row.classList.remove('visible');
+            row.classList.add('hidden');
         } else {
-            // 展開：加上 visible class
-            row.classList.add('visible');
+            row.classList.remove('hidden');
         }
     });
 }
@@ -788,10 +705,7 @@ document.querySelectorAll('th[data-col]').forEach(th => {
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
-    loadGames().then(() => {
-        // 初始化固定標題（在表格渲染後）
-        setTimeout(() => initStickyHeader(), 100);
-    });
+    loadGames();
 
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => filterByStatus(btn.dataset.filter));

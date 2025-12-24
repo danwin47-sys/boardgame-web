@@ -9,3 +9,4 @@ python-dotenv
 pydantic
 redis>=7.0.0
 flask-caching>=2.3.0
+Flask-Static-Digest==0.4.0
