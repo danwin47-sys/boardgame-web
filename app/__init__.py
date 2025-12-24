@@ -45,6 +45,11 @@ def create_app(config_name=None):
     from .middleware.error_handlers import register_error_handlers
     register_error_handlers(app)
     
+    # 初始化請求日誌追蹤（為每個請求分配唯一ID）
+    from .middleware.request_logger import init_request_logging
+    init_request_logging(app)
+    logger.info("已啟用請求追蹤日誌")
+    
     # 註冊 Blueprints
     from .blueprints import register_blueprints
     register_blueprints(app)

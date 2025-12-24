@@ -2,9 +2,10 @@
 共用的 BoardGameManager 獲取函數
 避免在每個 Blueprint 重複相同的程式碼
 """
-from flask import current_app
+from flask import current_app, g
 from typing import Dict, Any, Tuple, Optional
 import logging
+import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -33,31 +34,78 @@ def error_response(
     message: str,
     error_code: str = "ERROR",
     status_code: int = 400,
-    details: Optional[Dict[str, Any]] = None
+    details: Optional[Dict[str, Any]] = None,
+    error_obj: Exception = None
 ) -> Tuple[Dict[str, Any], int]:
     """
-    創建標準化的錯誤回應
+    創建標準化的錯誤回應（帶詳細日誌）
     
     Args:
         message: 錯誤訊息（使用者可讀）
         error_code: 錯誤代碼（用於程式化處理）
         status_code: HTTP 狀態碼
         details: 額外的錯誤詳情（可選）
+        error_obj: 原始異常對象（用於記錄堆疊追蹤）
     
     Returns:
         Tuple[Dict, int]: (JSON 回應字典, HTTP 狀態碼)
     
     Example:
-        from app.utils import error_response
-        return error_response("找不到遊戲", "GAME_NOT_FOUND", 404)
+        try:
+            # some code
+        except Exception as e:
+            return error_response(
+                "載入資料失敗",
+                "LOAD_DATA_ERROR",
+                500,
+                error_obj=e
+            )
     """
+    request_id = getattr(g, 'request_id', 'unknown')
+    
+    # 構建詳細的日誌資訊
+    log_data = {
+        'request_id': request_id,
+        'error_code': error_code,
+        'message': message,
+        'status_code': status_code
+    }
+    
+    if details:
+        log_data['context'] = details
+    
+    # 如果有異常對象，記錄完整堆疊
+    if error_obj:
+        log_data['exception_type'] = type(error_obj).__name__
+        log_data['exception_message'] = str(error_obj)
+    
+    # 記錄錯誤（使用適當的日誌層級）
+    if status_code >= 500:
+        logger.error(
+            f"[{request_id}] {error_code}: {message}",
+            extra=log_data,
+            exc_info=error_obj is not None
+        )
+    elif status_code >= 400:
+        logger.warning(
+            f"[{request_id}] {error_code}: {message}",
+            extra=log_data
+        )
+    
+    # 返回標準錯誤回應
     response = {
         "success": False,
         "error_code": error_code,
         "message": message
     }
+    
+    # 在開發環境加入 request_id（方便除錯）
+    if current_app.debug and request_id != 'unknown':
+        response["request_id"] = request_id
+    
     if details:
         response["details"] = details
+    
     return response, status_code
 
 
