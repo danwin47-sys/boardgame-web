@@ -4,6 +4,7 @@ import time
 import gspread
 from typing import List, Dict, Any, Optional
 from gspread.utils import rowcol_to_a1
+from flask import g
 import logging
 
 from .constants import (
@@ -121,12 +122,16 @@ class SheetsClient:
         """
         讀取所有桌遊資料 (已停用快取，每次都從 Google Sheets 讀取最新資料)
         """
+        request_id = getattr(g, 'request_id', 'batch')
+        logger.info(f"[{request_id}] [sheets_client] 開始載入遊戲列表")
+        
         # 如果未連線，嘗試重新連線
         if not self.valid:
-            logger.info("SheetsClient not valid, attempting to reconnect...")
+            logger.warning(f"[{request_id}] [sheets_client] 未連線，嘗試重新連線")
             self._connect()
 
         if not self.valid:
+            logger.error(f"[{request_id}] [sheets_client] 重新連線失敗，返回空列表")
             return []
 
         # 停用快取機制 - 每次都直接從 Google Sheets 讀取最新資料
@@ -138,16 +143,6 @@ class SheetsClient:
         #     return self._games_cache
 
         try:
-            ws = self.get_games_worksheet()
-            # 使用 value_render_option='FORMATTED_VALUE' 來保持字串格式
-            # 避免 gspread 自動將 "FALSE"/"TRUE" 轉換為布林值
-            records = ws.get_all_records(value_render_option='FORMATTED_VALUE')
-            self._games_cache = records if records is not None else []
-            self._games_cache_time = time.time()
-            logger.info(f"從 Google Sheets 讀取了 {len(self._games_cache)} 筆遊戲資料")
-            return self._games_cache
-        except Exception as e:
-            logger.error(f"讀取 games 失敗: {e}")
             # 如果讀取失敗，可能是 token 過期，嘗試重連一次
             logger.info("Attempting to reconnect and retry...")
             self._connect()
