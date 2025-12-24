@@ -103,8 +103,9 @@ def error_response(
     if current_app.debug and request_id != 'unknown':
         response["request_id"] = request_id
     
+    #合併 details 到回應（保持向後相容）
     if details:
-        response["details"] = details
+        response.update(details)
     
     return response, status_code
 

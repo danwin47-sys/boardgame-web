@@ -187,4 +187,4 @@ def health_check():
 
     except Exception as e:
         logger.error(f"健康檢查失敗: {e}")
-        return error_response(str(e), "HEALTH_CHECK_ERROR", 500)
+        return error_response(str(e), "HEALTH_CHECK_ERROR", 500, details={"status": "unhealthy"})
