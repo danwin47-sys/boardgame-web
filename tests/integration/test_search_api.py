@@ -31,8 +31,9 @@ class TestGlobalSearchAPI:
         
         data = json.loads(response.data)
         assert data['success'] is False
-        assert 'error' in data
-        assert '缺少搜尋關鍵字' in data['error']
+        assert 'error_code' in data
+        assert 'message' in data
+        assert '缺少搜尋關鍵字' in data['message']
     
     def test_global_search_empty_query(self, client):
         """測試空搜尋關鍵字"""
@@ -41,7 +42,7 @@ class TestGlobalSearchAPI:
         
         data = json.loads(response.data)
         assert data['success'] is False
-        assert 'error' in data
+        assert 'error_code' in data
     
     def test_global_search_with_fuzzy_true(self, client):
         """測試啟用模糊搜尋"""
@@ -101,8 +102,8 @@ class TestSearchGamesAPI:
         
         data = json.loads(response.data)
         assert data['success'] is False
-        assert 'error' in data
-        assert '缺少搜尋關鍵字' in data['error']
+        assert 'error_code' in data
+        assert '缺少搜尋關鍵字' in data['message']
     
     def test_search_games_empty_query(self, client):
         """測試空搜尋關鍵字"""
@@ -173,8 +174,9 @@ class TestSearchMembersAPI:
         
         data = json.loads(response.data)
         assert data['success'] is False
-        assert 'error' in data
-        assert '缺少搜尋關鍵字' in data['error']
+        assert 'error_code' in data
+        assert 'message' in data
+        assert '缺少搜尋關鍵字' in data['message']
     
     def test_search_members_empty_query(self, client):
         """測試空搜尋關鍵字"""

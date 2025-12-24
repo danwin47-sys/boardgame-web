@@ -6,7 +6,7 @@ from typing import Tuple, Any, Optional, Dict
 from flask import Blueprint, jsonify, request, Response
 import logging
 
-from app.utils import get_manager
+from app.utils import get_manager, error_response
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ def get_games() -> Tuple[Response, int]:
         return jsonify(mgr.games), 200
     except Exception as e:
         logger.error(f"獲取桌遊列表失敗: {e}", exc_info=True)
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "LOAD_GAMES_ERROR", 500)
 
 
 @games_bp.route("/borrow", methods=["POST"])
@@ -60,24 +60,24 @@ def borrow_game() -> Tuple[Response, int]:
     try:
         data = request.get_json()
         if not data:
-            return jsonify({"success": False, "error": "缺少請求資料"}), 400
+            return error_response("缺少請求資料", "MISSING_REQUEST_DATA", 400)
 
         name = data.get("name")
         member_id = data.get("member_id")
 
         if not name or not member_id:
-            return jsonify({"success": False, "error": "缺少必要欄位"}), 400
+            return error_response("缺少必要欄位: name, member_id", "MISSING_REQUIRED_FIELDS", 400)
 
         mgr = get_manager()
         member = mgr.find_member_by_id(member_id)
         if not member:
-            return jsonify({"success": False, "error": "找不到社員"}), 404
+            return error_response(f"找不到社員: {member_id}", "MEMBER_NOT_FOUND", 404)
 
         success, msg = mgr.borrow_game(name, member["name"], member["id"])
         return jsonify({"message": msg, "success": success}), 200 if success else 400
     except Exception as e:
         logger.error(f"借桌遊失敗: {e}", exc_info=True)
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "BORROW_GAME_ERROR", 500)
 
 
 @games_bp.route("/return", methods=["POST"])
@@ -103,14 +103,14 @@ def return_game() -> Tuple[Response, int]:
         data = request.get_json()
         name = data.get("name")
         if not name:
-            return jsonify({"success": False, "error": "缺少桌遊名稱"}), 400
+            return error_response("缺少桌遊名稱", "MISSING_GAME_NAME", 400)
 
         mgr = get_manager()
         success, msg = mgr.return_game(name)
         return jsonify({"message": msg, "success": success}), 200 if success else 400
     except Exception as e:
         logger.error(f"歸還桌遊失敗: {e}", exc_info=True)
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "RETURN_GAME_ERROR", 500)
 
 
 # ============ 擴充管理 API ============
@@ -139,7 +139,7 @@ def get_game_expansions(game_name):
         )
     except Exception as e:
         logger.error(f"取得擴充失敗: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "GET_EXPANSIONS_ERROR", 500)
 
 
 @games_bp.route("/games/<game_name>/family", methods=["GET"])
@@ -166,7 +166,7 @@ def get_game_family(game_name):
         )
     except Exception as e:
         logger.error(f"取得遊戲家族失敗: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "GET_GAME_FAMILY_ERROR", 500)
 
 
 @games_bp.route("/games/<game_name>/validate-borrow", methods=["GET"])
@@ -194,4 +194,4 @@ def validate_game_borrow(game_name):
         )
     except Exception as e:
         logger.error(f"驗證借出失敗: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "VALIDATE_BORROW_ERROR", 500)

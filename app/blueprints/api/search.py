@@ -6,7 +6,7 @@ from typing import Tuple
 from flask import Blueprint, jsonify, request, Response
 import logging
 
-from app.utils import get_manager
+from app.utils import get_manager, error_response
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +58,7 @@ def global_search() -> Tuple[Response, int]:
     try:
         query = request.args.get("q", "").strip()
         if not query:
-            return jsonify({"success": False, "error": "缺少搜尋關鍵字"}), 400
+            return error_response("缺少搜尋關鍵字 (query)", "MISSING_QUERY_PARAMETER", 400)
 
         fuzzy = request.args.get("fuzzy", "true").lower() == "true"
 
@@ -71,7 +71,7 @@ def global_search() -> Tuple[Response, int]:
 
     except Exception as e:
         logger.error(f"全站搜尋失敗: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "GLOBAL_SEARCH_ERROR", 500)
 
 
 @search_bp.route("/games", methods=["GET"])
@@ -91,7 +91,7 @@ def search_games() -> Tuple[Response, int]:
     try:
         query = request.args.get("q", "").strip()
         if not query:
-            return jsonify({"success": False, "error": "缺少搜尋關鍵字"}), 400
+            return error_response("缺少搜尋關鍵字 (query)", "MISSING_QUERY_PARAMETER", 400)
 
         fuzzy = request.args.get("fuzzy", "true").lower() == "true"
 
@@ -107,7 +107,7 @@ def search_games() -> Tuple[Response, int]:
 
     except Exception as e:
         logger.error(f"搜尋遊戲失敗: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "SEARCH_GAMES_ERROR", 500)
 
 
 @search_bp.route("/members", methods=["GET"])
@@ -127,7 +127,7 @@ def search_members() -> Tuple[Response, int]:
     try:
         query = request.args.get("q", "").strip()
         if not query:
-            return jsonify({"success": False, "error": "缺少搜尋關鍵字"}), 400
+            return error_response("缺少搜尋關鍵字 (query)", "MISSING_QUERY_PARAMETER", 400)
 
         fuzzy = request.args.get("fuzzy", "true").lower() == "true"
 
@@ -143,4 +143,4 @@ def search_members() -> Tuple[Response, int]:
 
     except Exception as e:
         logger.error(f"搜尋會員失敗: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "SEARCH_MEMBERS_ERROR", 500)
