@@ -155,7 +155,7 @@ class SheetsClient:
                 try:
                     records = ws.get_all_records()
                     self._games_cache = records if records is not None else []
-                    self._games_cache_time = current_time
+                    self._games_cache_time = time.time()
                     return self._games_cache
                 except Exception as retry_e:
                     logger.error(f"重試讀取 games 失敗: {retry_e}")
