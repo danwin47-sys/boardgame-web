@@ -26,6 +26,7 @@ def create_app(config_name=None):
     
     # 建立 Flask 應用程式
     app = Flask(__name__, 
+                template_folder='templates',
                 static_folder='../static', 
                 static_url_path='',
                 root_path=os.path.dirname(os.path.abspath(__file__)))

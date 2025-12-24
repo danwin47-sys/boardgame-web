@@ -342,43 +342,7 @@ function renderTable(games) {
                     onclick="viewBGGGameDetails(${game.bgg_id}, \`${escapedName}\`)">`
             : '';
 
-        // 構建行內容，為手機版卡片佈局添加 data-label
-        // 注意：手機版會透過 CSS 將 table row 轉換為卡片
-        tr.innerHTML = `
-            <td class="col-checkbox mobile-hide">${checkboxHtml}</td>
-            <td class="col-tree mobile-hide-symbol">${toggleBtnHtml}${treeCellContent}</td>
-            <td class="col-thumbnail" data-label="封面">${thumbnailHtml}</td>
-            <td class="col-name" data-label="名稱">
-                <div class="game-name-wrapper">
-                    <span class="game-name">${game.name}</span>
-                    <span class="mobile-only-badges">
-                        ${isChild ? '<span class="badge badge-expansion">擴充</span>' : ''}
-                        ${hasChildren ? '<span class="badge badge-has-expansions">含擴充</span>' : ''}
-                    </span>
-                </div>
-            </td>
-            <td class="col-status ${statusClass}" data-label="狀態">${statusText}</td>
-            <td class="col-borrower" data-label="借閱人">${borrowerDisplay}</td>
-            <td class="col-players mobile-hide-low-prio" data-label="人數">${game.players || '-'}</td>
-            <td class="col-duration mobile-hide-low-prio" data-label="時間">${game.duration ? game.duration + ' 分' : '-'}</td>
-            <td class="col-difficulty mobile-hide-low-prio" data-label="難度">${game.difficulty ? parseFloat(game.difficulty).toFixed(1) : '-'}</td>
-            <td class="col-location mobile-hide-low-prio" data-label="位置">${game.location || '-'}</td>
-            <td class="col-bgg" data-label="BGG">${bggIcon}</td>
-        `;
-
-        if (isAdmin) {
-            // 管理員模式下的操作按鈕，需要適配手機
-            const adminActions = `
-                <button class="btn btn-sm btn-action" onclick="editGame1('${escapedName}')">編輯</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteGame('${escapedName}')">刪除</button>
-             `;
-            // 插入到 BGG 欄位之後或作為單獨欄位
-            // 這裡簡化處理，因為原始代碼似乎沒有在 renderGameRow 中直接包含管理員按鈕的 TD，
-            // 而是可能由 checkboxHtml 處理? 不，看原始碼 checkbox 是在最前面
-            // 檢查原始碼發現並沒有操作欄位，可能是點擊名稱或其他方式編輯?
-            // 查看 script.js 其他部分... 發現 editGame1 是全域函式
-            // 假設目前表格結構如上，我們保持原樣，僅增強現有欄位
-        }
+        // **關鍵修復**: 必須在使用前先宣告這些變數
         let toggleBtnHtml = '';
         let treeCellContent = '';
 
@@ -387,11 +351,12 @@ function renderTable(games) {
             treeCellContent = '<span class="tree-symbol">└─</span>';
         } else if (hasChildren) {
             // 主遊戲有擴充：顯示展開按鈕
-            toggleBtnHtml = `<span class="toggle-expansions-btn" onclick="toggleExpansionRows(event, this, '${escapedName.replace(/'/g, "\\'")}')" title="展開/收起擴充"></span>`;
+            toggleBtnHtml = `<span class="toggle-expansions-btn" onclick="toggleExpansionRows(event, this, '${escapedName.replace(/'/g, "\\'")}')\" title="展開/收起擴充"></span>`;
             tr.classList.add('has-expansions');
             treeCellContent = toggleBtnHtml;
         }
 
+        // 構建表格行內容
         tr.innerHTML = `
             ${checkboxHtml}
             <td class="tree-cell">${treeCellContent}</td>

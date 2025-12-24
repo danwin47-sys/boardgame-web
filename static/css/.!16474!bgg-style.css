@@ -1,0 +1,403 @@
+/* ========== BGG (BoardGameGeek) 樣式 ========== */
+
+/* BGG 搜尋區塊 */
+.bgg-section {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+}
+
+/* BGG Header with logo */
+.bgg-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.bgg-section h2 {
+    color: #2d3748;
+    font-size: 1.5em;
+    margin: 0;
+    font-weight: 700;
+}
+
+/* BGG Attribution Logo */
+.bgg-attribution {
+    display: inline-block;
+    transition: opacity 0.2s ease;
+}
+
+.bgg-attribution:hover {
+    opacity: 0.8;
+}
+
+.bgg-logo {
+    height: 40px;
+    width: auto;
+}
+
+/* BGG Notice */
+.bgg-notice {
+    margin-top: 20px;
+    padding: 12px;
+    background: #f7fafc;
+    border-left: 3px solid #667eea;
+    color: #4a5568;
+    font-size: 0.9em;
+    border-radius: 4px;
+}
+
+.bgg-notice a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.bgg-notice a:hover {
+    text-decoration: underline;
+}
+
+.bgg-section h3 {
+    color: #4a5568;
+    font-size: 1.2em;
+    margin: 20px 0 15px;
+    font-weight: 600;
+}
+
+/* BGG 搜尋容器 */
+.bgg-search-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.bgg-search-container .search {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.bgg-search-container .btn {
+    min-width: 100px;
+}
+
+.btn.primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn.primary:hover {
+    background: #5568d3;
+}
+
+.btn.small {
+    padding: 8px 16px;
+    font-size: 13px;
+}
+
+/* BGG 搜尋結果 */
+.bgg-results {
+    margin-top: 20px;
+}
+
+.bgg-results-list {
+    display: grid;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+/* BGG 遊戲卡片 */
+.bgg-game-card {
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.bgg-game-card:hover {
+    background: #edf2f7;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.bgg-game-info h4 {
+    color: #2d3748;
+    font-size: 1.1em;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.bgg-game-year {
+    color: #718096;
+    font-size: 0.9em;
+}
+
+.bgg-game-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* BGG 熱門桌遊 */
+.bgg-hot-games {
+    margin-top: 30px;
+}
+
+.bgg-hot-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.bgg-hot-card {
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.bgg-hot-card:hover {
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px);
+}
+
+.bgg-hot-rank {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #667eea;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.85em;
+}
+
+.bgg-hot-thumbnail {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.bgg-hot-info h4 {
+    color: #2d3748;
+    font-size: 1em;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.bgg-hot-info p {
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.bgg-modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 800px;
+    max-height: 90vh;
+    width: 90%;
+    overflow-y: auto;
+    position: relative;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bgg-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 2em;
+    color: #718096;
+    cursor: pointer;
+    z-index: 10;
+    line-height: 1;
+}
+
+.bgg-modal-close:hover {
+    color: #2d3748;
+}
+
+.bgg-modal-header {
+    padding: 30px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    gap: 20px;
+    align-items: start;
+}
+
+.bgg-game-image {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.bgg-modal-header h2 {
+    color: #2d3748;
+    font-size: 1.8em;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.bgg-modal-body {
+    padding: 30px;
+}
+
+.bgg-game-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.bgg-game-stats .stat {
+    background: #f7fafc;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.bgg-game-stats strong {
+    color: #4a5568;
+    font-weight: 600;
+}
+
+.bgg-game-description {
+    margin-bottom: 20px;
+}
+
+.bgg-game-description h3 {
+    color: #2d3748;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.bgg-game-description p {
+    color: #4a5568;
+    line-height: 1.6;
+}
+
+.bgg-game-categories,
+.bgg-game-mechanics {
+    margin-bottom: 15px;
+    color: #4a5568;
+    line-height: 1.6;
+}
+
+.bgg-modal-footer {
+    padding: 20px 30px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .bgg-section {
+        padding: 20px 15px;
+    }
+
+    .bgg-search-container {
+        flex-direction: column;
+    }
+
+    .bgg-hot-list {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+    }
+
+    .bgg-modal-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+
+    .bgg-modal-header {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .bgg-game-image {
+        width: 100%;
+        height: 200px;
+    }
+
+    .bgg-modal-body {
+        padding: 20px;
+    }
+
+    .bgg-game-stats {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .bgg-modal-footer {
+        padding: 15px 20px;
+        flex-direction: column;
+    }
+
+    .bgg-modal-footer .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .bgg-section h2 {
+        font-size: 1.3em;
+    }
+
+    .bgg-hot-list {
+        grid-template-columns: 1fr;
+    }
+
+    .bgg-game-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .bgg-game-actions .btn {
+        width: 100%;
+    }
+}

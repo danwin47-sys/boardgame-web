@@ -76,6 +76,36 @@ def favicon() -> Response:
     )
 
 
+@main_bp.route("/css/<path:filename>")
+def serve_css(filename) -> Response:
+    """提供 CSS 檔案
+    
+    Returns:
+        Response: CSS 文件響應
+    """
+    return send_from_directory("../static/css", filename)
+
+
+@main_bp.route("/js/<path:filename>")
+def serve_js(filename) -> Response:
+    """提供 JavaScript 檔案
+    
+    Returns:
+        Response: JS 文件響應
+    """
+    return send_from_directory("../static/js", filename)
+
+
+@main_bp.route("/images/<path:filename>")
+def serve_images(filename) -> Response:
+    """提供圖片檔案
+    
+    Returns:
+        Response: 圖片文件響應
+    """
+    return send_from_directory("../static/images", filename)
+
+
 @main_bp.route("/api/health")
 def health_check() -> Tuple[Response, int]:
     """健康檢查端點
