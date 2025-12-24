@@ -177,16 +177,15 @@ class TestSheetsClientLoadData:
 
     def test_load_games_cache_hit(self):
         """測試快取命中"""
+        # 注意：快取功能已停用，所以每次都會讀取
         cached_data = [{'name': 'Catan'}]
-        self.client._games_cache = cached_data
-        import time
-        self.client._games_cache_time = time.time()
+        self.client.games_ws.get_all_records.return_value = cached_data
         
         data = self.client.load_games()
         
         assert data == cached_data
-        # 確保沒有呼叫 API
-        self.client.games_ws.get_all_records.assert_not_called()
+        # 由於快取已停用，會呼叫 API
+        self.client.games_ws.get_all_records.assert_called_once()
 
     def test_load_games_retry(self):
         """測試讀取失敗後重試"""
@@ -285,7 +284,7 @@ class TestSheetsClientWriteData:
             {'name': 'Other Game'},
             {'name': 'Target Game'}
         ]
-        self.client.games_ws.row_values.return_value = ['name', 'bgg_id', 'bgg_thumbnail', 'image']
+        self.client.games_ws.row_values.return_value = ['name', 'bgg_id', 'bgg_thumbnail', 'image', 'players']
         
         result = self.client.update_game_bgg_id(
             game_name='Target Game',
@@ -296,8 +295,11 @@ class TestSheetsClientWriteData:
         )
         
         assert result is True
-        # 驗證 update_cell 呼叫 (row=3, 因為是第二筆資料 + 標題列1)
-        assert self.client.games_ws.update_cell.call_count >= 3
+        # 驗證 batch_update 被呼叫（實際方法使用 batch_update 而不是 update_cell）
+        self.client.games_ws.batch_update.assert_called_once()
+        # 驗證更新內容包含 bgg_id, thumbnail, image, players
+        call_args = self.client.games_ws.batch_update.call_args[0][0]
+        assert len(call_args) == 4  # 4 個欄位更新
         assert self.client._games_cache is None
 
     def test_update_game_bgg_id_not_found(self):

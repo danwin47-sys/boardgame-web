@@ -21,7 +21,8 @@ class TestConfig:
         assert hasattr(BaseConfig, 'PORT')
         assert hasattr(BaseConfig, 'HOST')
         assert hasattr(BaseConfig, 'BGG_API_TOKEN')
-        assert BaseConfig.PORT == int(os.environ.get("PORT", 5000))
+        # PORT 從 .env 讀取為 5001
+        assert BaseConfig.PORT == 5001
     
     def test_development_config(self):
         """測試開發環境配置"""

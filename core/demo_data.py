@@ -3,8 +3,8 @@
 提供 BGG API 的模擬資料，用於演示和測試
 """
 
-# 演示用遊戲清單
-DEMO_GAMES = [
+# 演示用遊戲清單（基礎列表）
+_DEMO_GAMES_LIST = [
     {
         "id": 13,
         "name": "Catan",
@@ -147,6 +147,21 @@ DEMO_GAMES = [
     },
 ]
 
+# 演示用遊戲字典（按關鍵字分類）
+DEMO_GAMES = {
+    "catan": [_DEMO_GAMES_LIST[0]],
+    "gloomhaven": [_DEMO_GAMES_LIST[1]],
+    "terraform": [_DEMO_GAMES_LIST[2]],
+    "mars": [_DEMO_GAMES_LIST[2]],
+    "scythe": [_DEMO_GAMES_LIST[3]],
+    "brass": [_DEMO_GAMES_LIST[4]],
+    "pandemic": [_DEMO_GAMES_LIST[5]],
+    "wingspan": [_DEMO_GAMES_LIST[6], _DEMO_GAMES_LIST[7]],
+    "gaia": [_DEMO_GAMES_LIST[8]],
+    "ages": [_DEMO_GAMES_LIST[9]],
+    "default": _DEMO_GAMES_LIST[:5],  # 預設返回前5個
+}
+
 # 演示用遊戲詳情
 DEMO_GAME_DETAILS = {
     13: {
@@ -255,7 +270,7 @@ DEMO_PARTY_GAMES = [
 ]
 
 # 策略遊戲演示資料
-DEMO_STRATEGY_GAMES = DEMO_GAMES[:5]
+DEMO_STRATEGY_GAMES = _DEMO_GAMES_LIST[:5]
 
 # 家庭遊戲演示資料
 DEMO_FAMILY_GAMES = [
@@ -275,4 +290,4 @@ DEMO_CHILDREN_GAMES = [
 ]
 
 # 熱門遊戲演示資料
-DEMO_HOT_GAMES = DEMO_GAMES[:10]
+DEMO_HOT_GAMES = _DEMO_GAMES_LIST[:10]

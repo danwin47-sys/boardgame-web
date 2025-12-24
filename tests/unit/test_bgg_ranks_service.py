@@ -132,20 +132,29 @@ class TestBGGRanksServiceGetStats:
     def test_get_stats(self, mock_conn):
         """測試取得統計資訊"""
         mock_cursor = MagicMock()
+        # 設定 fetchone 返回值序列
         mock_cursor.fetchone.side_effect = [
-            {'count': 100000},
-            {'count': 90000},
-            {'count': 10000},
-            {'latest': '2024-01-01'}
+            {'count': 100000},   # total_games
+            {'count': 90000},    # ranked_games  
+            {'count': 10000},    # expansions
+            {'latest': '2024-01-01'}  # last_updated
         ]
         mock_connection = MagicMock()
         mock_connection.cursor.return_value = mock_cursor
+        mock_connection.close = MagicMock()  # 添加 close 方法
         mock_conn.return_value = mock_connection
         
         service = BGGRanksService()
         stats = service.get_stats()
         
+        # 驗證返回的統計資訊
         assert 'total_games' in stats
+        assert 'ranked_games' in stats
+        assert 'expansions' in stats
+        assert 'last_updated' in stats
+        assert stats['total_games'] == 100000
+        # 驗證連接已關閉
+        mock_connection.close.assert_called_once()
     
     @patch.object(BGGRanksService, '_get_connection')
     def test_get_stats_error(self, mock_conn):
