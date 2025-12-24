@@ -8,7 +8,7 @@ from urllib.parse import unquote
 import logging
 import traceback
 
-from app.utils import get_manager
+from app.utils import get_manager, error_response
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ def search_bgg() -> Tuple[Response, int]:
     try:
         query = request.args.get("q", "").strip()
         if not query:
-            return jsonify({"success": False, "error": "缺少搜尋關鍵字"}), 400
+            return error_response("缺少搜尋關鍵字 (q)", "MISSING_QUERY_PARAMETER", 400)
 
         logger.debug(f"BGG search query: {query}")
         bgg = get_bgg_service()
@@ -69,7 +69,7 @@ def search_bgg() -> Tuple[Response, int]:
     except Exception as e:
         logger.error(f"BGG search exception: {e}")
         traceback.print_exc()
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "BGG_SEARCH_ERROR", 500)
 
 
 @bgg_bp.route("/games/<int:game_id>", methods=["GET"])
@@ -97,11 +97,11 @@ def get_bgg_game(game_id: int) -> Tuple[Response, int]:
         if game:
             return jsonify({"success": True, "game": game}), 200
         else:
-            return jsonify({"success": False, "error": "找不到遊戲"}), 404
+            return error_response("找不到遊戲", "GAME_NOT_FOUND", 404)
     except Exception as e:
         logger.error(f"Get BGG game exception: {e}")
         traceback.print_exc()
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "BGG_API_ERROR", 500)
 
 
 @bgg_bp.route("/hot", methods=["GET"])
@@ -132,7 +132,7 @@ def get_hot_games() -> Tuple[Response, int]:
     except Exception as e:
         logger.error(f"Get hot games exception: {e}")
         traceback.print_exc()
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "BGG_HOT_GAMES_ERROR", 500)
 
 
 @bgg_bp.route("/our-hot-games", methods=["GET"])
@@ -176,7 +176,7 @@ def get_our_hot_games() -> Tuple[Response, int]:
     except Exception as e:
         logger.error(f"Get our hot games exception: {e}")
         traceback.print_exc()
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "OUR_HOT_GAMES_ERROR", 500)
 
 
 @bgg_bp.route("/recommendations", methods=["GET"])
@@ -203,7 +203,7 @@ def get_recommendations() -> Tuple[Response, int]:
         source = request.args.get("source", "bgg")  # bgg or club
 
         if not category:
-            return jsonify({"success": False, "error": "缺少 category 參數"}), 400
+            return error_response("缺少 category 參數", "MISSING_CATEGORY_PARAMETER", 400)
 
         logger.debug(f"Fetching recommendations: source={source}, category={category}")
 
@@ -256,7 +256,7 @@ def get_recommendations() -> Tuple[Response, int]:
     except Exception as e:
         logger.error(f"Get recommendations exception: {e}")
         traceback.print_exc()
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "BGG_RECOMMENDATIONS_ERROR", 500)
 
 
 @bgg_bp.route("/collection", methods=["POST"])
@@ -305,7 +305,7 @@ def add_to_collection() -> Tuple[Response, int]:
         force = data.get("force", False)
 
         if not game_id:
-            return jsonify({"success": False, "error": "缺少 game_id"}), 400
+            return error_response("缺少 game_id", "MISSING_GAME_ID", 400)
 
         logger.debug(
             f"Adding BGG game to collection: {game_id}, custodian: {custodian}, force: {force}"
@@ -347,7 +347,7 @@ def add_to_collection() -> Tuple[Response, int]:
         game = bgg.get_game_details(game_id)
 
         if not game:
-            return jsonify({"success": False, "error": "找不到遊戲"}), 404
+            return error_response(f"找不到 BGG 遊戲: {game_id}", "GAME_NOT_FOUND", 404)
 
         # 準備要加入到 Google Sheets 的遊戲資料
         game_data = {
@@ -377,7 +377,7 @@ def add_to_collection() -> Tuple[Response, int]:
     except Exception as e:
         logger.error(f"Add to collection exception: {e}")
         traceback.print_exc()
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "ADD_TO_COLLECTION_ERROR", 500)
 
 
 # ============ BGG 遊戲連結 API ============
@@ -422,7 +422,7 @@ def search_for_linking(game_name: str) -> Tuple[Response, int]:
     except Exception as e:
         logger.error(f"search_for_linking exception: {e}")
         traceback.print_exc()
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "BGG_SEARCH_LINKING_ERROR", 500)
 
 
 @bgg_bp.route("/games/link/<game_name>", methods=["POST"])
@@ -456,7 +456,7 @@ def link_game(game_name: str) -> Tuple[Response, int]:
         bgg_id = data.get("bgg_id")
 
         if not bgg_id:
-            return jsonify({"success": False, "error": "缺少 bgg_id"}), 400
+            return error_response("缺少 bgg_id", "MISSING_BGG_ID", 400)
 
         # 使用共用 manager
         mgr = get_manager()
@@ -501,7 +501,7 @@ def link_game(game_name: str) -> Tuple[Response, int]:
     except Exception as e:
         logger.error(f"link_game exception: {e}")
         traceback.print_exc()
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "LINK_GAME_ERROR", 500)
 
 
 @bgg_bp.route("/games/link/<game_name>", methods=["DELETE"])
@@ -549,4 +549,4 @@ def unlink_game(game_name: str) -> Tuple[Response, int]:
     except Exception as e:
         logger.error(f"unlink_game exception: {e}")
         traceback.print_exc()
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "UNLINK_GAME_ERROR", 500)

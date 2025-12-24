@@ -37,7 +37,7 @@ class TestGameAPI:
         assert response.status_code == 400
         data = json.loads(response.data)
         assert data['success'] == False
-        assert '缺少必要欄位' in data['error']
+        assert '缺少必要欄位' in data['message']
     
     def test_return_game_missing_name(self, client):
         """測試歸還桌遊時缺少名稱"""
