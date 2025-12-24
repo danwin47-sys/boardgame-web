@@ -950,7 +950,7 @@ tbody tr:last-child td {
 }
 
 .search-filter-row .table-search-wrapper {
-    flex: 0 0 300px;
+    flex: 0 0 200px;
     margin-bottom: 0;
 }
 
@@ -970,7 +970,7 @@ tbody tr:last-child td {
     .search-filter-row {
         flex-direction: column;
     }
-    
+
     .search-filter-row .table-search-wrapper {
         flex: 1;
         width: 100%;
@@ -984,4 +984,46 @@ tbody tr:last-child td {
 
 .bgg-header {
     padding: 10px 0;
+}
+
+/* 縮小 BGG 區塊的邊距 */
+.bgg-section {
+    padding: 10px !important;
+    margin-bottom: 10px !important;
+}
+/* 進一步縮小並置中 BGG 區塊內容 */
+.bgg-section {
+    padding: 5px 10px !important;
+    margin-bottom: 5px !important;
+    text-align: center !important;
+}
+
+.bgg-header {
+    justify-content: center !important;
+}
+
+.bgg-notice-inline,
+.info-bar {
+    justify-content: center !important;
+}
+
+/* 統計卡片文字不換行 */
+.stat-label {
+    white-space: nowrap !important;
+}
+
+/* 統計卡片橫向佈局 - 數字和標籤同一行 */
+.stat-card {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.stat-value {
+    font-size: 1.5em !important;
+}
+
+.stat-label {
+    margin-top: 0 !important;
+    font-size: 0.9em !important;
 }

@@ -65,6 +65,14 @@ function createGameCard(game, isExpansion, childExpansions) {
     }
 
     const hasChildren = childExpansions && childExpansions.length > 0;
+
+    // Safe escape function
+    const escapeHtml = window.escapeHtml || function (text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    };
+
     const escapedName = escapeHtml(game.name || '');
 
     // 狀態相關
@@ -95,9 +103,9 @@ function createGameCard(game, isExpansion, childExpansions) {
     // 工號
     let displayBorrowerId = game.borrower_id || '-';
     if (!displayBorrowerId || displayBorrowerId === '-') {
-        if (game.borrower && memberNameToId) {
+        if (game.borrower && window.memberNameToId) {
             const borrowerName = String(game.borrower).trim();
-            displayBorrowerId = memberNameToId[borrowerName] || '-';
+            displayBorrowerId = window.memberNameToId[borrowerName] || '-';
         }
     }
 
@@ -146,7 +154,7 @@ function createGameCard(game, isExpansion, childExpansions) {
             </div>
             <div class="game-card-detail-row">
                 <span class="game-card-detail-label">修改日期</span>
-                <span class="game-card-detail-value">${formatDate(game.mdate)}</span>
+                <span class="game-card-detail-value">${window.formatDate ? window.formatDate(game.mdate) : (game.mdate || '-')}</span>
             </div>
         </div>
         
@@ -155,7 +163,7 @@ function createGameCard(game, isExpansion, childExpansions) {
             <span class="expand-text">顯示更多</span>
         </button>
         
-        ${isAdmin ? `
+        ${(window.isAdmin || false) ? `
         <div class="game-card-actions">
             <button class="game-card-btn game-card-btn-primary" onclick="openEditGameModal('${escapedName}')">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -200,23 +208,27 @@ window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
         // 重新渲染適當的視圖
-        if (currentFilteredGames && currentFilteredGames.length > 0) {
-            renderTable(currentFilteredGames);
+        if (window.currentFilteredGames && window.currentFilteredGames.length > 0) {
+            if (typeof window.renderTable === 'function') {
+                window.renderTable(window.currentFilteredGames);
+            }
             if (isMobileDevice()) {
-                renderMobileCards(currentFilteredGames);
+                renderMobileCards(window.currentFilteredGames);
             }
         }
     }, 250);
 });
 
 // 修改原有的 renderTable 函數，同時渲染手機版
-const originalRenderTable = renderTable;
-renderTable = function (games) {
-    // 渲染桌面版表格
-    originalRenderTable(games);
+if (typeof window.renderTable === 'function') {
+    const originalRenderTable = window.renderTable;
+    window.renderTable = function (games) {
+        // 渲染桌面版表格
+        originalRenderTable(games);
 
-    // 如果是手機裝置，也渲染卡片
-    if (isMobileDevice()) {
-        renderMobileCards(games);
-    }
-};
+        // 如果是手機裝置，也渲染卡片
+        if (isMobileDevice()) {
+            renderMobileCards(games);
+        }
+    };
+}

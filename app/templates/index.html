@@ -21,7 +21,10 @@
 <body>
     <!-- 標題和統計資訊容器 -->
     <div class="header-stats-wrapper">
-        <h1>瑞昱桌遊社 - 桌遊管理系統</h1>
+        <div
+            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 16px; border-radius: 8px; text-align: center; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h1 style="margin: 0; font-size: 1.5em; font-weight: 600;">瑞昱桌遊社 - 桌遊管理系統</h1>
+        </div>
 
         <!-- 統計資訊 -->
         <div class="stats-container">
@@ -78,9 +81,10 @@
     </div>
 
     <!-- BGG BoardGameGeek 搜尋功能 -->
-    <div class="bgg-section">
-        <div class="bgg-header">
-            <h2>功能清單</h2>
+    <div class="bgg-section" style="padding: 5px 10px !important; margin-bottom: 5px !important; text-align: center;">
+        <div class="bgg-header"
+            style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">功能清單</h2>
             <div class="bgg-buttons-inline">
                 <button id="bggSearchBtn" class="btn primary">🔍 BGG桌遊搜尋</button>
                 <button id="bggRecommendationsBtn" class="btn primary" onclick="toggleRecommendations('bgg')">🔥 BGG
