@@ -6,7 +6,7 @@ from typing import Tuple, Optional, List, Dict, Any
 from flask import Blueprint, jsonify, request, Response
 import logging
 
-from app.utils import get_manager
+from app.utils import get_manager, error_response
 
 logger = logging.getLogger(__name__)
 
@@ -309,4 +309,4 @@ def get_gallery_games() -> Tuple[Response, int]:
 
     except Exception as e:
         logger.error(f"獲取展示牆遊戲列表失敗: {e}", exc_info=True)
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "API_ERROR", 500)

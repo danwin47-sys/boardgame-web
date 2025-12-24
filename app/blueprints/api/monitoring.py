@@ -3,6 +3,7 @@
 提供 Redis 統計、快取統計和系統資訊
 """
 from flask import Blueprint, jsonify
+from app.utils import error_response
 import logging
 import sys
 import os
@@ -63,7 +64,7 @@ def get_redis_stats():
 
     except Exception as e:
         logger.error(f"獲取 Redis 統計失敗: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "MONITORING_ERROR", 500)
 
 
 @monitoring_bp.route("/cache-stats", methods=["GET"])
@@ -111,7 +112,7 @@ def get_cache_stats():
 
     except Exception as e:
         logger.error(f"獲取快取統計失敗: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "MONITORING_ERROR", 500)
 
 
 @monitoring_bp.route("/system-info", methods=["GET"])
@@ -186,4 +187,4 @@ def health_check():
 
     except Exception as e:
         logger.error(f"健康檢查失敗: {e}")
-        return jsonify({"success": False, "status": "unhealthy", "error": str(e)}), 500
+        return error_response(str(e), "HEALTH_CHECK_ERROR", 500)

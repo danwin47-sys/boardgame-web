@@ -6,7 +6,7 @@ from typing import Tuple
 from flask import Blueprint, jsonify, Response
 import logging
 
-from app.utils import get_manager
+from app.utils import get_manager, error_response
 
 logger = logging.getLogger(__name__)
 
@@ -34,4 +34,4 @@ def get_members() -> Tuple[Response, int]:
         return jsonify(members), 200
     except Exception as e:
         logger.error(f"獲取社員列表失敗: {e}", exc_info=True)
-        return jsonify({"success": False, "error": str(e)}), 500
+        return error_response(str(e), "API_ERROR", 500)
