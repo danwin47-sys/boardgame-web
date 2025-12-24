@@ -169,12 +169,13 @@ class TestGamesAPIReturnGame:
 class TestGamesAPIExpansions:
     """測試擴充相關 API"""
     
-    @patch('app.blueprints.api.games.ExpansionService')
+    @patch('core.expansion_service.ExpansionService')
     @patch('app.blueprints.api.games.get_manager')
     def test_get_expansions_success(self, mock_get_mgr, mock_exp_service_class, client):
         """測試取得擴充 - 成功"""
         mock_mgr = MagicMock()
         mock_mgr.load_data.return_value = []
+        mock_mgr.client = MagicMock()
         mock_get_mgr.return_value = mock_mgr
         
         mock_exp_service = MagicMock()
@@ -191,12 +192,13 @@ class TestGamesAPIExpansions:
         assert data['success'] is True
         assert data['count'] == 2
     
-    @patch('app.blueprints.api.games.ExpansionService')
+    @patch('core.expansion_service.ExpansionService')
     @patch('app.blueprints.api.games.get_manager')
     def test_get_family_success(self, mock_get_mgr, mock_exp_service_class, client):
         """測試取得遊戲家族 - 成功"""
         mock_mgr = MagicMock()
         mock_mgr.load_data.return_value = []
+        mock_mgr.client = MagicMock()
         mock_get_mgr.return_value = mock_mgr
         
         mock_exp_service = MagicMock()
@@ -213,12 +215,13 @@ class TestGamesAPIExpansions:
         assert data['success'] is True
         assert data['expansion_count'] == 1
     
-    @patch('app.blueprints.api.games.ExpansionService')
+    @patch('core.expansion_service.ExpansionService')
     @patch('app.blueprints.api.games.get_manager')
     def test_validate_borrow_success(self, mock_get_mgr, mock_exp_service_class, client):
         """測試驗證借出 - 成功"""
         mock_mgr = MagicMock()
         mock_mgr.load_data.return_value = []
+        mock_mgr.client = MagicMock()
         mock_get_mgr.return_value = mock_mgr
         
         mock_exp_service = MagicMock()
