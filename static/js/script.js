@@ -90,8 +90,13 @@ function updateStats() {
 
 // --- 手機版篩選面板控制 ---
 function initMobileFilterPanel() {
-    // 檢查是否為手機版且尚未初始化
-    if (window.innerWidth > 768 || document.querySelector('.filter-panel-toggle')) {
+    // 檢查是否為手機版
+    if (window.innerWidth > 768) {
+        return;
+    }
+
+    // 如果已經存在切換按鈕，不重複創建
+    if (document.querySelector('.filter-panel-toggle')) {
         return;
     }
 
