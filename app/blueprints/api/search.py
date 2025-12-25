@@ -7,6 +7,7 @@ from flask import Blueprint, jsonify, request, Response
 import logging
 
 from app.utils import get_manager, error_response
+from core.types import ResponseTuple
 
 logger = logging.getLogger(__name__)
 

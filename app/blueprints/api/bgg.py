@@ -9,6 +9,7 @@ import logging
 import traceback
 
 from app.utils import get_manager, error_response
+from core.types import ResponseTuple
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +41,7 @@ def get_bgg_service():
 
 
 @bgg_bp.route("/search", methods=["GET"])
-def search_bgg() -> Tuple[Response, int]:
+def search_bgg() -> ResponseTuple:
     """搜尋 BGG 桌遊
 
     根據關鍵字搜尋 BoardGameGeek 資料庫中的桌遊。
@@ -73,7 +74,7 @@ def search_bgg() -> Tuple[Response, int]:
 
 
 @bgg_bp.route("/games/<int:game_id>", methods=["GET"])
-def get_bgg_game(game_id: int) -> Tuple[Response, int]:
+def get_bgg_game(game_id: int) -> ResponseTuple:
     """取得 BGG 遊戲詳情
 
     根據 BGG ID 獲取遊戲的詳細資訊。
@@ -105,7 +106,7 @@ def get_bgg_game(game_id: int) -> Tuple[Response, int]:
 
 
 @bgg_bp.route("/hot", methods=["GET"])
-def get_hot_games() -> Tuple[Response, int]:
+def get_hot_games() -> ResponseTuple:
     """取得 BGG 熱門桌遊
 
     從 BoardGameGeek 獲取當前熱門的桌遊列表。
@@ -136,7 +137,7 @@ def get_hot_games() -> Tuple[Response, int]:
 
 
 @bgg_bp.route("/our-hot-games", methods=["GET"])
-def get_our_hot_games() -> Tuple[Response, int]:
+def get_our_hot_games() -> ResponseTuple:
     """取得館藏中的熱門遊戲
 
     從 BGG 熱門遊戲列表中篩選出本館藏已有的遊戲。
@@ -180,7 +181,7 @@ def get_our_hot_games() -> Tuple[Response, int]:
 
 
 @bgg_bp.route("/recommendations", methods=["GET"])
-def get_recommendations() -> Tuple[Response, int]:
+def get_recommendations() -> ResponseTuple:
     """取得推薦桌遊
 
     從 Google Sheets 讀取指定分類的推薦遊戲列表，並獲取遊戲詳細資訊。
@@ -260,7 +261,7 @@ def get_recommendations() -> Tuple[Response, int]:
 
 
 @bgg_bp.route("/collection", methods=["POST"])
-def add_to_collection() -> Tuple[Response, int]:
+def add_to_collection() -> ResponseTuple:
     """從 BGG 加入桌遊到館藏
 
     根據 BGG ID 獲取遊戲詳情並將遊戲加入到 Google Sheets 館藏中。
@@ -384,7 +385,7 @@ def add_to_collection() -> Tuple[Response, int]:
 
 
 @bgg_bp.route("/games/link/search/<game_name>", methods=["GET"])
-def search_for_linking(game_name: str) -> Tuple[Response, int]:
+def search_for_linking(game_name: str) -> ResponseTuple:
     """搜尋 BGG 遊戲（用於連結功能）
 
     根據遊戲名稱搜尋 BGG，用於將本地遊戲連結到 BGG 資料庫。
@@ -426,7 +427,7 @@ def search_for_linking(game_name: str) -> Tuple[Response, int]:
 
 
 @bgg_bp.route("/games/link/<game_name>", methods=["POST"])
-def link_game(game_name: str) -> Tuple[Response, int]:
+def link_game(game_name: str) -> ResponseTuple:
     """連結桌遊到 BGG
 
     將 Google Sheets 中的桌遊連結到 BGG 資料庫，並更新 BGG ID、縮圖等資訊。
@@ -505,7 +506,7 @@ def link_game(game_name: str) -> Tuple[Response, int]:
 
 
 @bgg_bp.route("/games/link/<game_name>", methods=["DELETE"])
-def unlink_game(game_name: str) -> Tuple[Response, int]:
+def unlink_game(game_name: str) -> ResponseTuple:
     """取消桌遊與 BGG 的連結
 
     移除 Google Sheets 中桌遊的 BGG ID 連結。

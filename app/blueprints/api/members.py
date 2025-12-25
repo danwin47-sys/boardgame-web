@@ -4,6 +4,7 @@
 """
 from typing import Tuple
 from flask import Blueprint, jsonify, Response
+from core.types import ResponseTuple
 import logging
 
 from app.utils import get_manager, error_response

@@ -4,6 +4,7 @@ Gallery API Blueprint
 """
 from typing import Tuple, Optional, List, Dict, Any
 from flask import Blueprint, jsonify, request, Response
+from core.types import ResponseTuple
 import logging
 
 from app.utils import get_manager, error_response

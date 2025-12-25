@@ -4,6 +4,7 @@
 """
 from flask import Blueprint, jsonify
 from app.utils import error_response
+from core.types import ResponseTuple
 import logging
 import sys
 import os
