@@ -142,8 +142,13 @@ class SheetsClient:
         # ):
         #     return self._games_cache
 
+        try:
+            ws = self.get_games_worksheet()
+            games = ws.get_all_records()
+            logger.info(f"[{request_id}] 成功載入 {len(games)} 筆遊戲資料")
+            return games
         except Exception as e:
-            logger.error(f"載入遊戲列表時發生錯誤: {e}")
+            logger.error(f"[{request_id}] 載入遊戲列表時發生錯誤: {e}", exc_info=True)
             return []
 
     def load_members(self) -> List[Dict[str, Any]]:
