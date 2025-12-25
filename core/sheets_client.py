@@ -142,18 +142,8 @@ class SheetsClient:
         # ):
         #     return self._games_cache
 
-        try:
-            # 如果讀取失敗，可能是 token 過期，嘗試重連一次
-            logger.info("Attempting to reconnect and retry...")
-            self._connect()
-            if self.valid:
-                try:
-                    records = ws.get_all_records()
-                    self._games_cache = records if records is not None else []
-                    self._games_cache_time = time.time()
-                    return self._games_cache
-                except Exception as retry_e:
-                    logger.error(f"重試讀取 games 失敗: {retry_e}")
+        except Exception as e:
+            logger.error(f"載入遊戲列表時發生錯誤: {e}")
             return []
 
     def load_members(self) -> List[Dict[str, Any]]:
