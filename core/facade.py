@@ -1,12 +1,11 @@
-from typing import List, Dict, Any, Optional, TYPE_CHECKING
+from typing import List, Dict, Any, Optional
 
 from core.sheets_client import SheetsClient
 from core.game_service import GameService
 from core.member_service import MemberService
 from core.utils import get_current_timestamp
 
-if TYPE_CHECKING:
-    from core.types import GameList, MemberList, GameDict, MemberDict
+from core.types import GameList, MemberList, MemberDict
 
 
 class BoardGameManager:
