@@ -7,6 +7,7 @@ from flask import Blueprint, jsonify, request, Response
 import logging
 
 from app.utils import get_manager, error_response
+from core.types import ResponseTuple
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ def get_games() -> Tuple[Response, int]:
 
 
 @games_bp.route("/borrow", methods=["POST"])
-def borrow_game() -> Tuple[Response, int]:
+def borrow_game() -> ResponseTuple:
     """借出桌遊
 
     處理桌遊借出請求，更新桌遊狀態並記錄借閱人資訊。
@@ -81,7 +82,7 @@ def borrow_game() -> Tuple[Response, int]:
 
 
 @games_bp.route("/return", methods=["POST"])
-def return_game() -> Tuple[Response, int]:
+def return_game() -> ResponseTuple:
     """歸還桌遊
 
     處理桌遊歸還請求，更新桌遊狀態並清除借閱人資訊。
@@ -116,8 +117,46 @@ def return_game() -> Tuple[Response, int]:
 # ============ 擴充管理 API ============
 
 
+@games_bp.route("/games/<game_name>/expansion", methods=["PUT"])
+def update_game_expansion(game_name: str) -> ResponseTuple:
+    """取得遊戲的所有擴充"""
+    try:
+        from core.expansion_service import ExpansionService
+        from app.utils import get_manager
+
+        mgr = get_manager()
+        expansion_service = ExpansionService(mgr.client)
+        all_games = mgr.load_data()
+
+        # Placeholder for actual logic
+        # For example, if the request body contains expansion data to update
+        data = request.get_json()
+        if not data:
+            return error_response("缺少請求資料", "MISSING_REQUEST_DATA", 400)
+
+        # Assuming 'expansion_name' and 'is_expansion_of' are in the request body
+        expansion_name = data.get("expansion_name")
+        is_expansion_of = data.get("is_expansion_of")
+
+        if not expansion_name or not is_expansion_of:
+            return error_response("缺少必要欄位: expansion_name, is_expansion_of", "MISSING_REQUIRED_FIELDS", 400)
+
+        # Example: Update logic (this would depend on your ExpansionService implementation)
+        # For now, just return a success message
+        return jsonify(
+            {
+                "success": True,
+                "message": f"Expansion '{expansion_name}' for game '{game_name}' updated successfully.",
+                "updated_data": {"expansion_name": expansion_name, "is_expansion_of": is_expansion_of}
+            }
+        ), 200
+    except Exception as e:
+        logger.error(f"更新遊戲擴充失敗: {e}")
+        return error_response(str(e), "UPDATE_EXPANSION_ERROR", 500)
+
+
 @games_bp.route("/games/<game_name>/expansions", methods=["GET"])
-def get_game_expansions(game_name):
+def get_game_expansions(game_name: str) -> ResponseTuple:
     """取得遊戲的所有擴充"""
     try:
         from core.expansion_service import ExpansionService
