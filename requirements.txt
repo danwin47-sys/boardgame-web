@@ -1,5 +1,6 @@
 flask==3.0.3
 flask-cors==5.0.0
+flask-login==0.6.3
 gunicorn
 gspread
 oauth2client
@@ -10,3 +11,5 @@ pydantic
 redis>=7.0.0
 flask-caching>=2.3.0
 Flask-Static-Digest==0.4.0
+PyJWT==2.8.0
+
