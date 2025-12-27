@@ -2,6 +2,10 @@
 新增 update_game_playtime 方法到 SheetsClient
 用於將 BGG 遊戲時間寫回 Google Sheets
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def update_game_playtime(self, game_name: str, min_playtime: int, max_playtime: int) -> bool:
     """更新遊戲的遊玩時間到 Google Sheets
