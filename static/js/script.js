@@ -204,7 +204,7 @@ function renderTable(games) {
     const tbody = document.querySelector('#gameTable tbody');
     tbody.innerHTML = '';
 
-    const isAdmin = document.body.classList.contains('admin-page');
+    const isAdmin = typeof IS_ADMIN !== 'undefined' ? IS_ADMIN : false;
     const fragment = document.createDocumentFragment();
 
     // 儲存當前篩選後的遊戲列表（用於分頁）
@@ -867,115 +867,143 @@ document.addEventListener('DOMContentLoaded', () => {
         clearBtn.addEventListener('click', clearFilters);
     }
 
-    // Admin 頁面功能
-    if (document.body.classList.contains('admin-page')) {
-        // 監聽 Checkbox 變更 (限制最多選5個)
-        const gameTable = document.getElementById('gameTable');
-        if (gameTable) {
-            gameTable.addEventListener('change', (e) => {
-                if (e.target.classList.contains('game-checkbox')) {
-                    const checkedCount = document.querySelectorAll('.game-checkbox:checked').length;
-                    if (checkedCount > 5) {
-                        e.target.checked = false;
-                        showToast('單筆資料最多只能選5個', 'error');
-                    }
+    // Admin 頁面功能 - 批次借出/歸還
+    // 注意：不再檢查 admin-page class，因為 index.html 繼承的 base.html 沒有此 class
+    // 改為直接檢查按鈕是否存在來判斷是否為管理員模式
 
-                    // 更新全選按鈕狀態
-                    const allCheckboxes = document.querySelectorAll('.game-checkbox');
-                    const selectAll = document.getElementById('selectAll');
-                    if (selectAll) {
-                        selectAll.checked = allCheckboxes.length > 0 && checkedCount === allCheckboxes.length;
+    // 監聽 Checkbox 變更 (限制最多選5個)
+    const gameTable = document.getElementById('gameTable');
+    if (gameTable) {
+        gameTable.addEventListener('change', (e) => {
+            if (e.target.classList.contains('game-checkbox')) {
+                const checkedCount = document.querySelectorAll('.game-checkbox:checked').length;
+                if (checkedCount > 5) {
+                    e.target.checked = false;
+                    showToast('單筆資料最多只能選5個', 'error');
+                }
+
+                // 更新全選按鈕狀態
+                const allCheckboxes = document.querySelectorAll('.game-checkbox');
+                const selectAll = document.getElementById('selectAll');
+                if (selectAll) {
+                    selectAll.checked = allCheckboxes.length > 0 && checkedCount === allCheckboxes.length;
+                }
+            }
+        });
+    }
+
+    // 全選功能 (最多選5個)
+    const selectAll = document.getElementById('selectAll');
+    if (selectAll) {
+        selectAll.addEventListener('click', (e) => {
+            const checkboxes = document.querySelectorAll('.game-checkbox');
+            const isChecked = e.target.checked;
+
+            if (isChecked) {
+                let count = 0;
+                checkboxes.forEach(cb => {
+                    if (count < 5) {
+                        cb.checked = true;
+                        count++;
+                    } else {
+                        cb.checked = false;
+                    }
+                });
+
+                if (checkboxes.length > 5) {
+                    showToast('已自動選取前5筆 (單筆上限5個)', 'warning');
+                }
+            } else {
+                checkboxes.forEach(cb => cb.checked = false);
+            }
+        });
+    }
+
+    // 批次借出
+    const batchBorrowBtn = document.getElementById('batchBorrowBtn');
+    if (batchBorrowBtn) {
+        batchBorrowBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const selected = Array.from(document.querySelectorAll('.game-checkbox:checked')).map(cb => cb.value);
+            if (selected.length === 0) return showToast('請選擇桌遊', 'error');
+
+            const memberId = prompt(`將借出 ${selected.length} 款桌遊，請輸入工號：`);
+            if (!memberId) return;
+
+            fetch('/api/batch-borrow', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    game_names: selected,
+                    member_id: memberId
+                })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('批次借出成功');
+                        loadGames();
+                        if (selectAll) selectAll.checked = false;
+                    } else {
+                        showToast(data.message || data.error, 'error');
+                    }
+                });
+        });
+    }
+
+    // 批次歸還
+    const batchReturnBtn = document.getElementById('batchReturnBtn');
+    if (batchReturnBtn) {
+        batchReturnBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const selectedCheckboxes = document.querySelectorAll('.game-checkbox:checked');
+            if (selectedCheckboxes.length === 0) return showToast('請選擇桌遊', 'error');
+
+            // 檢查所選遊戲的狀態
+            const selected = [];
+            const notBorrowed = [];
+
+            selectedCheckboxes.forEach(cb => {
+                const gameName = cb.value;
+                // 找到對應的遊戲資料
+                const game = allGames.find(g => g.name === gameName);
+                if (game) {
+                    if (game.status === '借出') {
+                        selected.push(gameName);
+                    } else {
+                        notBorrowed.push(gameName);
                     }
                 }
             });
-        }
 
-        // 全選功能 (最多選5個)
-        const selectAll = document.getElementById('selectAll');
-        if (selectAll) {
-            selectAll.addEventListener('click', (e) => {
-                const checkboxes = document.querySelectorAll('.game-checkbox');
-                const isChecked = e.target.checked;
+            if (notBorrowed.length > 0) {
+                showToast(`以下遊戲未被借出，無法歸還：${notBorrowed.join(', ')}`, 'error');
+                return;
+            }
 
-                if (isChecked) {
-                    let count = 0;
-                    checkboxes.forEach(cb => {
-                        if (count < 5) {
-                            cb.checked = true;
-                            count++;
-                        } else {
-                            cb.checked = false;
-                        }
-                    });
+            if (selected.length === 0) {
+                showToast('沒有可歸還的遊戲（所選遊戲均未被借出）', 'error');
+                return;
+            }
 
-                    if (checkboxes.length > 5) {
-                        showToast('已自動選取前5筆 (單筆上限5個)', 'warning');
-                    }
-                } else {
-                    checkboxes.forEach(cb => cb.checked = false);
-                }
-            });
-        }
-
-        // 批次借出
-        const batchBorrowBtn = document.getElementById('batchBorrowBtn');
-        if (batchBorrowBtn) {
-            batchBorrowBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const selected = Array.from(document.querySelectorAll('.game-checkbox:checked')).map(cb => cb.value);
-                if (selected.length === 0) return showToast('請選擇桌遊', 'error');
-
-                const memberId = prompt(`將借出 ${selected.length} 款桌遊，請輸入工號：`);
-                if (!memberId) return;
-
-                fetch('/api/batch-borrow', {
+            if (confirm(`確定要歸還 ${selected.length} 款桌遊？`)) {
+                fetch('/api/batch-return', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        game_names: selected,
-                        member_id: memberId
-                    })
+                    body: JSON.stringify({ game_names: selected })
                 })
                     .then(r => r.json())
                     .then(data => {
                         if (data.success) {
-                            showToast('批次借出成功');
+                            showToast('批次歸還成功');
                             loadGames();
                             if (selectAll) selectAll.checked = false;
                         } else {
                             showToast(data.message || data.error, 'error');
                         }
                     });
-            });
-        }
-
-        // 批次歸還
-        const batchReturnBtn = document.getElementById('batchReturnBtn');
-        if (batchReturnBtn) {
-            batchReturnBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const selected = Array.from(document.querySelectorAll('.game-checkbox:checked')).map(cb => cb.value);
-                if (selected.length === 0) return showToast('請選擇桌遊', 'error');
-
-                if (confirm(`確定要歸還 ${selected.length} 款桌遊？`)) {
-                    fetch('/api/batch-return', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ game_names: selected })
-                    })
-                        .then(r => r.json())
-                        .then(data => {
-                            if (data.success) {
-                                showToast('批次歸還成功');
-                                loadGames();
-                                if (selectAll) selectAll.checked = false;
-                            } else {
-                                showToast(data.message || data.error, 'error');
-                            }
-                        });
-                }
-            });
-        }
+            }
+        });
     }
 
     // 定期更新 (30分鐘)

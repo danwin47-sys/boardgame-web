@@ -53,6 +53,34 @@ def create_app(config_name=None):
     from .blueprints import register_blueprints
     register_blueprints(app)
 
+    # 註冊 Auth Blueprint
+    from .blueprints.auth.routes import auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/auth')
+    logger.info("已註冊 auth blueprint")
+
+    # 初始化 Flask-Login
+    from flask_login import LoginManager
+    from core.user_model import User
+    
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = 'auth.login'
+    login_manager.login_message = '請先登入以存取此頁面'
+    login_manager.login_message_category = 'warning'
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.get(user_id)
+
+    # 增強 Cookie 安全性
+    app.config.update(
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax',
+        # 生產環境才啟用 Secure，避免本地開發 (HTTP) 出問題
+        SESSION_COOKIE_SECURE=config_name == 'production'
+    )
+    logger.info("Flask-Login 已初始化，Cookie 安全性已增強")
+
     # 初始化 BoardGameManager（全域共享）
     with app.app_context():
         from core.facade import BoardGameManager

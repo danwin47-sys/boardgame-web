@@ -8,7 +8,12 @@ import os
 import secrets
 import logging
 
+
+
 from app.utils import get_manager
+from flask_login import current_user
+
+logger = logging.getLogger(__name__)
 
 logger = logging.getLogger(__name__)
 
@@ -109,6 +114,12 @@ def admin_verify() -> Tuple[Response, int]:
         if not admin_password:
             logger.error("ADMIN_PASSWORD 環境變數未設定")
             return jsonify({"success": False, "error": "伺服器設定錯誤"}), 500
+
+        # 1. 自動管理員權限檢查 (透過 LINE Login + 職稱)
+        if hasattr(current_user, 'is_authenticated') and current_user.is_authenticated:
+            if getattr(current_user, 'is_admin', False):
+                logger.info(f"管理員自動驗證成功 (User: {current_user.name}, Title: {getattr(current_user, 'title', '')})")
+                return jsonify({"success": True, "method": "auto"}), 200
 
         if password == admin_password:
             logger.info("管理員驗證成功")

@@ -13,12 +13,8 @@ MILLISECONDS_PER_SECOND = 1000
 DATETIME_FORMAT = "%Y-%m-%d %H:%M"
 
 # === 桌遊狀態（狀態值，非動作）===
-GAME_STATUS_AVAILABLE = "可用"  # 桌遊可借用
-GAME_STATUS_BORROWED = "已借出"  # 桌遊已被借走
-
-# 向後相容的舊值（Google Sheets 中仍使用這些值）
-GAME_STATUS_AVAILABLE_LEGACY = "歸還"
-GAME_STATUS_BORROWED_LEGACY = "借出"
+GAME_STATUS_AVAILABLE = "在庫"  # 桌遊可借用
+GAME_STATUS_BORROWED = "借出"  # 桌遊已被借走
 
 # === Google Sheets 工作表名稱 ===
 WORKSHEET_GAMES = "games"

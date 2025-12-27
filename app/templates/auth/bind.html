@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}綁定工號 - Boardgame-Web{% endblock %}
+
+{% block content %}
+<style>
+    .bind-page-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at top right, #f3f4f6 0%, #e5e7eb 100%);
+        padding: 20px;
+    }
+
+    .bind-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 10px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        overflow: hidden;
+        width: 100%;
+        max-width: 450px;
+        transition: transform 0.3s ease;
+    }
+
+    .bind-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .profile-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px 20px;
+        text-align: center;
+        color: white;
+        position: relative;
+    }
+
+    .profile-avatar-container {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 15px;
+    }
+
+    .profile-avatar {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        object-fit: cover;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .line-badge {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: #06c755;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid white;
+        color: white;
+        font-size: 16px;
+    }
+
+    .form-section {
+        padding: 40px 30px;
+    }
+
+    .custom-input {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 15px 20px;
+        font-size: 1.1rem;
+        transition: all 0.2s ease;
+        text-align: center;
+        letter-spacing: 1px;
+    }
+
+    .custom-input:focus {
+        background: white;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    .btn-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 15px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25);
+    }
+
+    .btn-gradient:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 12px rgba(102, 126, 234, 0.3);
+        filter: brightness(1.1);
+    }
+
+    .btn-gradient:active {
+        transform: translateY(1px);
+    }
+
+    .helper-links {
+        margin-top: 25px;
+        text-align: center;
+        font-size: 0.9rem;
+        color: #718096;
+    }
+
+    .helper-links a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+
+    .helper-links a:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+</style>
+
+<div class="bind-page-container">
+    <div class="bind-card">
+        <!-- 上半部：個人資料與歡迎詞 -->
+        <div class="profile-section">
+            <div class="profile-avatar-container">
+                {% if profile.picture %}
+                <img src="{{ profile.picture }}" alt="LINE Profile" class="profile-avatar">
+                {% else %}
+                <div class="profile-avatar"
+                    style="background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-person-fill" style="font-size: 40px; color: white;"></i>
+                </div>
+                {% endif %}
+                <div class="line-badge">
+                    <i class="bi bi-line"></i>
+                </div>
+            </div>
+            <h2 style="font-weight: 700; margin-bottom: 5px; font-size: 1.5rem;">{{ profile.name }}</h2>
+            <p style="opacity: 0.8; margin: 0; font-size: 0.95rem;">歡迎加入瑞昱桌遊社！</p>
+        </div>
+
+        <!-- 下半部：表單 -->
+        <div class="form-section">
+            <form method="POST" action="{{ url_for('auth.bind') }}">
+                <div class="mb-4">
+                    <label for="student_id" class="form-label text-muted fw-bold mb-3 d-block text-center">
+                        <i class="bi bi-card-heading me-1"></i> 請驗證您的身分
+                    </label>
+                    <input type="text" class="form-control form-control-lg custom-input" id="student_id"
+                        name="student_id" required autofocus placeholder="請輸入您的工號 / 學號">
+                    <div class="text-center mt-2">
+                        <small class="text-muted" style="font-size: 0.8rem;">
+                            <i class="bi bi-info-circle"></i> 此工號必須存在於目前的社員名單中
+                        </small>
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-gradient">
+                        確認綁定 <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                </div>
+
+                <div class="helper-links">
+                    這不是您的帳號嗎？
+                    <a href="{{ url_for('auth.logout') }}">
+                        重新登入
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

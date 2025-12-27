@@ -191,6 +191,77 @@ class SheetsClient:
                     logger.error(f"重試讀取 members 失敗: {retry_e}")
             return []
 
+    def get_user_by_line_id(self, line_user_id: str) -> Optional[Dict[str, Any]]:
+        """透過 LINE User ID 查找使用者"""
+        if not line_user_id:
+            return None
+            
+        members = self.load_members()
+        for member in members:
+            # 兼容舊資料，如果沒有 line_user_id 欄位則略過
+            if str(member.get("line_user_id", "")) == str(line_user_id):
+                return member
+        return None
+
+    def get_user_by_student_id(self, student_id: str) -> Optional[Dict[str, Any]]:
+        """透過學號/工號查找使用者"""
+        if not student_id:
+            return None
+            
+        members = self.load_members()
+        for member in members:
+            # 支援 'id' 或 'student_id' 欄位名稱
+            mem_id = str(member.get("id", member.get("student_id", "")))
+            if mem_id == str(student_id):
+                return member
+        return None
+        
+    def bind_user_to_line_id(self, student_id: str, line_user_id: str) -> bool:
+        """
+        將 LINE User ID 綁定到指定學號
+        """
+        logger.info(f"[AUTH] Binding student {student_id} to LINE {line_user_id}")
+        if not self.valid:
+            return False
+
+        try:
+            ws = self.get_members_worksheet()
+            all_records = ws.get_all_records()
+            
+            # 找到對應的社員
+            for idx, member in enumerate(all_records):
+                mem_id = str(member.get("id", member.get("student_id", "")))
+                
+                if mem_id == str(student_id):
+                    headers = ws.row_values(1)
+                    
+                    # 檢查並創建 line_user_id 欄位
+                    if "line_user_id" not in headers:
+                        col_idx = len(headers)
+                        ws.update_cell(1, col_idx + 1, "line_user_id")
+                        headers.append("line_user_id")
+                        logger.info("已新增 line_user_id 欄位到 Google Sheets")
+                    
+                    col_idx = headers.index("line_user_id")
+                    
+                    # 更新資料
+                    row_num = idx + 2
+                    ws.update_cell(row_num, col_idx + 1, line_user_id)
+                    
+                    # 使快取失效
+                    self._members_cache = None
+                    self._members_cache_time = 0
+                    
+                    logger.info(f"成功綁定：{student_id} -> {line_user_id}")
+                    return True
+            
+            logger.warning(f"找不到工號: {student_id}")
+            return False
+
+        except Exception as e:
+            logger.error(f"綁定失敗: {e}", exc_info=True)
+            return False
+
     def invalidate_games_cache(self):
         """強制使 games 快取失效 (通常在更新後呼叫)"""
         self._games_cache = None

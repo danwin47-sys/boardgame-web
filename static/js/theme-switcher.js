@@ -60,20 +60,22 @@ class ThemeSwitcher {
 
     /**
      * 創建切換按鈕
+     * 已停用：深色模式按鈕已整合至功能列表
      */
     createToggleButton() {
-        const button = document.createElement('button');
-        button.className = 'theme-toggle';
-        button.setAttribute('aria-label', 'Toggle theme');
-        button.innerHTML = '<span class="theme-toggle-icon">🌙</span>';
-
-        button.addEventListener('click', () => this.toggleTheme());
-
-        document.body.appendChild(button);
-        this.toggleButton = button;
-
-        // 初始化圖示
-        this.updateToggleIcon();
+        // 不再創建浮動按鈕，改用功能列表中的按鈕
+        // const button = document.createElement('button');
+        // button.className = 'theme-toggle';
+        // button.setAttribute('aria-label', 'Toggle theme');
+        // button.innerHTML = '<span class="theme-toggle-icon">🌙</span>';
+        // 
+        // button.addEventListener('click', () => this.toggleTheme());
+        // 
+        // document.body.appendChild(button);
+        // this.toggleButton = button;
+        // 
+        // // 初始化圖示
+        // this.updateToggleIcon();
     }
 
     /**

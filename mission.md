@@ -1,29 +1,29 @@
-# Agent Mission
+# Agent 任務
 
-**Objective:** Build and maintain a comprehensive boardgame management system.
+**目標：** 建立並維護一個全方位的桌遊管理系統。
 
-## Description
+## 描述
 
-This system should provide:
+此系統應提供：
 
-1. **Inventory Management**: Track boardgame collection with borrowing/returning functionality.
-2. **BGG Integration**: Link games to BoardGameGeek for rich metadata (images, ratings, player counts).
-3. **Member Management**: Track members, their borrowing history, and achievements.
-4. **Gallery Wall**: Visual display of the game collection with filtering capabilities.
-5. **Admin Features**: Secure backend for batch operations and system monitoring.
+1. **庫存管理**：追蹤桌遊收藏，包含借出/歸還功能。
+2. **BGG 整合**：連結遊戲至 BoardGameGeek 以取得豐富的元數據（圖片、評分、玩家人數）。
+3. **會員管理**：追蹤會員、借閱歷史和成就。
+4. **展示牆**：視覺化展示遊戲收藏，具備篩選功能。
+5. **管理功能**：安全的後台介面，用於批次操作和系統監控。
 
-## Success Criteria
+## 成功標準
 
-- The system reliably syncs with Google Sheets.
-- BGG data is accurately retrieved and cached.
-- The UI is responsive and user-friendly.
-- All operations are logged for accountability.
-- Test coverage maintains 80%+ for critical paths.
+- 系統可靠地與 Google Sheets 同步。
+- BGG 數據準確獲取並快取。
+- UI 響應式且使用者友善。
+- 所有操作皆有日誌記錄以確保問責性。
+- 關鍵路徑的測試覆蓋率維持在 80% 以上。
 
-## Technology Stack
+## 技術堆疊
 
-- **Backend**: Flask + Python 3.8+
-- **Database**: Google Sheets (via gspread)
-- **External APIs**: BoardGameGeek XML API
-- **Frontend**: Vanilla HTML/CSS/JS
-- **Testing**: pytest
+- **後端**：Flask + Python 3.8+
+- **資料庫**：Google Sheets（透過 gspread）
+- **外部 API**：BoardGameGeek XML API
+- **前端**：原生 HTML/CSS/JS
+- **測試**：pytest
