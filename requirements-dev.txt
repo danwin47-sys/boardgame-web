@@ -17,3 +17,4 @@ mypy==1.7.1
 
 # 其他工具
 ipython==8.18.1
+pytest-xdist==3.8.0
