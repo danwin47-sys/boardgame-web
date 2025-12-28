@@ -46,6 +46,37 @@ class TestSimpleCache:
         # 未設定時應無效
         assert cache.is_valid() == False
         
-        # 設定後應有效
         cache.set('test_value')
         assert cache.is_valid() == True
+
+
+def test_cache_with_timeout_decorator():
+    """測試 cache_with_timeout 裝飾器"""
+    from core.cache import cache_with_timeout
+    
+    call_count = 0
+    
+    @cache_with_timeout(60)
+    def cached_func(x):
+        nonlocal call_count
+        call_count += 1
+        return x * 2
+        
+    # 第一次執行
+    assert cached_func(5) == 10
+    assert call_count == 1
+    
+    # 第二次執行（應命中快取）
+    assert cached_func(5) == 10
+    assert call_count == 1
+
+
+def test_get_redis_cache_logic():
+    """測試獲取 Redis 快取的邏輯"""
+    from core.cache import get_redis_cache, SimpleCache
+    from core.redis_cache import RedisCache
+    
+    # 這裡我們主要驗證是否能正常呼叫且不拋出未捕獲異常
+    cache = get_redis_cache()
+    # 在測試環境中可能會回傳 SimpleCache (Fallback) 或 RedisCache
+    assert isinstance(cache, (SimpleCache, RedisCache))

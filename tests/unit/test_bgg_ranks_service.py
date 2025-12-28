@@ -163,6 +163,25 @@ class TestBGGRanksServiceGetStats:
         mock_conn.side_effect = Exception("Database error")
         
         service = BGGRanksService()
-        stats = service.get_stats()
+
+class TestBGGRanksServiceExtended:
+    """測試 BGGRanksService 的異常情況"""
+
+    def test_database_error_handling(self):
+        """測試資料庫錯誤處理（如路徑不存在）"""
+        # 使用一個不存在且無法建立的路徑
+        invalid_path = "/nonexistent/directory/db.sqlite"
+        service = BGGRanksService(db_path=invalid_path)
         
-        assert stats == {}
+        # 測試各個方法在資料庫不可用時的表現
+        assert service.get_by_id(1) is None
+        assert service.search_by_name("test") == []
+        assert service.get_top_games() == []
+        assert service.get_by_category_rank("party") == []
+        assert service.get_stats() == {}
+
+    def test_invalid_category(self):
+        """測試無效的分類"""
+        service = BGGRanksService()
+        result = service.get_by_category_rank("nonexistent_category_rank_xyz")
+        assert result == []

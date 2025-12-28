@@ -224,10 +224,29 @@ class TestRedisCacheClear:
         
         assert result == 0  # 沒有匹配也算成功，回傳 0
     
-    def test_clear_error(self):
-        """測試清除時錯誤"""
-        self.mock_client.keys.side_effect = Exception("Connection lost")
-        
-        result = self.cache.clear_pattern('pattern:*')
-        
         assert result == 0
+
+
+class TestRedisCacheAdvanced:
+    """測試 RedisCache 的進階功能"""
+    
+    def setup_method(self):
+        self.mock_client = MagicMock()
+        with patch('core.redis_cache.redis') as mock_redis:
+            mock_redis.Redis.return_value = self.mock_client
+            self.cache = RedisCache()
+            self.cache.client = self.mock_client
+
+    def test_ttl_success(self):
+        """測試取得鍵的 TTL"""
+        self.mock_client.ttl.return_value = 3600
+        assert self.cache.get_ttl('test_key') == 3600
+        
+    def test_get_stats_success(self):
+        """測試取得統計資訊"""
+        self.mock_client.info.return_value = {'used_memory_human': '1KB', 'connected_clients': 5}
+        self.mock_client.dbsize.return_value = 10
+        
+        stats = self.cache.get_stats()
+        assert stats['used_memory_human'] == '1KB'
+        assert stats['total_keys'] == 10

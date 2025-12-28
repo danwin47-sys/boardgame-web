@@ -148,7 +148,20 @@ class SheetsClient:
             logger.info(f"[{request_id}] 成功載入 {len(games)} 筆遊戲資料")
             return games
         except Exception as e:
-            logger.error(f"[{request_id}] 載入遊戲列表時發生錯誤: {e}", exc_info=True)
+            logger.error(f"[{request_id}] 載入遊戲列表時發生錯誤: {e}")
+            # 如果讀取失敗，可能是 token 過期，嘗試重連一次
+            logger.info(f"[{request_id}] Attempting to reconnect and retry...")
+            self._connect()
+            if self.valid:
+                try:
+                    # 重連後重新取得工作表並讀取
+                    self.games_ws = None # 重置工作表物件快取
+                    ws = self.get_games_worksheet()
+                    games = ws.get_all_records()
+                    logger.info(f"[{request_id}] 重試成功載入 {len(games)} 筆遊戲資料")
+                    return games
+                except Exception as retry_e:
+                    logger.error(f"[{request_id}] 重試載入遊戲列表失敗: {retry_e}")
             return []
 
     def load_members(self) -> List[Dict[str, Any]]:

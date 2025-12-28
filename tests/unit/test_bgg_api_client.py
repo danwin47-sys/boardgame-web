@@ -234,3 +234,80 @@ class TestMakeRequest:
         result = client._make_request('test')
         
         assert result is None
+
+
+class TestBGGApiClientExtended:
+    """測試 BGGApiClient 的擴展細節功能"""
+
+    def setup_method(self):
+        self.client = BGGApiClient(api_token="test-token")
+
+    @patch('requests.Session.get')
+    def test_game_full_details(self, mock_get):
+        """測試獲取完整的遊戲細節並解析 XML"""
+        xml_content = """
+        <items>
+            <item type="boardgame" id="123">
+                <name type="primary" value="Catan"/>
+                <yearpublished value="1995"/>
+                <description>Classic game</description>
+                <image>http://image.jpg</image>
+                <thumbnail>http://thumb.jpg</thumbnail>
+                <minplayers value="3"/>
+                <maxplayers value="4"/>
+                <playingtime value="90"/>
+                <minplaytime value="60"/>
+                <maxplaytime value="120"/>
+                <minage value="10"/>
+                <statistics page="1">
+                    <ratings>
+                        <usersrated value="100000"/>
+                        <average value="7.1"/>
+                        <bayesaverage value="6.9"/>
+                        <ranks>
+                            <rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="150" bayesaverage="6.9"/>
+                        </ranks>
+                    </ratings>
+                </statistics>
+                <link type="boardgamecategory" id="1021" value="Economic"/>
+                <link type="boardgamemechanic" id="2007" value="Trading"/>
+                <link type="boardgameexpansion" id="456" value="Catan: Seafarers" inbound="true"/>
+            </item>
+        </items>
+        """
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.content = xml_content.encode('utf-8')
+        mock_get.return_value = mock_response
+
+        details = self.client.game(123)
+        
+        assert details['id'] == 123
+        assert details['name'] == "Catan"
+        assert details['is_expansion'] is True
+        assert details['rating_average'] == 7.1
+        assert details['rank'] == 150
+        assert "Economic" in details['categories']
+
+    @patch('requests.Session.get')
+    def test_hot_items_extended(self, mock_get):
+        """測試獲取熱門項目的進階解析"""
+        xml_content = """
+        <items>
+            <item rank="1" id="123">
+                <name value="Gloomhaven"/>
+                <yearpublished value="2017"/>
+                <thumbnail value="http://thumb.jpg"/>
+            </item>
+        </items>
+        """
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.content = xml_content.encode('utf-8')
+        mock_get.return_value = mock_response
+
+        hot = self.client.hot_items()
+        
+        assert len(hot) == 1
+        assert hot[0]['name'] == "Gloomhaven"
+        assert hot[0]['rank'] == 1

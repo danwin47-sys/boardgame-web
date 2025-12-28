@@ -90,3 +90,28 @@ class TestErrorHandlers:
             assert response.status_code == 400
             data = response.get_json()
             assert data['error_code'] == 'VALIDATION_ERROR'
+
+    def test_internal_error_handler(self, app):
+        """測試 500 內部錯誤處理"""
+        @app.route('/trigger-500')
+        def trigger_500():
+            raise Exception("Unexpected error")
+            
+        with app.test_client() as client:
+            response = client.get('/trigger-500')
+            assert response.status_code == 500
+            data = response.get_json()
+            assert data['error_code'] == 'INTERNAL_ERROR'
+
+    def test_bad_request_handler(self, app):
+        """測試 400 Bad Request 處理"""
+        @app.route('/trigger-400')
+        def trigger_400():
+            from flask import abort
+            abort(400)
+            
+        with app.test_client() as client:
+            response = client.get('/trigger-400')
+            assert response.status_code == 400
+            data = response.get_json()
+            assert data['error_code'] == 'BAD_REQUEST'

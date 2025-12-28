@@ -152,15 +152,25 @@ class TestSheetsClientWorksheets:
         mock_new_ws.update.assert_called_once() # 驗證標題列寫入
 
 
+from app import create_app
+
 class TestSheetsClientLoadData:
     """測試資料讀取與快取"""
 
     def setup_method(self):
+        self.app = create_app('testing')
+        self.ctx = self.app.app_context()
+        self.ctx.push()
         self.client = SheetsClient()
         self.client.valid = True
         self.client.sh = MagicMock()
-        self.client.games_ws = MagicMock()
+        self.mock_ws = MagicMock()
+        self.client.sh.worksheet.return_value = self.mock_ws
+        self.client.games_ws = self.mock_ws
         self.client.members_ws = MagicMock()
+
+    def teardown_method(self):
+        self.ctx.pop()
 
     def test_load_games_success(self):
         """測試成功讀取遊戲並寫入快取"""
@@ -171,9 +181,7 @@ class TestSheetsClientLoadData:
         data = self.client.load_games()
         
         assert data == expected_data
-        assert self.client._games_cache == expected_data
-        assert self.client._games_cache_time > 0
-        self.client.games_ws.get_all_records.assert_called_once()
+        self.mock_ws.get_all_records.assert_called_once()
 
     def test_load_games_cache_hit(self):
         """測試快取命中"""
@@ -185,12 +193,12 @@ class TestSheetsClientLoadData:
         
         assert data == cached_data
         # 由於快取已停用，會呼叫 API
-        self.client.games_ws.get_all_records.assert_called_once()
+        self.mock_ws.get_all_records.assert_called_once()
 
     def test_load_games_retry(self):
         """測試讀取失敗後重試"""
         # 第一次呼叫失敗，第二次成功 (模擬重連後)
-        self.client.games_ws.get_all_records.side_effect = [Exception("API Error"), [{'name': 'Catan'}]]
+        self.mock_ws.get_all_records.side_effect = [Exception("API Error"), [{'name': 'Catan'}]]
         
         with patch.object(self.client, '_connect') as mock_connect:
             # 模擬重連成功
@@ -391,3 +399,116 @@ class TestSheetsClientBGGRecommendations:
         time_str = self.client.get_bgg_recommendations_update_time('party')
         
         assert time_str == '2025-01-01'
+
+
+class TestSheetsClientUserAuth:
+    """測試使用者認證相關功能"""
+
+    def setup_method(self):
+        self.app = create_app('testing')
+        self.ctx = self.app.app_context()
+        self.ctx.push()
+        self.client = SheetsClient()
+        self.client.valid = True
+        self.mock_members_ws = MagicMock()
+        self.client.members_ws = self.mock_members_ws
+        self.client.sh = MagicMock()
+        self.client.sh.worksheet.return_value = self.mock_members_ws
+
+    def teardown_method(self):
+        self.ctx.pop()
+
+    def test_get_user_by_line_id(self):
+        """測試透過 LINE ID 查找使用者"""
+        members = [
+            {'student_id': '101', 'line_user_id': 'U123'},
+            {'student_id': '102', 'line_user_id': 'U456'}
+        ]
+        self.mock_members_ws.get_all_records.return_value = members
+        
+        user = self.client.get_user_by_line_id('U456')
+        assert user['student_id'] == '102'
+        
+        user_none = self.client.get_user_by_line_id('U999')
+        assert user_none is None
+
+    def test_get_user_by_student_id(self):
+        """測試透過學號查找使用者"""
+        members = [
+            {'id': '101', 'name': 'User1'},
+            {'student_id': '102', 'name': 'User2'}
+        ]
+        self.mock_members_ws.get_all_records.return_value = members
+        
+        user1 = self.client.get_user_by_student_id('101')
+        assert user1['name'] == 'User1'
+        
+        user2 = self.client.get_user_by_student_id('102')
+        assert user2['name'] == 'User2'
+        
+        user_none = self.client.get_user_by_student_id('999')
+        assert user_none is None
+
+    def test_bind_user_to_line_id_success(self):
+        """測試成功將 LINE ID 綁定到學號"""
+        members = [
+            {'id': '101', 'name': 'User1'}
+        ]
+        self.mock_members_ws.get_all_records.return_value = members
+        self.mock_members_ws.row_values.return_value = ['id', 'name']
+        
+        result = self.client.bind_user_to_line_id('101', 'U123')
+        
+        assert result is True
+        # 驗證新增欄位與更新資料
+        self.mock_members_ws.update_cell.assert_any_call(1, 3, 'line_user_id')
+        self.mock_members_ws.update_cell.assert_any_call(2, 3, 'U123')
+        assert self.client._members_cache is None
+
+    def test_bind_user_to_line_id_not_found(self):
+        """測試綁定不存在的使用者"""
+        self.mock_members_ws.get_all_records.return_value = []
+        result = self.client.bind_user_to_line_id('999', 'U123')
+        assert result is False
+
+
+class TestSheetsClientGameUpdates:
+    """測試遊戲資訊更新功能"""
+
+    def setup_method(self):
+        self.app = create_app('testing')
+        self.ctx = self.app.app_context()
+        self.ctx.push()
+        self.client = SheetsClient()
+        self.client.valid = True
+        self.mock_games_ws = MagicMock()
+        self.client.games_ws = self.mock_games_ws
+        self.client.sh = MagicMock()
+        self.client.sh.worksheet.return_value = self.mock_games_ws
+
+    def teardown_method(self):
+        self.ctx.pop()
+
+    def test_update_game_playtime_success(self):
+        """測試更新遊戲遊玩時間"""
+        games = [{'name': 'Catan'}]
+        self.mock_games_ws.get_all_records.return_value = games
+        self.mock_games_ws.row_values.return_value = ['name', 'minplaytime', 'maxplaytime']
+        
+        result = self.client.update_game_playtime('Catan', 60, 120)
+        
+        assert result is True
+        self.mock_games_ws.batch_update.assert_called_once()
+        assert self.client._games_cache is None
+
+    def test_update_game_expansion_info_success(self):
+        """測試更新遊戲擴充資訊"""
+        games = [{'name': 'Catan Expansion'}]
+        self.mock_games_ws.get_all_records.return_value = games
+        self.mock_games_ws.row_values.return_value = ['name', 'is_expansion', 'parent_game', 'storage_mode']
+        
+        result = self.client.update_game_expansion_info('Catan Expansion', True, 'Catan', 'merged')
+        
+        assert result is True
+        self.mock_games_ws.batch_update.assert_called_once()
+        assert self.client._games_cache is None
