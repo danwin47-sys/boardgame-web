@@ -3,8 +3,12 @@
  */
 
 // 篩選面板切換
+// 篩選面板切換
 function initFilterPanel() {
     if (!isMobileDevice()) return;
+
+    // 防止重複創建
+    if (document.querySelector('.filter-panel-toggle')) return;
 
     const filterButtons = document.querySelector('.filter-buttons');
     if (!filterButtons) return;

@@ -1304,10 +1304,36 @@ tbody tr:last-child td {
         border-radius: 8px;
         border: 1px dashed #e2e8f0;
         margin-bottom: 15px;
+        flex-wrap: wrap;
+        /* 允許換行 */
     }
 
     .filter-buttons.show {
         display: flex;
         /* 展開時顯示 */
+    }
+
+    /* 防止按鈕爆版 */
+    .btn {
+        max-width: 100%;
+        width: 100%;
+        /* 手機版讓功能按鈕滿寬，比較好看 */
+        margin-bottom: 10px;
+        /* 增加間距 */
+        padding: 12px 16px;
+        /* 縮小左右 padding */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: flex;
+        /* 確保內容置中 */
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* 篩選器內的下拉選單也要限制 */
+    .filter-buttons select {
+        max-width: 100%;
+        width: 100%;
     }
 }
