@@ -38,7 +38,7 @@ jobs:
     - name: Install Playwright Browsers & Deps
       run: |
         python -m playwright install chromium
-        sudo python -m playwright install-deps chromium
+        python -m playwright install-deps chromium
 
     - name: Lint with flake8
       run: |
