@@ -125,7 +125,6 @@ class SheetsClient:
         request_id = getattr(g, 'request_id', 'batch')
         logger.info(f"[{request_id}] [sheets_client] 開始載入遊戲列表")
         
-        # 如果未連線，嘗試重新連線
         if not self.valid:
             logger.warning(f"[{request_id}] [sheets_client] 未連線，嘗試重新連線")
             self._connect()

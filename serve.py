@@ -21,8 +21,8 @@ if __name__ == '__main__':
     flask_env = os.getenv('FLASK_ENV', 'production').lower()
     
     # 根據環境建立應用程式
-    if flask_env == 'development':
-        app = create_app('development')
+    if flask_env in ['development', 'testing']:
+        app = create_app(flask_env)
     else:
         app = create_app('production')
     
