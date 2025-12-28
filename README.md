@@ -9,7 +9,7 @@
 [![CI/CD](https://github.com/danwin47-sys/boardgame-web/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/danwin47-sys/boardgame-web/actions/workflows/ci-cd.yml)
 [![Render](https://img.shields.io/badge/Render-%46E3B7.svg?style=flat&logo=render&logoColor=white)](https://render.com)
 [![Google Sheets](https://img.shields.io/badge/Google%20Sheets-34A853?style=flat&logo=google-sheets&logoColor=white)](https://www.google.com/sheets/about/)
-[![Coverage](https://img.shields.io/badge/Coverage-80%25-brightgreen.svg)](tests/)
+[![Coverage](https://img.shields.io/badge/Coverage-95%25-brightgreen.svg)](tests/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
@@ -35,8 +35,13 @@ Boardgame-Web 是一個現代化、高效能的桌遊管理系統，專為桌遊
 - **智慧摺疊面板**: 篩選器自動收合，釋放寶貴的螢幕空間。
 - **觸控友善設計**: 全面優化按鈕尺寸 (44px+) 與間距，操作不再誤觸。
 
-### 🧪 測試覆蓋率 80%
-- **穩健可靠**: 通過 390+ 個自動化測試案例。
+### 🛡️ 工程品質與自動化 (New)
+- **95% 測試覆蓋率**: 超過 530+ 個測試案例，涵蓋單元、整合與 E2E 測試。
+- **CI/CD 流水線**: GitHub Actions 自動化測試與 Lint 檢查，確保每次提交的穩定性。
+- **E2E 前端測試**: 導入 Playwright 進行瀏覽器自動化測試，模擬真實使用者操作。
+
+### 🧪 測試覆蓋率 95%
+- **穩健可靠**: 通過 530+ 個自動化測試案例。
 - **全面防護**: 核心邏輯、API 端點與擴充服務皆有完整測試保護。
 
 ---
@@ -60,7 +65,7 @@ Boardgame-Web 是一個現代化、高效能的桌遊管理系統，專為桌遊
 | **DOM 節點**   | 4,140    | **1,018**    | 📉 **-75%**  |
 | **首屏請求**   | 414      | **46**       | 📉 **-89%**  |
 | **資料庫查詢** | 全表掃描 | **索引查詢** | ⚡ **+500%** |
-| **測試覆蓋率** | 0%       | **80%**      | 🛡️ **+80%**  |
+| **測試覆蓋率** | 0%       | **95%**      | 🛡️ **+95%**  |
 
 ---
 
@@ -83,6 +88,8 @@ Boardgame-Web 是一個現代化、高效能的桌遊管理系統，專為桌遊
 2. **安裝依賴**
    ```bash
    pip install -r requirements.txt
+   playwright install chromium
+   playwright install-deps chromium
    ```
 
 3. **環境配置**
@@ -167,11 +174,11 @@ pytest
 pytest --cov=core --cov=app --cov-report=html
 ```
 
-目前測試覆蓋率已達 **80%**，包含以下關鍵模組：
-- `expansion_service`: 93%
-- `monitoring`: 87%
-- `metrics`: 86%
-- `games_api`: 83%
+目前測試覆蓋率已達 **95%**，包含以下關鍵模組：
+- `app/routes`: 100%
+- `core/logging_config`: 100%
+- `core/bgg_service`: 98%
+- `core/sheets_client`: 94%
 
 ---
 
