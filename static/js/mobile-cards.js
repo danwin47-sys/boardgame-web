@@ -56,15 +56,13 @@ function renderMobileCards(games) {
     });
 }
 
-// 創建單個遊戲卡片
+// 創建單個遊戲卡片 (GitHub Style List View)
 function createGameCard(game, isExpansion, childExpansions) {
     const card = document.createElement('div');
     card.className = 'game-card';
     if (isExpansion) {
         card.classList.add('expansion-card');
     }
-
-    const hasChildren = childExpansions && childExpansions.length > 0;
 
     // Safe escape function
     const escapeHtml = window.escapeHtml || function (text) {
@@ -75,104 +73,97 @@ function createGameCard(game, isExpansion, childExpansions) {
 
     const escapedName = escapeHtml(game.name || '');
 
-    // 狀態相關
-    const statusText = game.status === '借出' ? '借出' : '在庫';
-    const statusClass = game.status === '借出' ? 'status-borrowed' : 'status-available';
+    // 狀態標籤 (GitHub Style Badges)
+    const isBorrowed = game.status === '借出';
+    const statusText = isBorrowed ? 'Borrowed' : 'Available'; // 英文標籤更像 GitHub
+    const statusClass = isBorrowed ? 'status-borrowed' : 'status-available';
+    const statusIcon = isBorrowed ? '🟣' : '🟢';
 
     // 類型標籤
     const isExp = String(game.is_expansion || '').trim();
-    const typeText = (isExp === '1' || isExp.toLowerCase() === 'true') ? '🧩 擴充' : '🎮 主遊戲';
-    const typeBadgeClass = (isExp === '1' || isExp.toLowerCase() === 'true') ? 'expansion-badge' : 'main-game-badge';
+    const isExpBool = (isExp === '1' || isExp.toLowerCase() === 'true');
+    const typeText = isExpBool ? 'Expansion' : 'Game';
+    const typeLabelClass = isExpBool ? 'Label Label--secondary' : 'Label Label--primary';
 
-    // 縮圖
+    // 縮圖 (左側)
     const thumbnailHtml = game.bgg_thumbnail
-        ? `<img src="${game.bgg_thumbnail}" class="game-card-thumbnail" alt="縮圖" loading="lazy">`
-        : '';
+        ? `<img src="${game.bgg_thumbnail}" class="game-list-thumbnail" alt="縮圖" loading="lazy">`
+        : `<div class="game-list-thumbnail-placeholder">${game.name.charAt(0)}</div>`;
 
-    // BGG 圖示
-    const bggIcon = game.bgg_id
-        ? `<span class="bgg-icon" title="BGG ID: ${game.bgg_id}">🎲</span>`
-        : '';
-
-    // 借閱人顯示
-    let borrowerDisplay = game.borrower || '-';
-    if (game.status === '借出' && game.borrower) {
-        borrowerDisplay = `<strong>${game.borrower}</strong>`;
+    // 借閱資訊
+    let borrowerInfo = '';
+    if (isBorrowed && game.borrower) {
+        borrowerInfo = `
+            <span class="text-small color-fg-muted">
+                Borrowed by <strong>${escapeHtml(game.borrower)}</strong>
+            </span>
+        `;
     }
 
-    // 工號
-    let displayBorrowerId = game.borrower_id || '-';
-    if (!displayBorrowerId || displayBorrowerId === '-') {
-        if (game.borrower && window.memberNameToId) {
-            const borrowerName = String(game.borrower).trim();
-            displayBorrowerId = window.memberNameToId[borrowerName] || '-';
-        }
+    // 擴充數量
+    let expansionInfo = '';
+    if (childExpansions && childExpansions.length > 0) {
+        expansionInfo = `
+            <span class="text-small color-fg-muted ml-2">
+                • ${childExpansions.length} expansions
+            </span>
+        `;
     }
 
     card.innerHTML = `
-        <div class="game-card-header">
-            ${thumbnailHtml}
-            <div class="game-card-title-section">
-                <div class="game-card-title">${game.name}</div>
-                <div class="game-card-badges">
-                    <span class="${typeBadgeClass}">${typeText}</span>
-                    <span class="status-badge ${statusClass}">
-                        <span class="status-dot"></span>${statusText}
-                    </span>
-                    ${bggIcon}
+        <div class="game-list-row">
+            <div class="game-list-left">
+                ${thumbnailHtml}
+            </div>
+            <div class="game-list-content">
+                <div class="game-list-header">
+                    <div class="game-list-title-row">
+                        <span class="game-list-title">${escapedName}</span>
+                        <span class="game-list-status ${statusClass}">
+                            ${statusText}
+                        </span>
+                    </div>
+                    <div class="game-list-meta">
+                        <span class="${typeLabelClass}">${typeText}</span>
+                        ${expansionInfo}
+                    </div>
+                </div>
+                
+                ${borrowerInfo ? `<div class="game-list-borrower">${borrowerInfo}</div>` : ''}
+                
+                <div class="game-list-details" id="details-${escapedName.replace(/[^a-zA-Z0-9]/g, '_')}">
+                    <div class="game-detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Players</span>
+                            <span class="detail-value">${game.players || '-'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Diff</span>
+                            <span class="detail-value">${game.diff || '-'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Loc</span>
+                            <span class="detail-value">${game.location || '-'}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="game-card-content">
-            <div class="game-card-field">
-                <div class="game-card-label">借閱人</div>
-                <div class="game-card-value">${borrowerDisplay}</div>
-            </div>
-            <div class="game-card-field">
-                <div class="game-card-label">工號</div>
-                <div class="game-card-value">${displayBorrowerId}</div>
-            </div>
-            <div class="game-card-field">
-                <div class="game-card-label">遊玩人數</div>
-                <div class="game-card-value">${game.players || '-'}</div>
-            </div>
-            <div class="game-card-field">
-                <div class="game-card-label">難度</div>
-                <div class="game-card-value">${game.diff || '-'}</div>
+            <div class="game-list-action">
+                <button class="btn-icon" onclick="toggleCardDetails('${escapedName.replace(/'/g, "\\'")}')">
+                    <span class="icon-chevron-down">▼</span>
+                </button>
             </div>
         </div>
         
-        <div class="game-card-details" id="details-${escapedName.replace(/[^a-zA-Z0-9]/g, '_')}">
-            <div class="game-card-detail-row">
-                <span class="game-card-detail-label">保管人</span>
-                <span class="game-card-detail-value">${game.custodian || '-'}</span>
-            </div>
-            <div class="game-card-detail-row">
-                <span class="game-card-detail-label">位置</span>
-                <span class="game-card-detail-value">${game.location || '-'}</span>
-            </div>
-            <div class="game-card-detail-row">
-                <span class="game-card-detail-label">修改日期</span>
-                <span class="game-card-detail-value">${window.formatDate ? window.formatDate(game.mdate) : (game.mdate || '-')}</span>
-            </div>
+        <!-- 主要操作區 (展開後或底部) -->
+        <div class="game-card-actions" id="actions-${escapedName.replace(/[^a-zA-Z0-9]/g, '_')}">
+             ${(window.isAdmin || false) ? `
+             <button class="btn btn-sm" onclick="openEditGameModal('${escapedName}')">Edit</button>
+             ` : ''}
+             <button class="btn btn-sm btn-primary" onclick="openBorrowModal('${escapedName}')" ${isBorrowed ? 'disabled' : ''}>
+                ${isBorrowed ? 'Unavailable' : 'Borrow'}
+             </button>
         </div>
-        
-        <button class="game-card-expand-btn" onclick="toggleCardDetails('${escapedName.replace(/'/g, "\\'")}')">
-            <span class="expand-icon">▼</span>
-            <span class="expand-text">顯示更多</span>
-        </button>
-        
-        ${(window.isAdmin || false) ? `
-        <div class="game-card-actions">
-            <button class="game-card-btn game-card-btn-primary" onclick="openEditGameModal('${escapedName}')">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
-                </svg>
-                編輯
-            </button>
-        </div>
-        ` : ''}
     `;
 
     return card;
@@ -182,18 +173,15 @@ function createGameCard(game, isExpansion, childExpansions) {
 function toggleCardDetails(gameName) {
     const safeId = gameName.replace(/[^a-zA-Z0-9]/g, '_');
     const details = document.getElementById(`details-${safeId}`);
-    const btn = event.currentTarget;
-    const icon = btn.querySelector('.expand-icon');
-    const text = btn.querySelector('.expand-text');
+    const actions = document.getElementById(`actions-${safeId}`); // Also toggle actions visibility if needed
 
+    // 這裡我們用簡單的 class toggle
     if (details.classList.contains('show')) {
         details.classList.remove('show');
-        icon.textContent = '▼';
-        text.textContent = '顯示更多';
+        actions.classList.remove('show');
     } else {
         details.classList.add('show');
-        icon.textContent = '▲';
-        text.textContent = '顯示較少';
+        actions.classList.add('show');
     }
 }
 

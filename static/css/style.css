@@ -1097,169 +1097,213 @@ tbody tr:last-child td {
     align-items: center;
 }
 
-/* 卡片內容網格 */
-.game-card-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1px;
-    background: #edf2f7;
-    /* 用於網格線 */
-    border-bottom: 1px solid #edf2f7;
+/* GitHub Style Mobile List View */
+.mobile-cards-container {
+    padding: 0;
+    background: transparent;
 }
 
-.game-card-field {
+.game-card {
     background: white;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.game-list-row {
+    display: flex;
     padding: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    gap: 12px;
 }
 
-.expansion-card .game-card-field {
-    background: #f0fdf9;
+.game-list-left {
+    flex-shrink: 0;
 }
 
-.game-card-label {
-    font-size: 0.8em;
-    color: #718096;
-    margin-bottom: 4px;
+.game-list-thumbnail {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid #e1e4e8;
 }
 
-.game-card-value {
-    font-size: 0.95em;
-    font-weight: 600;
-    color: #2d3748;
-}
-
-/* 隱藏詳情區域 */
-.game-card-details {
-    display: none;
-    padding: 12px 16px;
-    background: #f7fafc;
-    border-top: 1px solid #edf2f7;
-}
-
-.game-card-details.show {
-    display: block;
-    animation: slideDown 0.3s ease;
-}
-
-.game-card-detail-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px dashed #e2e8f0;
-    font-size: 0.9em;
-}
-
-.game-card-detail-row:last-child {
-    border-bottom: none;
-}
-
-.game-card-detail-label {
-    color: #718096;
-}
-
-.game-card-detail-value {
-    color: #4a5568;
-    font-weight: 500;
-}
-
-/* 展開按鈕 */
-.game-card-expand-btn {
-    width: 100%;
-    padding: 10px;
-    background: white;
-    border: none;
-    color: #667eea;
-    font-size: 0.9em;
-    font-weight: 600;
-    cursor: pointer;
+.game-list-thumbnail-placeholder {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+    background: #f6f8fa;
+    color: #57606a;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    transition: background 0.2s;
-}
-
-.expansion-card .game-card-expand-btn {
-    background: #f0fdf9;
-}
-
-.game-card-expand-btn:hover {
-    background: #f7fafc;
-}
-
-/* 編輯按鈕區域 */
-.game-card-actions {
-    padding: 10px 16px;
-    background: white;
-    border-top: 1px solid #edf2f7;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.game-card-btn {
-    padding: 6px 16px;
-    border-radius: 6px;
-    font-size: 0.9em;
     font-weight: 600;
-    cursor: pointer;
-    display: inline-flex;
+    font-size: 20px;
+    border: 1px solid #e1e4e8;
+}
+
+.game-list-content {
+    flex-grow: 1;
+    min-width: 0;
+    /* 防止 flex item 溢出 */
+}
+
+.game-list-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.game-list-title-row {
+    display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.game-list-title {
+    font-weight: 600;
+    color: #24292f;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+/* GitHub Style Badges */
+.game-list-status {
+    display: inline-flex;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    border-radius: 2em;
+}
+
+.game-list-status.status-available {
+    color: #1a7f37;
+    border-color: rgba(26, 127, 55, 0.4);
+    background-color: #dafbe1;
+}
+
+.game-list-status.status-borrowed {
+    color: #8250df;
+    border-color: rgba(130, 80, 223, 0.4);
+    background-color: #f4f0ff;
+}
+
+.game-list-meta {
+    font-size: 12px;
+    color: #57606a;
+    margin-top: 2px;
+}
+
+.Label {
+    display: inline-block;
+    padding: 0 7px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+    border-radius: 2em;
+    border: 1px solid transparent;
+}
+
+.Label--secondary {
+    color: #57606a;
+    background-color: #eff1f3;
+    border-color: #d0d7de;
+}
+
+.Label--primary {
+    color: #24292f;
+    background-color: #f6f8fa;
+    border-color: #d0d7de;
+}
+
+.text-small {
+    font-size: 12px !important;
+}
+
+.color-fg-muted {
+    color: #57606a !important;
+}
+
+/* Details Grid */
+.game-list-details {
+    display: none;
+    margin-top: 12px;
+    background: #f6f8fa;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.game-list-details.show {
+    display: block;
+}
+
+.game-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    text-align: center;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-label {
+    font-size: 10px;
+    color: #57606a;
+    text-transform: uppercase;
+}
+
+.detail-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #24292f;
+}
+
+/* Action Button */
+.game-list-action {
+    display: flex;
+    align-items: flex-start;
+}
+
+.btn-icon {
+    background: transparent;
     border: none;
+    color: #57606a;
+    padding: 4px;
+    cursor: pointer;
 }
 
-.game-card-btn-primary {
-    background: #edf2f7;
-    color: #4a5568;
-    transition: all 0.2s;
+/* Actions Footer */
+.game-card-actions {
+    display: none;
+    /* 預設隱藏直到展開 */
+    padding: 8px 12px 12px;
+    border-top: 1px solid #d0d7de;
+    justify-content: flex-end;
+    gap: 8px;
 }
 
-.game-card-btn-primary:hover {
-    background: #e2e8f0;
-    color: #2d3748;
+.game-card-actions.show {
+    display: flex;
 }
 
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* 手機版顯示邏輯 override */
+/* Sticky Header & Tools */
 @media (max-width: 768px) {
-    .table-wrapper {
-        display: none !important;
-        /* 隱藏表格 */
-    }
-
-    .mobile-cards-container {
-        display: block !important;
-        /* 顯示卡片 */
-    }
-
-    /* 調整篩選器佈局 */
-    .filter-buttons {
-        gap: 8px;
-    }
-
-
-
-    .filter-btn,
-    .player-btn {
-        flex: 1 1 auto;
-        text-align: center;
-        min-width: 60px;
-        padding: 8px 4px;
+    .search-filter-container {
+        position: sticky;
+        top: 0;
+        z-index: 99;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-radius: 0 0 12px 12px;
+        border-top: none;
     }
 }
 
