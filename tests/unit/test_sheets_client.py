@@ -93,6 +93,38 @@ class TestSheetsClientInit:
             assert client.gc == mock_gc
             mock_gspread.service_account.assert_called_once()
 
+    @patch('core.sheets_client.gspread')
+    @patch('core.sheets_client.os.environ.get')
+    def test_connect_env_json_fail(self, mock_env, mock_gspread):
+        """測試環境變數 JSON 解析失敗"""
+        mock_env.return_value = '{"invalid": "json"...'  # 格式錯誤
+        
+        with patch('os.path.exists', return_value=False):
+            client = SheetsClient()
+            assert client.valid is False
+
+    @patch('core.sheets_client.gspread')
+    @patch('core.sheets_client.os.environ.get')
+    @patch('os.path.exists', return_value=True)
+    def test_connect_local_fail_connection(self, mock_exists, mock_env, mock_gspread):
+        """測試本地檔案連線時發生異常"""
+        mock_env.return_value = None
+        mock_gspread.service_account.side_effect = Exception("Auth fail")
+        
+        client = SheetsClient()
+        assert client.valid is False
+
+    @patch('core.sheets_client.gspread')
+    @patch('core.sheets_client.os.environ.get')
+    @patch('os.path.exists', return_value=True)
+    @patch('dotenv.load_dotenv')
+    def test_connect_local_missing_url(self, mock_load, mock_exists, mock_env, mock_gspread):
+        """測試本地檔案模式下 SHEET_URL 缺失"""
+        mock_env.return_value = None  # 所有 env 都回傳 None
+        
+        client = SheetsClient()
+        assert client.valid is False
+
 
 class TestSheetsClientWorksheets:
     """測試工作表存取"""
@@ -212,6 +244,17 @@ class TestSheetsClientLoadData:
             assert data[0]['name'] == 'Catan'
             mock_connect.assert_called_once()
 
+    def test_load_games_retry_fail(self):
+        """測試讀取失敗，重連後依然失敗"""
+        self.mock_ws.get_all_records.side_effect = Exception("API Error")
+        
+        with patch.object(self.client, '_connect') as mock_connect:
+            # 即使重連成功，第二次呼叫依然丟出例外
+            data = self.client.load_games()
+            
+            assert data == []
+            assert mock_connect.called
+
     def test_load_members_success(self):
         """測試成功讀取會員"""
         expected_data = [{'id': '001', 'name': 'Alice'}]
@@ -238,6 +281,35 @@ class TestSheetsClientLoadData:
             assert len(data) == 1
             assert data[0]['id'] == '001'
             mock_connect.assert_called_once()
+
+    def test_load_members_retry_fail(self):
+        """測試讀取會員失敗，重連後依然失敗"""
+        self.client.members_ws.get_all_records.side_effect = Exception("API Error")
+        
+        with patch.object(self.client, '_connect') as mock_connect:
+            data = self.client.load_members()
+            assert data == []
+            assert mock_connect.called
+
+    def test_get_bgg_cache_worksheet_invalid(self):
+        """測試取得 BGG 快取工作表（連線無效時）"""
+        self.client.valid = False
+        with patch.object(self.client, '_connect'):
+            result = self.client.get_bgg_cache_worksheet()
+            assert result is None
+            
+    def test_get_bgg_cache_worksheet_sh_none(self):
+        """測試取得 BGG 快取工作表（sh 為 None 時）"""
+        self.client.valid = True
+        self.client.sh = None
+        result = self.client.get_bgg_cache_worksheet()
+        assert result is None
+
+    def test_load_bgg_recommendations_fail(self):
+        """測試讀取 BGG 推薦失敗"""
+        self.client.sh.worksheet.side_effect = Exception("WS Error")
+        result = self.client.load_bgg_recommendations('party')
+        assert result is None
 
     def test_invalidate_games_cache(self):
         """測試快取失效"""
@@ -513,6 +585,20 @@ class TestSheetsClientGameUpdates:
         self.mock_games_ws.batch_update.assert_called_once()
         assert self.client._games_cache is None
 
+    def test_update_game_bgg_info_new_columns(self):
+        """測試更新 BGG 資訊時建立新欄位"""
+        games = [{'name': 'Catan'}]
+        self.mock_games_ws.get_all_records.return_value = games
+        # 初始標題不包含 bgg_id 等
+        self.mock_games_ws.row_values.return_value = ['name', 'players']
+        
+        result = self.client.update_game_bgg_id('Catan', 13, 'thumb', 'image', '3-4')
+        
+        assert result is True
+        # 驗證 update_cell 被呼叫來建立新欄位 (bgg_id, bgg_thumbnail, image)
+        assert self.mock_games_ws.update_cell.call_count >= 3 
+        self.mock_games_ws.batch_update.assert_called_once()
+
 class TestSheetsClientErrorPaths:
     """測試 SheetsClient 在 API 發生錯誤時的處理"""
 
@@ -541,9 +627,10 @@ class TestSheetsClientErrorPaths:
 
     def test_load_games_api_error(self):
         """測試讀取遊戲清單時 API 錯誤"""
-        self.mock_sh.worksheet.side_effect = Exception("API Error")
-        result = self.client.load_games()
-        assert result == []
+        with patch.object(self.client, '_connect'):
+            self.mock_sh.worksheet.side_effect = Exception("API Error")
+            result = self.client.load_games()
+            assert result == []
 
     def test_update_game_playtime_not_found(self):
         """測試更新遊戲時間時找不到遊戲"""
@@ -571,4 +658,34 @@ class TestSheetsClientErrorPaths:
         """測試綁定用戶時發生異常"""
         self.mock_sh.worksheet.side_effect = Exception("Bind fail")
         result = self.client.bind_user_to_line_id("101", "U123")
+        assert result is False
+
+    def test_all_methods_invalid_connection(self):
+        """測試當連線無效時，所有方法都應該優雅失敗或拋出例外"""
+        # 手動阻斷自動連線嘗試
+        with patch.object(self.client, '_connect'):
+            self.client.valid = False
+            
+            assert self.client.load_games() == []
+            assert self.client.load_members() == []
+            assert self.client.update_game_playtime('G', 1, 2) is False
+            assert self.client.update_game_bgg_id('G', 1) is False
+            assert self.client.bind_user_to_line_id('S', 'L') is False
+            assert self.client.add_new_game({'name': 'N'}) is False
+            assert self.client.update_game_expansion_info('G', True) is False
+            
+            with pytest.raises(SheetConnectionError):
+                self.client.get_games_worksheet()
+            with pytest.raises(SheetConnectionError):
+                self.client.get_members_worksheet()
+
+    def test_update_game_expansion_info_api_error(self):
+        """測試更新擴展資訊時 API 報錯"""
+        # 模擬 worksheet 讀取正常但 batch_update 報錯
+        self.mock_sh.worksheet.return_value = self.mock_ws
+        self.mock_ws.get_all_records.return_value = [{'name': 'Catan Exp'}]
+        # 讓 batch_update 拋出例外
+        self.mock_ws.batch_update.side_effect = Exception("Batch fail")
+        
+        result = self.client.update_game_expansion_info('Catan Exp', True, 'Catan')
         assert result is False
