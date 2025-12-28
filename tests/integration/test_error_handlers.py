@@ -95,13 +95,27 @@ class TestErrorHandlers:
         """測試 500 內部錯誤處理"""
         @app.route('/trigger-500')
         def trigger_500():
-            raise Exception("Unexpected error")
+            from flask import abort
+            abort(500)
             
         with app.test_client() as client:
             response = client.get('/trigger-500')
             assert response.status_code == 500
             data = response.get_json()
             assert data['error_code'] == 'INTERNAL_ERROR'
+
+    def test_generic_exception_handler(self, app):
+        """測試未捕獲的通用異常處理"""
+        @app.route('/trigger-exception')
+        def trigger_exc():
+            raise Exception("Unexpected generic error")
+            
+        with app.test_client() as client:
+            response = client.get('/trigger-exception')
+            assert response.status_code == 500
+            data = response.get_json()
+            assert data['error_code'] == 'INTERNAL_ERROR'
+            assert data['message'] == '發生未預期的錯誤'
 
     def test_bad_request_handler(self, app):
         """測試 400 Bad Request 處理"""
@@ -115,3 +129,27 @@ class TestErrorHandlers:
             assert response.status_code == 400
             data = response.get_json()
             assert data['error_code'] == 'BAD_REQUEST'
+
+    def test_static_path_500_raises(self, app):
+        """測試靜態路徑下的 500 錯誤是否直接拋出應用程式錯誤"""
+        # 手動模擬 500 錯誤在靜態路徑觸發
+        @app.route('/static/test-trigger')
+        def trigger_static_500():
+            from flask import abort
+            abort(500)
+            
+        with app.test_client() as client:
+            # 在 Flask 測試模式下，handle_user_exception 會拋出異常
+            # 我們預期它會穿過自定義處理器
+            with pytest.raises(Exception):
+                client.get('/static/test-trigger')
+
+    def test_static_path_exception_raises(self, app):
+        """測試靜態路徑下的未定義異常是否直接拋出"""
+        @app.route('/css/test-trigger')
+        def trigger_static_exc():
+            raise Exception("Static exception")
+            
+        with app.test_client() as client:
+            with pytest.raises(Exception):
+                client.get('/css/test-trigger')
