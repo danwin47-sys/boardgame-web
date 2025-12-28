@@ -22,9 +22,9 @@ def test_server():
         preexec_fn=os.setsid
     )
     
-    # 健康檢查：等待伺服器回應 200 OK
+    # 健康檢查：等待伺服器回應 200 OK (CI 環境可能較慢，設定 30 秒超时)
     import requests
-    max_retries = 10
+    max_retries = 30
     url = "http://localhost:5002"
     for i in range(max_retries):
         try:

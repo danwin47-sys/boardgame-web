@@ -130,7 +130,8 @@ class TestSheetsClientWorksheets:
     """測試工作表存取"""
 
     def setup_method(self):
-        self.client = SheetsClient()
+        with patch.object(SheetsClient, '_connect'):
+            self.client = SheetsClient()
         self.client.valid = True
         self.client.sh = MagicMock()
 
@@ -193,7 +194,8 @@ class TestSheetsClientLoadData:
         self.app = create_app('testing')
         self.ctx = self.app.app_context()
         self.ctx.push()
-        self.client = SheetsClient()
+        with patch.object(SheetsClient, '_connect'):
+            self.client = SheetsClient()
         self.client.valid = True
         self.client.sh = MagicMock()
         self.mock_ws = MagicMock()
@@ -326,7 +328,8 @@ class TestSheetsClientWriteData:
     """測試資料寫入"""
 
     def setup_method(self):
-        self.client = SheetsClient()
+        with patch.object(SheetsClient, '_connect'):
+            self.client = SheetsClient()
         self.client.valid = True
         self.client.sh = MagicMock()
         self.client.games_ws = MagicMock()
