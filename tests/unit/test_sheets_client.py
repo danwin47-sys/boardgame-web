@@ -512,3 +512,63 @@ class TestSheetsClientGameUpdates:
         assert result is True
         self.mock_games_ws.batch_update.assert_called_once()
         assert self.client._games_cache is None
+
+class TestSheetsClientErrorPaths:
+    """測試 SheetsClient 在 API 發生錯誤時的處理"""
+
+    def setup_method(self):
+        from app import create_app
+        from core.sheets_client import SheetsClient
+        self.app = create_app('testing')
+        self.ctx = self.app.app_context()
+        self.ctx.push()
+        
+        # 建立 Mock 物件
+        self.mock_gc = MagicMock()
+        self.mock_sh = MagicMock()
+        self.mock_ws = MagicMock()
+        
+        # 阻斷連線邏輯，避免真正去連 Google
+        with patch('core.sheets_client.gspread.service_account', return_value=self.mock_gc), \
+             patch('core.sheets_client.gspread.service_account_from_dict', return_value=self.mock_gc):
+            self.client = SheetsClient()
+            # 強制設為有效並手動注入 mock
+            self.client.valid = True
+            self.client.sh = self.mock_sh
+
+    def teardown_method(self):
+        self.ctx.pop()
+
+    def test_load_games_api_error(self):
+        """測試讀取遊戲清單時 API 錯誤"""
+        self.mock_sh.worksheet.side_effect = Exception("API Error")
+        result = self.client.load_games()
+        assert result == []
+
+    def test_update_game_playtime_not_found(self):
+        """測試更新遊戲時間時找不到遊戲"""
+        self.mock_sh.worksheet.return_value = self.mock_ws
+        self.mock_ws.get_all_records.return_value = [{'name': 'Catan'}]
+        # 傳入不存在的遊戲名稱
+        result = self.client.update_game_playtime('Monopoly', 60, 120)
+        assert result is False
+
+    def test_get_user_by_line_id_error(self):
+        """測試依 LINE ID 取得用戶時發生錯誤"""
+        self.mock_sh.worksheet.side_effect = Exception("GSpread Error")
+        result = self.client.get_user_by_line_id("U123")
+        assert result is None
+
+    def test_save_bgg_recommendations_api_error(self):
+        """測試儲存 BGG 推薦時 API 錯誤"""
+        self.mock_sh.worksheet.return_value = self.mock_ws
+        self.mock_ws.append_row.side_effect = Exception("Write Error")
+        
+        result = self.client.save_bgg_recommendations(123, "Rec Data")
+        assert result is False
+
+    def test_bind_user_to_line_id_error(self):
+        """測試綁定用戶時發生異常"""
+        self.mock_sh.worksheet.side_effect = Exception("Bind fail")
+        result = self.client.bind_user_to_line_id("101", "U123")
+        assert result is False

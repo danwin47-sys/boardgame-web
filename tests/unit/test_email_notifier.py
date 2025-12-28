@@ -136,3 +136,45 @@ class TestEmailNotifierTemplates:
         )
         
         assert result is False
+
+    @patch('smtplib.SMTP')
+    def test_send_success_with_db_stats(self, mock_smtp):
+        """測試帶有資料庫統計資訊的導入成功通知"""
+        from core.email_notifier import EmailNotifier
+        notifier = EmailNotifier(username='u', password='p')
+        
+        with patch.object(notifier, 'send_notification', return_value=True) as mock_send:
+            db_stats = {'total_games': 500, 'expansions': 50}
+            notifier.send_import_success('to@ex.com', 10, 0, 1.2, db_stats)
+            
+            # 驗證 content 中包含統計數字
+            content = mock_send.call_args[0][2]
+            assert "500" in content
+            assert "50" in content
+
+    @patch('smtplib.SMTP')
+    def test_send_notification_smtp_exception(self, mock_smtp):
+        """測試 SMTP 發送時發生異常"""
+        from core.email_notifier import EmailNotifier
+        notifier = EmailNotifier(username='u', password='p')
+        
+        mock_server = MagicMock()
+        mock_server.send_message.side_effect = Exception("SMTP error")
+        mock_smtp.return_value.__enter__.return_value = mock_server
+        
+        result = notifier.send_notification('to@ex.com', 'S', 'C')
+        assert result is False
+
+
+class TestEmailNotifierMain:
+    """測試 main 函式"""
+
+    @patch('sys.argv', ['test_notifier.py', 'test@example.com'])
+    @patch('core.email_notifier.EmailNotifier.send_notification', return_value=True)
+    def test_main_execution(self, mock_send):
+        """測試 main 函式執行"""
+        from core.email_notifier import main
+        # 確保有憑證
+        with patch.dict('os.environ', {'EMAIL_USERNAME': 'user', 'EMAIL_PASSWORD': 'pwd'}):
+            main()
+            assert mock_send.called

@@ -23,22 +23,6 @@ class TestRedisCacheInit:
     
     @patch('core.redis_cache.redis')
     def test_init_success(self, mock_redis):
-        """測試初始化成功"""
-        # ... setup skipped, assuming method body is mostly fine or handled by class structure
-        # But wait, replace_file_content replaces the BLOCK.
-        # I cannot replace disjoint blocks easily without multi_replace.
-        pass
-
-# I need to use MULTI_REPLACE because errors are scattered.
-REDIS_AVAILABLE = True
-
-
-@pytest.mark.skipif(not REDIS_AVAILABLE, reason="Redis not available")
-class TestRedisCacheInit:
-    """測試初始化"""
-    
-    @patch('core.redis_cache.redis')
-    def test_init_success(self, mock_redis):
         """測試成功初始化"""
         mock_client = MagicMock()
         mock_redis.Redis.return_value = mock_client
@@ -58,6 +42,14 @@ class TestRedisCacheInit:
         
         cache = RedisCache()
         
+        assert cache.client is None
+
+    @patch('core.redis_cache.redis')
+    def test_init_generic_exception(self, mock_redis):
+        """測試初始化時的泛型異常"""
+        mock_redis.ConnectionError = MockConnectionError
+        mock_redis.Redis.side_effect = Exception("Unknown error")
+        cache = RedisCache()
         assert cache.client is None
 
 
@@ -117,6 +109,22 @@ class TestRedisCacheSetGet:
         value = self.cache.get('key')
         
         assert value is None
+
+    def test_get_json_decode_error(self):
+        """測試取得時 JSON 解析錯誤"""
+        self.mock_client.get.return_value = b'invalid-json'
+        
+        value = self.cache.get('key')
+        assert value is None
+        self.mock_client.delete.assert_called_once_with('key')
+
+    def test_set_serialization_error(self):
+        """測試設定時 JSON 序列化錯誤"""
+        # 建立一個無法被 JSON 序列化的物件
+        bad_value = {1, 2, 3} 
+        
+        result = self.cache.set('key', bad_value)
+        assert result is False
 
 
 @pytest.mark.skipif(not REDIS_AVAILABLE, reason="Redis not available")
@@ -223,7 +231,13 @@ class TestRedisCacheClear:
         result = self.cache.clear_pattern('nonexistent:*')
         
         assert result == 0  # 沒有匹配也算成功，回傳 0
-    
+
+    def test_clear_error(self):
+        """測試清除時錯誤"""
+        self.mock_client.keys.side_effect = Exception("Connection lost")
+        
+        result = self.cache.clear_pattern('pattern:*')
+        
         assert result == 0
 
 
@@ -250,3 +264,119 @@ class TestRedisCacheAdvanced:
         stats = self.cache.get_stats()
         assert stats['used_memory_human'] == '1KB'
         assert stats['total_keys'] == 10
+
+    def test_get_ttl_error(self):
+        """測試取得 TTL 時發生錯誤"""
+        self.mock_client.ttl.side_effect = Exception("TTL fail")
+        assert self.cache.get_ttl('key') == -2
+
+    def test_get_stats_error(self):
+        """測試取得統計資訊時發生錯誤"""
+        self.mock_client.info.side_effect = Exception("Redis info failed")
+        stats = self.cache.get_stats()
+        assert stats['available'] is False
+        assert 'error' in stats
+
+
+class TestRedisCacheDecorator:
+    """測試 redis_cache_decorator"""
+
+    def setup_method(self):
+        self.mock_redis_cache = MagicMock()
+        self.mock_redis_cache.is_available.return_value = True
+
+    def test_decorator_cache_hit(self):
+        """測試裝飾器快取命中"""
+        from core.redis_cache import redis_cache_decorator
+        
+        self.mock_redis_cache.get.return_value = "cached_result"
+        
+        @redis_cache_decorator("test_prefix", redis_client=self.mock_redis_cache)
+        def my_func(a, b):
+            return a + b
+            
+        result = my_func(1, 2)
+        assert result == "cached_result"
+        self.mock_redis_cache.get.assert_called_once()
+        # 驗證快取鍵中包含參數
+        cache_key = self.mock_redis_cache.get.call_args[0][0]
+        assert "test_prefix" in cache_key
+        assert "(1, 2)" in cache_key
+
+    def test_decorator_cache_miss(self):
+        """測試裝飾器快取未命中"""
+        from core.redis_cache import redis_cache_decorator
+        
+        self.mock_redis_cache.get.return_value = None
+        
+        @redis_cache_decorator("test_prefix", redis_client=self.mock_redis_cache)
+        def my_func(a, b):
+            return a + b
+            
+        result = my_func(1, 2)
+        assert result == 3
+        self.mock_redis_cache.set.assert_called_once()
+        assert self.mock_redis_cache.set.call_args[0][1] == 3
+
+    def test_decorator_redis_unavailable(self):
+        """測試 Redis 不可用時裝飾器的行為"""
+        from core.redis_cache import redis_cache_decorator
+        
+        self.mock_redis_cache.is_available.return_value = False
+        
+        @redis_cache_decorator("test_prefix", redis_client=self.mock_redis_cache)
+        def my_func(a, b):
+            return a + b
+            
+        result = my_func(10, 20)
+        assert result == 30
+        self.mock_redis_cache.get.assert_not_called()
+
+    @patch('core.cache.get_redis_cache')
+    def test_decorator_default_client(self, mock_get_redis):
+        """測試裝飾器使用預設客戶端"""
+        from core.redis_cache import redis_cache_decorator
+        
+        mock_get_redis.return_value = self.mock_redis_cache
+        self.mock_redis_cache.get.return_value = "default_client_result"
+        
+        @redis_cache_decorator("default")
+        def my_func():
+            return "real_result"
+            
+        assert my_func() == "default_client_result"
+
+    def test_decorator_import_error(self):
+        """測試裝飾器因 ImportError 降級"""
+        from core.redis_cache import redis_cache_decorator
+        
+        # 模擬從 core.cache 導入 get_redis_cache 失敗
+        with patch('builtins.__import__', side_effect=ImportError):
+            @redis_cache_decorator("import_err", redis_client=None)
+            def my_func():
+                return "fallback"
+            
+            assert my_func() == "fallback"
+
+
+class TestRedisCacheErrorHandling:
+    """測試 RedisCache 在客戶端未初始化時的行為"""
+    
+    def setup_method(self):
+        # 故意不初始化 client
+        with patch('core.redis_cache.redis') as mock_redis:
+            mock_redis.ConnectionError = MockConnectionError
+            mock_redis.Redis.side_effect = Exception("Conn fail")
+            self.cache = RedisCache()
+            self.cache.client = None
+
+    def test_methods_when_no_client(self):
+        """測試當 client 為 None 時各個方法的行為 (Fail-safe)"""
+        assert self.cache.is_available() is False
+        assert self.cache.get("any") is None
+        assert self.cache.set("any", "val") is False
+        assert self.cache.delete("any") is False
+        assert self.cache.clear_pattern("*") == 0
+        assert self.cache.exists("any") is False
+        assert self.cache.get_ttl("any") == -2
+        assert self.cache.get_stats() == {"available": False}

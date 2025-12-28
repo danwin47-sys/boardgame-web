@@ -3,6 +3,7 @@
 """
 import pytest
 import time
+from unittest.mock import patch
 from core.cache import SimpleCache
 
 
@@ -80,3 +81,26 @@ def test_get_redis_cache_logic():
     cache = get_redis_cache()
     # 在測試環境中可能會回傳 SimpleCache (Fallback) 或 RedisCache
     assert isinstance(cache, (SimpleCache, RedisCache))
+
+
+def test_get_redis_cache_error_handling():
+    """測試 get_redis_cache 發生異常時的處理"""
+    from core.cache import get_redis_cache
+    import core.cache
+    
+    # 模擬 RedisCache 初始化時拋出異常
+    with patch('core.redis_cache.RedisCache', side_effect=Exception("Epic fail")):
+        # 清除單例狀態
+        core.cache._redis_cache_instance = None
+        cache = get_redis_cache()
+        assert cache is None
+
+
+def test_get_cache_backend_fallback():
+    """測試 get_cache_backend 當 Redis 不可用時的降級邏輯"""
+    from core.cache import get_cache_backend, SimpleCache
+    
+    with patch('core.cache.get_redis_cache', return_value=None):
+        cache = get_cache_backend(ttl=123)
+        assert isinstance(cache, SimpleCache)
+        assert cache.ttl == 123

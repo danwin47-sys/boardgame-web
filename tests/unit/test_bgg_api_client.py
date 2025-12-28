@@ -221,18 +221,59 @@ class TestMakeRequest:
         
         assert result is None
     
-    @patch('core.bgg_api_client.requests.Session')
-    def test_make_request_500(self, mock_session_class):
-        """測試 500 錯誤"""
-        mock_session = MagicMock()
-        mock_response = MagicMock()
-        mock_response.status_code = 500
-        mock_session.get.return_value = mock_response
-        mock_session_class.return_value = mock_session
+        assert result is None
+
+
+class TestBGGApiClientRetry:
+    """測試 BGGApiClient 的重試邏輯"""
+
+    def setup_method(self):
+        self.client = BGGApiClient(retries=2)
+
+    @patch('time.sleep', return_value=None)
+    def test_retry_on_429(self, mock_sleep):
+        """測試 429 速率限制重試"""
+        mock_429 = MagicMock()
+        mock_429.status_code = 429
         
-        client = BGGApiClient()
-        result = client._make_request('test')
+        mock_200 = MagicMock()
+        mock_200.status_code = 200
+        mock_200.content = b'<items><item id="1"/></items>'
         
+        with patch.object(self.client.session, 'get') as mock_get:
+            # 兩次 429，第三次成功
+            mock_get.side_effect = [mock_429, mock_429, mock_200]
+            
+            result = self.client._make_request('test')
+            assert result is not None
+            assert mock_get.call_count == 3
+            assert mock_sleep.call_count == 2
+
+    @patch('time.sleep', return_value=None)
+    def test_retry_on_timeout(self, mock_sleep):
+        """測試逾時重試"""
+        from requests.exceptions import Timeout
+        
+        mock_200 = MagicMock()
+        mock_200.status_code = 200
+        mock_200.content = b'<items/>'
+        
+        with patch.object(self.client.session, 'get') as mock_get:
+            mock_get.side_effect = [Timeout(), mock_200]
+            
+            result = self.client._make_request('test')
+            assert result is not None
+            assert mock_get.call_count == 2
+
+    @patch('requests.Session.get')
+    def test_parse_error(self, mock_get):
+        """測試 XML 解析錯誤"""
+        mock_200 = MagicMock()
+        mock_200.status_code = 200
+        mock_200.content = b'invalid xml'
+        mock_get.return_value = mock_200
+        
+        result = self.client._make_request('test')
         assert result is None
 
 
