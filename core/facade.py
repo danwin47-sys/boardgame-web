@@ -1,13 +1,12 @@
-from typing import List, Dict, Any, Optional
+import logging
+import os
+from typing import Any, Dict, List, Optional
 
-from core.sheets_client import SheetsClient
 from core.game_service import GameService
 from core.member_service import MemberService
+from core.sheets_client import SheetsClient
+from core.types import GameList, MemberDict, MemberList
 from core.utils import get_current_timestamp
-
-from core.types import GameList, MemberList, MemberDict
-import os
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +38,7 @@ class BoardGameManager:
         """載入所有桌遊資料"""
         if os.environ.get("DEMO_MODE", "").lower() == "true":
             from .demo_data import _DEMO_GAMES_LIST
+
             logger.info("[facade] 正在演示模式下載入預設遊戲資料")
             return _DEMO_GAMES_LIST
         return self.client.load_games()
@@ -49,7 +49,7 @@ class BoardGameManager:
             logger.info("[facade] 正在演示模式下載入預設社員資料")
             return [
                 {"id": "R4815", "name": "施奇", "line_user_id": "U12345678"},
-                {"id": "TEST001", "name": "測試人員", "line_user_id": ""}
+                {"id": "TEST001", "name": "測試人員", "line_user_id": ""},
             ]
         return self.client.load_members()
 
@@ -63,7 +63,9 @@ class BoardGameManager:
         """借出桌遊"""
         return self.game_service.borrow_game(name, user_name, user_id)
 
-    def batch_borrow_games(self, game_names: List[str], member_id: str) -> Dict[str, Any]:
+    def batch_borrow_games(
+        self, game_names: List[str], member_id: str
+    ) -> Dict[str, Any]:
         """批量借出桌遊"""
         return self.game_service.batch_borrow_games(game_names, member_id)
 
@@ -80,7 +82,11 @@ class BoardGameManager:
         return self.game_service.batch_return_games_by_member(member_id)
 
     def update_game_expansion_info(
-        self, game_name: str, is_expansion: bool, parent_game: Optional[str], storage_mode: str
+        self,
+        game_name: str,
+        is_expansion: bool,
+        parent_game: Optional[str],
+        storage_mode: str,
     ) -> Dict[str, Any]:
         """更新桌遊擴充資訊"""
         return self.game_service.update_game_expansion_info(

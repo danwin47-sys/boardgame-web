@@ -4,8 +4,9 @@ Flask 裝飾器模組
 提供請求驗證和錯誤處理的裝飾器
 """
 from functools import wraps
-from flask import request, jsonify
-from typing import Callable, Any
+from typing import Any, Callable
+
+from flask import jsonify, request
 
 
 def validate_json(f: Callable) -> Callable:
@@ -83,9 +84,9 @@ def handle_exceptions(f: Callable) -> Callable:
             # 這裡可以根據不同異常類型返回不同的狀態碼
             from .exceptions import (
                 BoardGameException,
+                GameAlreadyBorrowedException,
                 GameNotFoundException,
                 MemberNotFoundException,
-                GameAlreadyBorrowedException,
             )
 
             if isinstance(e, (GameNotFoundException, MemberNotFoundException)):

@@ -3,16 +3,17 @@
 擴充管理服務模組
 處理桌遊擴充的相關邏輯，包含合併收納與獨立收納模式
 """
-from typing import List, Dict, Optional, Tuple, Any
+from typing import Any, Dict, List, Optional, Tuple
+
 from .constants import (
-    FIELD_NAME,
     FIELD_IS_EXPANSION,
+    FIELD_NAME,
     FIELD_PARENT_GAME,
-    FIELD_STORAGE_MODE,
     FIELD_STATUS,
-    STORAGE_MODE_MERGED,
-    STORAGE_MODE_INDEPENDENT,
+    FIELD_STORAGE_MODE,
     GAME_STATUS_BORROWED,
+    STORAGE_MODE_INDEPENDENT,
+    STORAGE_MODE_MERGED,
 )
 
 

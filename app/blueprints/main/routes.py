@@ -2,9 +2,10 @@
 主要路由 Blueprint
 處理首頁、靜態資源、健康檢查等基本路由
 """
-from typing import Tuple, Dict, Any
-from flask import Blueprint, send_from_directory, jsonify, Response, render_template
 import logging
+from typing import Any, Dict, Tuple
+
+from flask import Blueprint, Response, jsonify, render_template, send_from_directory
 
 from app.utils import get_manager
 
@@ -79,7 +80,7 @@ def favicon() -> Response:
 @main_bp.route("/css/<path:filename>")
 def serve_css(filename) -> Response:
     """提供 CSS 檔案
-    
+
     Returns:
         Response: CSS 文件響應
     """
@@ -89,7 +90,7 @@ def serve_css(filename) -> Response:
 @main_bp.route("/js/<path:filename>")
 def serve_js(filename) -> Response:
     """提供 JavaScript 檔案
-    
+
     Returns:
         Response: JS 文件響應
     """
@@ -99,7 +100,7 @@ def serve_js(filename) -> Response:
 @main_bp.route("/images/<path:filename>")
 def serve_images(filename) -> Response:
     """提供圖片檔案
-    
+
     Returns:
         Response: 圖片文件響應
     """
@@ -159,8 +160,9 @@ def sys_info() -> Response:
         - 用於除錯和系統診斷
         - 包含敏感路徑資訊，生產環境應謹慎使用
     """
-    from flask import current_app
     import os
+
+    from flask import current_app
 
     info: Dict[str, Any] = {}
     try:

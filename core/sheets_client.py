@@ -1,11 +1,12 @@
-import os
 import json
-import time
-import gspread
-from typing import List, Dict, Any, Optional
-from gspread.utils import rowcol_to_a1
-from flask import g
 import logging
+import os
+import time
+from typing import Any, Dict, List, Optional
+
+import gspread
+from flask import g
+from gspread.utils import rowcol_to_a1
 
 from .constants import (
     GAMES_CACHE_TTL,
@@ -122,9 +123,9 @@ class SheetsClient:
         """
         讀取所有桌遊資料 (已停用快取，每次都從 Google Sheets 讀取最新資料)
         """
-        request_id = getattr(g, 'request_id', 'batch')
+        request_id = getattr(g, "request_id", "batch")
         logger.info(f"[{request_id}] [sheets_client] 開始載入遊戲列表")
-        
+
         if not self.valid:
             logger.warning(f"[{request_id}] [sheets_client] 未連線，嘗試重新連線")
             self._connect()
@@ -154,7 +155,7 @@ class SheetsClient:
             if self.valid:
                 try:
                     # 重連後重新取得工作表並讀取
-                    self.games_ws = None # 重置工作表物件快取
+                    self.games_ws = None  # 重置工作表物件快取
                     ws = self.get_games_worksheet()
                     games = ws.get_all_records()
                     logger.info(f"[{request_id}] 重試成功載入 {len(games)} 筆遊戲資料")
@@ -207,7 +208,7 @@ class SheetsClient:
         """透過 LINE User ID 查找使用者"""
         if not line_user_id:
             return None
-            
+
         members = self.load_members()
         for member in members:
             # 兼容舊資料，如果沒有 line_user_id 欄位則略過
@@ -219,7 +220,7 @@ class SheetsClient:
         """透過學號/工號查找使用者"""
         if not student_id:
             return None
-            
+
         members = self.load_members()
         for member in members:
             # 支援 'id' 或 'student_id' 欄位名稱
@@ -227,7 +228,7 @@ class SheetsClient:
             if mem_id == str(student_id):
                 return member
         return None
-        
+
     def bind_user_to_line_id(self, student_id: str, line_user_id: str) -> bool:
         """
         將 LINE User ID 綁定到指定學號
@@ -239,34 +240,34 @@ class SheetsClient:
         try:
             ws = self.get_members_worksheet()
             all_records = ws.get_all_records()
-            
+
             # 找到對應的社員
             for idx, member in enumerate(all_records):
                 mem_id = str(member.get("id", member.get("student_id", "")))
-                
+
                 if mem_id == str(student_id):
                     headers = ws.row_values(1)
-                    
+
                     # 檢查並創建 line_user_id 欄位
                     if "line_user_id" not in headers:
                         col_idx = len(headers)
                         ws.update_cell(1, col_idx + 1, "line_user_id")
                         headers.append("line_user_id")
                         logger.info("已新增 line_user_id 欄位到 Google Sheets")
-                    
+
                     col_idx = headers.index("line_user_id")
-                    
+
                     # 更新資料
                     row_num = idx + 2
                     ws.update_cell(row_num, col_idx + 1, line_user_id)
-                    
+
                     # 使快取失效
                     self._members_cache = None
                     self._members_cache_time = 0
-                    
+
                     logger.info(f"成功綁定：{student_id} -> {line_user_id}")
                     return True
-            
+
             logger.warning(f"找不到工號: {student_id}")
             return False
 
@@ -398,24 +399,30 @@ class SheetsClient:
 
                     # 更新 ID
                     value_id = bgg_id if bgg_id is not None else ""
-                    updates.append({
-                        "range": rowcol_to_a1(row_num, col_idx_id + 1),
-                        "values": [[value_id]]
-                    })
+                    updates.append(
+                        {
+                            "range": rowcol_to_a1(row_num, col_idx_id + 1),
+                            "values": [[value_id]],
+                        }
+                    )
 
                     # 更新 Thumbnail
                     value_thumb = thumbnail_url if thumbnail_url is not None else ""
-                    updates.append({
-                        "range": rowcol_to_a1(row_num, col_idx_thumb + 1),
-                        "values": [[value_thumb]]
-                    })
+                    updates.append(
+                        {
+                            "range": rowcol_to_a1(row_num, col_idx_thumb + 1),
+                            "values": [[value_thumb]],
+                        }
+                    )
 
                     # 更新 Image
                     value_image = image_url if image_url is not None else ""
-                    updates.append({
-                        "range": rowcol_to_a1(row_num, col_idx_image + 1),
-                        "values": [[value_image]]
-                    })
+                    updates.append(
+                        {
+                            "range": rowcol_to_a1(row_num, col_idx_image + 1),
+                            "values": [[value_image]],
+                        }
+                    )
 
                     # 更新玩家數（如果提供）
                     if players_display is not None:
@@ -423,10 +430,12 @@ class SheetsClient:
                             headers.index("players") if "players" in headers else None
                         )
                         if col_idx_players is not None:
-                            updates.append({
-                                "range": rowcol_to_a1(row_num, col_idx_players + 1),
-                                "values": [[players_display]]
-                            })
+                            updates.append(
+                                {
+                                    "range": rowcol_to_a1(row_num, col_idx_players + 1),
+                                    "values": [[players_display]],
+                                }
+                            )
                             logger.info(f"已更新 '{game_name}' 的玩家數: {players_display}")
 
                     # 批次更新（1 次 API 呼叫）
@@ -491,12 +500,12 @@ class SheetsClient:
                     updates = [
                         {
                             "range": rowcol_to_a1(row_num, minplaytime_idx + 1),
-                            "values": [[min_playtime]]
+                            "values": [[min_playtime]],
                         },
                         {
                             "range": rowcol_to_a1(row_num, maxplaytime_idx + 1),
-                            "values": [[max_playtime]]
-                        }
+                            "values": [[max_playtime]],
+                        },
                     ]
                     ws.batch_update(updates)
 

@@ -13,7 +13,7 @@ class BaseConfig:
     SECRET_KEY = os.environ.get(
         "SECRET_KEY", "dev-secret-key-please-change-in-production"
     )
-    
+
     # Session 過期時間（7 天）
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
 

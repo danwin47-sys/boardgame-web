@@ -6,6 +6,7 @@
 import time
 from datetime import datetime
 from typing import Optional
+
 from .constants import DATETIME_FORMAT, MILLISECONDS_PER_SECOND
 
 

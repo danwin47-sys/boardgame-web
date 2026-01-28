@@ -2,9 +2,10 @@
 Flask 擴展初始化模組
 集中管理所有 Flask 擴展的初始化
 """
+import logging
+
 from flask_cors import CORS
 from flask_static_digest import FlaskStaticDigest
-import logging
 
 logger = logging.getLogger(__name__)
 

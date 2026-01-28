@@ -2,11 +2,12 @@
 搜尋 API Routes
 處理全站搜尋相關的 API 端點
 """
-from typing import Tuple
-from flask import Blueprint, jsonify, request, Response
 import logging
+from typing import Tuple
 
-from app.utils import get_manager, error_response
+from flask import Blueprint, Response, jsonify, request
+
+from app.utils import error_response, get_manager
 from core.types import ResponseTuple
 
 logger = logging.getLogger(__name__)

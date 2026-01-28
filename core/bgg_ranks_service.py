@@ -2,10 +2,10 @@
 BGG Ranks Service
 提供 BGG 排名數據的查詢功能
 """
-import sqlite3
-from typing import Optional, List, Dict, Any
-from pathlib import Path
 import logging
+import sqlite3
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

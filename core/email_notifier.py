@@ -2,13 +2,13 @@
 Email Notification Service
 發送郵件通知 BGG ranks 更新結果
 """
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from datetime import datetime
-from typing import Optional
-import os
 import logging
+import os
+import smtplib
+from datetime import datetime
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 

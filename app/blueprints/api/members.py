@@ -2,12 +2,13 @@
 社員 API Blueprint
 處理社員相關的路由
 """
-from typing import Tuple
-from flask import Blueprint, jsonify, Response
-from core.types import ResponseTuple
 import logging
+from typing import Tuple
 
-from app.utils import get_manager, error_response
+from flask import Blueprint, Response, jsonify
+
+from app.utils import error_response, get_manager
+from core.types import ResponseTuple
 
 logger = logging.getLogger(__name__)
 

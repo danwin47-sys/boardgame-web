@@ -2,11 +2,12 @@
 BGG XML API v2 Client with Bearer Token Authentication
 直接使用 requests 呼叫 BGG API，支援 Bearer Token 認證
 """
-import requests
-import xml.etree.ElementTree as ET
-from typing import List, Dict, Any, Optional
 import logging
 import time
+import xml.etree.ElementTree as ET
+from typing import Any, Dict, List, Optional
+
+import requests
 
 logger = logging.getLogger(__name__)
 

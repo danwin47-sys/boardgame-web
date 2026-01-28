@@ -1,20 +1,20 @@
-from typing import List, Tuple, Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
-from .sheets_client import SheetsClient
-from .member_service import MemberService
-from .utils import get_current_timestamp, create_history_entry, format_datetime
 from .constants import (
-    GAME_STATUS_BORROWED,
-    GAME_STATUS_AVAILABLE,
-    FIELD_NAME,
-    FIELD_STATUS,
     FIELD_BORROWER,
     FIELD_BORROWER_ID,
-    FIELD_MDATE,
-    FIELD_HISTORY,
     FIELD_CUSTODIAN,
+    FIELD_HISTORY,
+    FIELD_MDATE,
+    FIELD_NAME,
+    FIELD_STATUS,
+    GAME_STATUS_AVAILABLE,
+    GAME_STATUS_BORROWED,
 )
+from .member_service import MemberService
+from .sheets_client import SheetsClient
+from .utils import create_history_entry, format_datetime, get_current_timestamp
 
 
 class GameService:

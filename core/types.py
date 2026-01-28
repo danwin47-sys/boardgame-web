@@ -4,15 +4,16 @@
 集中管理 boardgame-web 專案中常用的型別定義。
 這些型別用於提供更好的 IDE 支援和型別檢查。
 """
-from typing import TypedDict, List, Dict, Any, Optional, Tuple
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
 
 # ============ 桌遊相關型別 ============
+
 
 class GameDict(TypedDict, total=False):
     """
     桌遊資料結構
-    
+
     Attributes:
         name: 遊戲名稱
         bgg_id: BoardGameGeek ID (可選)
@@ -26,6 +27,7 @@ class GameDict(TypedDict, total=False):
         borrower: 借用人 (可選)
         borrow_date: 借用日期 (可選)
     """
+
     name: str
     bgg_id: Optional[int]
     players: str
@@ -42,13 +44,14 @@ class GameDict(TypedDict, total=False):
 class MemberDict(TypedDict, total=False):
     """
     社員資料結構
-    
+
     Attributes:
         name: 社員姓名
         email: 電子郵件 (可選)
         join_date: 加入日期 (可選)
         status: 狀態 (可選)
     """
+
     name: str
     email: Optional[str]
     join_date: Optional[str]
@@ -57,16 +60,18 @@ class MemberDict(TypedDict, total=False):
 
 # ============ API 回應型別 ============
 
+
 class ErrorResponse(TypedDict, total=False):
     """
     標準錯誤回應結構
-    
+
     Attributes:
         success: 固定為 False
         error_code: 錯誤代碼 (例如: "GAME_NOT_FOUND")
         message: 錯誤訊息 (使用者可讀)
         request_id: 請求追蹤 ID (開發環境)
     """
+
     success: bool  # 固定為 False
     error_code: str
     message: str
@@ -76,12 +81,13 @@ class ErrorResponse(TypedDict, total=False):
 class SuccessResponse(TypedDict, total=False):
     """
     標準成功回應結構
-    
+
     Attributes:
         success: 固定為 True
         data: 回應資料
         message: 成功訊息 (可選)
     """
+
     success: bool  # 固定為 True
     data: Any
     message: Optional[str]
@@ -89,10 +95,11 @@ class SuccessResponse(TypedDict, total=False):
 
 # ============ BGG API 型別 ============
 
+
 class BGGGameDict(TypedDict, total=False):
     """
     BoardGameGeek 遊戲資料結構
-    
+
     Attributes:
         id: BGG 遊戲 ID
         name: 遊戲名稱
@@ -106,6 +113,7 @@ class BGGGameDict(TypedDict, total=False):
         rating: BGG 評分
         chinese_name: 中文名稱 (如果有)
     """
+
     id: int
     name: str
     year_published: int

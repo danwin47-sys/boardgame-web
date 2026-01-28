@@ -2,12 +2,13 @@
 Gallery API Blueprint
 處理桌遊展示牆相關的路由
 """
-from typing import Tuple, Optional, List, Dict, Any
-from flask import Blueprint, jsonify, request, Response
-from core.types import ResponseTuple
 import logging
+from typing import Any, Dict, List, Optional, Tuple
 
-from app.utils import get_manager, error_response
+from flask import Blueprint, Response, jsonify, request
+
+from app.utils import error_response, get_manager
+from core.types import ResponseTuple
 
 logger = logging.getLogger(__name__)
 

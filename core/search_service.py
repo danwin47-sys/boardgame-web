@@ -2,13 +2,13 @@
 搜尋服務模組
 提供全站搜尋功能，包含遊戲搜尋、會員搜尋和模糊匹配
 """
-from typing import List, Dict, Any, Optional
-from difflib import SequenceMatcher
 import logging
+from difflib import SequenceMatcher
+from typing import Any, Dict, List, Optional
 
-from .sheets_client import SheetsClient
+from .constants import FIELD_BORROWER, FIELD_BORROWER_ID, FIELD_NAME, FIELD_STATUS
 from .member_service import MemberService
-from .constants import FIELD_NAME, FIELD_STATUS, FIELD_BORROWER, FIELD_BORROWER_ID
+from .sheets_client import SheetsClient
 
 logger = logging.getLogger(__name__)
 

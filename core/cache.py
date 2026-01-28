@@ -4,8 +4,8 @@
 提供簡單的 TTL 快取功能
 """
 import time
-from typing import Any, Optional
 from functools import wraps
+from typing import Any, Optional
 
 
 class SimpleCache:
@@ -130,8 +130,9 @@ def get_redis_cache():
 
     if _redis_cache_instance is None:
         try:
-            from core.redis_cache import RedisCache
             import os
+
+            from core.redis_cache import RedisCache
 
             # 從環境變數讀取 Redis 配置
             redis_host = os.getenv("REDIS_HOST", "localhost")

@@ -2,12 +2,13 @@
 進階監控指標 API
 提供 API 回應時間、錯誤率、請求計數等指標
 """
-from flask import Blueprint, jsonify, request
 import logging
 import time
-from datetime import datetime, timedelta
 from collections import defaultdict
+from datetime import datetime, timedelta
 from threading import Lock
+
+from flask import Blueprint, jsonify, request
 
 logger = logging.getLogger(__name__)
 
@@ -182,12 +183,14 @@ def setup_metrics_middleware(app):
     @app.after_request
     def after_request(response):
         # 跳過靜態文件請求，避免干擾 Flask 靜態文件服務
-        if (request.path.startswith("/css/") or 
-            request.path.startswith("/js/") or
-            request.path.startswith("/images/") or
-            request.path.startswith("/static/")):
+        if (
+            request.path.startswith("/css/")
+            or request.path.startswith("/js/")
+            or request.path.startswith("/images/")
+            or request.path.startswith("/static/")
+        ):
             return response
-            
+
         if hasattr(request, "start_time"):
             response_time = time.time() - request.start_time
 

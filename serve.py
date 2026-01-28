@@ -5,32 +5,35 @@
 - 生產環境：使用 Waitress WSGI 伺服器（預設）
 """
 from dotenv import load_dotenv
+
 load_dotenv()  # 自動載入 .env 檔案
 
-from waitress import serve
-from app import create_app
-from core.logging_config import setup_logging, get_logger
 import os
+
+from waitress import serve
+
+from app import create_app
+from core.logging_config import get_logger, setup_logging
 
 # 設定統一 logging
 setup_logging()
 logger = get_logger(__name__)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # 檢查環境變數
-    flask_env = os.getenv('FLASK_ENV', 'production').lower()
-    
+    flask_env = os.getenv("FLASK_ENV", "production").lower()
+
     # 根據環境建立應用程式
-    if flask_env in ['development', 'testing']:
+    if flask_env in ["development", "testing"]:
         app = create_app(flask_env)
     else:
-        app = create_app('production')
-    
-    host = app.config.get('HOST', '0.0.0.0')
-    port = app.config.get('PORT', 5000)
-    
+        app = create_app("production")
+
+    host = app.config.get("HOST", "0.0.0.0")
+    port = app.config.get("PORT", 5000)
+
     # 根據環境選擇伺服器
-    if flask_env == 'development':
+    if flask_env == "development":
         print(f"[DEV] Starting Flask development server on http://localhost:{port}")
         logger.info(f"Starting Flask development server on {host}:{port}")
         app.run(host=host, port=port, debug=True)
@@ -38,4 +41,3 @@ if __name__ == '__main__':
         print(f"[PROD] Starting Waitress production server on http://localhost:{port}")
         logger.info(f"Starting Waitress production server on {host}:{port}")
         serve(app, host=host, port=port, threads=6)
-

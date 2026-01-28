@@ -8,7 +8,7 @@
 - error_code: 自定義錯誤代碼
 - to_dict(): 轉換為 JSON 回應格式
 """
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class BoardGameException(Exception):

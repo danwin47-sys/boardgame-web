@@ -4,8 +4,9 @@ API 文件模組
 
 提供 OpenAPI 規格的 API 文件，可透過 /api/docs 查看。
 """
+from typing import Any, Dict
+
 from flask import Blueprint, jsonify
-from typing import Dict, Any
 
 api_docs_bp = Blueprint("api_docs", __name__, url_prefix="/api")
 

@@ -2,7 +2,7 @@
 
 **桌遊管理系統 - 完整的桌遊庫存、借閱和 BGG 整合解決方案**
 
-[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)](https://flask.palletsprojects.com/)
 [![Redis](https://img.shields.io/badge/Redis-8.0+-red.svg)](https://redis.io/)
 [![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
@@ -73,7 +73,7 @@ Boardgame-Web 是一個現代化、高效能的桌遊管理系統，專為桌遊
 
 ### 環境需求
 
-- Python 3.9+
+- Python 3.12+
 - Redis 8.0+
 - Google Cloud Service Account (用於 Sheets API)
 
@@ -200,5 +200,5 @@ pytest --cov=core --cov=app --cov-report=html
 
 ---
 
-**最後更新**: 2025-12-25
+**最後更新**: 2025-12-29
 **維護者**: Derek Shih

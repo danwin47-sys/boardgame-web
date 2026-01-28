@@ -1,8 +1,9 @@
 """
 生產環境配置
 """
-from .base import BaseConfig
 import os
+
+from .base import BaseConfig
 
 
 class ProductionConfig(BaseConfig):

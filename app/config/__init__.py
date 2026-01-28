@@ -4,8 +4,8 @@
 """
 from .base import BaseConfig
 from .development import DevelopmentConfig
-from .testing import TestingConfig
 from .production import ProductionConfig
+from .testing import TestingConfig
 
 # 配置字典，用於工廠函數選擇配置
 config = {

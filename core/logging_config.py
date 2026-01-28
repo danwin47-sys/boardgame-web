@@ -12,7 +12,6 @@ import os
 import sys
 from typing import Optional
 
-
 # 日誌格式常數
 CONSOLE_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 CONSOLE_FORMAT_SIMPLE = "%(levelname)s - %(message)s"

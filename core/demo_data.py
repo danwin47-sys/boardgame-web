@@ -262,11 +262,41 @@ DEMO_GAME_DETAILS = {
 
 # 派對遊戲演示資料
 DEMO_PARTY_GAMES = [
-    {"id": 178900, "name": "Codenames", "rating_average": 7.8, "min_players": 2, "max_players": 8},
-    {"id": 128882, "name": "The Resistance: Avalon", "rating_average": 7.6, "min_players": 5, "max_players": 10},
-    {"id": 223040, "name": "Deception: Murder in Hong Kong", "rating_average": 7.5, "min_players": 4, "max_players": 12},
-    {"id": 181304, "name": "Secret Hitler", "rating_average": 7.5, "min_players": 5, "max_players": 10},
-    {"id": 244992, "name": "Just One", "rating_average": 7.6, "min_players": 3, "max_players": 7},
+    {
+        "id": 178900,
+        "name": "Codenames",
+        "rating_average": 7.8,
+        "min_players": 2,
+        "max_players": 8,
+    },
+    {
+        "id": 128882,
+        "name": "The Resistance: Avalon",
+        "rating_average": 7.6,
+        "min_players": 5,
+        "max_players": 10,
+    },
+    {
+        "id": 223040,
+        "name": "Deception: Murder in Hong Kong",
+        "rating_average": 7.5,
+        "min_players": 4,
+        "max_players": 12,
+    },
+    {
+        "id": 181304,
+        "name": "Secret Hitler",
+        "rating_average": 7.5,
+        "min_players": 5,
+        "max_players": 10,
+    },
+    {
+        "id": 244992,
+        "name": "Just One",
+        "rating_average": 7.6,
+        "min_players": 3,
+        "max_players": 7,
+    },
 ]
 
 # 策略遊戲演示資料
@@ -274,19 +304,73 @@ DEMO_STRATEGY_GAMES = _DEMO_GAMES_LIST[:5]
 
 # 家庭遊戲演示資料
 DEMO_FAMILY_GAMES = [
-    {"id": 13, "name": "Catan", "rating_average": 7.2, "min_players": 3, "max_players": 4},
-    {"id": 30549, "name": "Pandemic", "rating_average": 7.6, "min_players": 2, "max_players": 4},
-    {"id": 36218, "name": "Dominion", "rating_average": 7.6, "min_players": 2, "max_players": 4},
-    {"id": 68448, "name": "7 Wonders", "rating_average": 7.8, "min_players": 2, "max_players": 7},
-    {"id": 148228, "name": "Splendor", "rating_average": 7.4, "min_players": 2, "max_players": 4},
+    {
+        "id": 13,
+        "name": "Catan",
+        "rating_average": 7.2,
+        "min_players": 3,
+        "max_players": 4,
+    },
+    {
+        "id": 30549,
+        "name": "Pandemic",
+        "rating_average": 7.6,
+        "min_players": 2,
+        "max_players": 4,
+    },
+    {
+        "id": 36218,
+        "name": "Dominion",
+        "rating_average": 7.6,
+        "min_players": 2,
+        "max_players": 4,
+    },
+    {
+        "id": 68448,
+        "name": "7 Wonders",
+        "rating_average": 7.8,
+        "min_players": 2,
+        "max_players": 7,
+    },
+    {
+        "id": 148228,
+        "name": "Splendor",
+        "rating_average": 7.4,
+        "min_players": 2,
+        "max_players": 4,
+    },
 ]
 
 # 兒童遊戲演示資料
 DEMO_CHILDREN_GAMES = [
-    {"id": 180621, "name": "Rhino Hero: Super Battle", "rating_average": 7.3, "min_players": 2, "max_players": 4},
-    {"id": 8571, "name": "Animal Upon Animal", "rating_average": 7.0, "min_players": 2, "max_players": 4},
-    {"id": 147020, "name": "Ice Cool", "rating_average": 6.9, "min_players": 2, "max_players": 4},
-    {"id": 207051, "name": "Zombie Kidz Evolution", "rating_average": 7.6, "min_players": 2, "max_players": 4},
+    {
+        "id": 180621,
+        "name": "Rhino Hero: Super Battle",
+        "rating_average": 7.3,
+        "min_players": 2,
+        "max_players": 4,
+    },
+    {
+        "id": 8571,
+        "name": "Animal Upon Animal",
+        "rating_average": 7.0,
+        "min_players": 2,
+        "max_players": 4,
+    },
+    {
+        "id": 147020,
+        "name": "Ice Cool",
+        "rating_average": 6.9,
+        "min_players": 2,
+        "max_players": 4,
+    },
+    {
+        "id": 207051,
+        "name": "Zombie Kidz Evolution",
+        "rating_average": 7.6,
+        "min_players": 2,
+        "max_players": 4,
+    },
 ]
 
 # 熱門遊戲演示資料

@@ -1,6 +1,7 @@
-from typing import Optional, Dict, Any
-from .sheets_client import SheetsClient
+from typing import Any, Dict, Optional
+
 from .exceptions import MemberNotFoundException
+from .sheets_client import SheetsClient
 
 
 class MemberService:

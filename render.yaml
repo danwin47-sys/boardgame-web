@@ -10,7 +10,7 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: PYTHON_VERSION
-        value: 3.9.6
+        value: 3.12.0
       - key: FLASK_ENV
         value: production
       - key: PORT

@@ -8,11 +8,12 @@ Author: Boardgame-Web Team
 Date: 2025-12-21
 """
 
-import redis
-from typing import Any, Optional, Dict
 import json
 import logging
 from functools import wraps
+from typing import Any, Dict, Optional
+
+import redis
 
 logger = logging.getLogger(__name__)
 

@@ -7,9 +7,9 @@ API Schema 模組
 - 清晰的類型定義
 - 自動文檔生成 (未來整合 OpenAPI)
 """
-from typing import Optional, List
-from pydantic import BaseModel, Field
+from typing import List, Optional
 
+from pydantic import BaseModel, Field
 
 # ============ 遊戲相關 Schema ============
 

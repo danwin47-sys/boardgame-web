@@ -19,7 +19,7 @@ echo -e "${GREEN}🏥 開始健康檢查...${NC}"
 
 # 檢查服務是否運行
 echo -e "${YELLOW}🔍 檢查服務狀態...${NC}"
-if curl -f -s "$BASE_URL/health" > /dev/null; then
+if curl -f -s "$BASE_URL/api/health" > /dev/null; then
     echo -e "${GREEN}✅ 健康檢查端點正常${NC}"
 else
     echo -e "${RED}❌ 健康檢查端點失敗${NC}"

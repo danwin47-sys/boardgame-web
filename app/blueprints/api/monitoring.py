@@ -2,13 +2,15 @@
 效能監控 API
 提供 Redis 統計、快取統計和系統資訊
 """
+import logging
+import os
+import sys
+from datetime import datetime
+
 from flask import Blueprint, jsonify
+
 from app.utils import error_response
 from core.types import ResponseTuple
-import logging
-import sys
-import os
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +21,9 @@ monitoring_bp = Blueprint("monitoring", __name__, url_prefix="/api/monitoring")
 def get_redis_stats():
     """獲取 Redis 統計資訊"""
     try:
-        from core.redis_cache import RedisCache
         import os
+
+        from core.redis_cache import RedisCache
 
         # 從環境變數獲取 Redis 配置
         redis_cache = RedisCache(
@@ -72,8 +75,9 @@ def get_redis_stats():
 def get_cache_stats():
     """獲取快取統計資訊"""
     try:
-        from core.redis_cache import RedisCache
         import os
+
+        from core.redis_cache import RedisCache
 
         redis_cache = RedisCache(
             host=os.getenv("REDIS_HOST", "localhost"),
@@ -121,6 +125,7 @@ def get_system_info():
     """獲取系統資訊"""
     try:
         import platform
+
         import psutil
 
         stats = {
@@ -164,8 +169,9 @@ def get_system_info():
 def health_check():
     """健康檢查"""
     try:
-        from core.redis_cache import RedisCache
         import os
+
+        from core.redis_cache import RedisCache
 
         redis_cache = RedisCache(
             host=os.getenv("REDIS_HOST", "localhost"),
@@ -188,4 +194,6 @@ def health_check():
 
     except Exception as e:
         logger.error(f"健康檢查失敗: {e}")
-        return error_response(str(e), "HEALTH_CHECK_ERROR", 500, details={"status": "unhealthy"})
+        return error_response(
+            str(e), "HEALTH_CHECK_ERROR", 500, details={"status": "unhealthy"}
+        )

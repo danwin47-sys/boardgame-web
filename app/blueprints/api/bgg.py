@@ -2,13 +2,14 @@
 BGG (BoardGameGeek) API Routes
 處理所有 BGG 相關的 API 端點
 """
-from typing import Tuple, Optional
-from flask import Blueprint, jsonify, request, Response
-from urllib.parse import unquote
 import logging
 import traceback
+from typing import Optional, Tuple
+from urllib.parse import unquote
 
-from app.utils import get_manager, error_response
+from flask import Blueprint, Response, jsonify, request
+
+from app.utils import error_response, get_manager
 from core.types import ResponseTuple
 
 logger = logging.getLogger(__name__)

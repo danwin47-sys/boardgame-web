@@ -2,14 +2,15 @@
 BoardGameGeek API Service
 提供桌遊搜尋、詳細資訊查詢等功能
 """
-from typing import List, Dict, Any, Optional
 import logging
-from flask import current_app
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Dict, List, Optional
+
+from flask import current_app
 
 from .bgg_api_client import BGGApiClient
 from .cache import cache_with_timeout
-from .demo_data import DEMO_GAMES, DEMO_GAME_DETAILS
+from .demo_data import DEMO_GAME_DETAILS, DEMO_GAMES
 
 logger = logging.getLogger(__name__)
 

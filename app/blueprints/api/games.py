@@ -2,11 +2,12 @@
 遊戲 API Blueprint
 處理桌遊相關的路由：列表、借還操作
 """
-from typing import Tuple, Any, Optional, Dict
-from flask import Blueprint, jsonify, request, Response
 import logging
+from typing import Any, Dict, Optional, Tuple
 
-from app.utils import get_manager, error_response
+from flask import Blueprint, Response, jsonify, request
+
+from app.utils import error_response, get_manager
 from core.types import ResponseTuple
 
 logger = logging.getLogger(__name__)
@@ -67,7 +68,9 @@ def borrow_game() -> ResponseTuple:
         member_id = data.get("member_id")
 
         if not name or not member_id:
-            return error_response("缺少必要欄位: name, member_id", "MISSING_REQUIRED_FIELDS", 400)
+            return error_response(
+                "缺少必要欄位: name, member_id", "MISSING_REQUIRED_FIELDS", 400
+            )
 
         mgr = get_manager()
         member = mgr.find_member_by_id(member_id)
@@ -121,8 +124,8 @@ def return_game() -> ResponseTuple:
 def update_game_expansion(game_name: str) -> ResponseTuple:
     """取得遊戲的所有擴充"""
     try:
-        from core.expansion_service import ExpansionService
         from app.utils import get_manager
+        from core.expansion_service import ExpansionService
 
         mgr = get_manager()
         expansion_service = ExpansionService(mgr.client)
@@ -139,17 +142,27 @@ def update_game_expansion(game_name: str) -> ResponseTuple:
         is_expansion_of = data.get("is_expansion_of")
 
         if not expansion_name or not is_expansion_of:
-            return error_response("缺少必要欄位: expansion_name, is_expansion_of", "MISSING_REQUIRED_FIELDS", 400)
+            return error_response(
+                "缺少必要欄位: expansion_name, is_expansion_of",
+                "MISSING_REQUIRED_FIELDS",
+                400,
+            )
 
         # Example: Update logic (this would depend on your ExpansionService implementation)
         # For now, just return a success message
-        return jsonify(
-            {
-                "success": True,
-                "message": f"Expansion '{expansion_name}' for game '{game_name}' updated successfully.",
-                "updated_data": {"expansion_name": expansion_name, "is_expansion_of": is_expansion_of}
-            }
-        ), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": f"Expansion '{expansion_name}' for game '{game_name}' updated successfully.",
+                    "updated_data": {
+                        "expansion_name": expansion_name,
+                        "is_expansion_of": is_expansion_of,
+                    },
+                }
+            ),
+            200,
+        )
     except Exception as e:
         logger.error(f"更新遊戲擴充失敗: {e}")
         return error_response(str(e), "UPDATE_EXPANSION_ERROR", 500)
@@ -159,8 +172,8 @@ def update_game_expansion(game_name: str) -> ResponseTuple:
 def get_game_expansions(game_name: str) -> ResponseTuple:
     """取得遊戲的所有擴充"""
     try:
-        from core.expansion_service import ExpansionService
         from app.utils import get_manager
+        from core.expansion_service import ExpansionService
 
         mgr = get_manager()
         expansion_service = ExpansionService(mgr.client)
@@ -185,8 +198,8 @@ def get_game_expansions(game_name: str) -> ResponseTuple:
 def get_game_family(game_name):
     """取得遊戲家族（主遊戲 + 所有擴充）"""
     try:
-        from core.expansion_service import ExpansionService
         from app.utils import get_manager
+        from core.expansion_service import ExpansionService
 
         mgr = get_manager()
         expansion_service = ExpansionService(mgr.client)
@@ -212,8 +225,8 @@ def get_game_family(game_name):
 def validate_game_borrow(game_name):
     """驗證借出操作（檢查擴充依賴）"""
     try:
-        from core.expansion_service import ExpansionService
         from app.utils import get_manager
+        from core.expansion_service import ExpansionService
 
         mgr = get_manager()
         expansion_service = ExpansionService(mgr.client)
