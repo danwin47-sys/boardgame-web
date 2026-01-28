@@ -91,9 +91,7 @@ class TestMonitoringAPI:
     @patch("psutil.cpu_percent")
     @patch("psutil.virtual_memory")
     @patch("psutil.disk_usage")
-    def test_system_info(
-        self, mock_disk, mock_mem, mock_cpu_pct, mock_cpu_count, client
-    ):
+    def test_system_info(self, mock_disk, mock_mem, mock_cpu_pct, mock_cpu_count, client):
         """測試系統資訊"""
         mock_cpu_count.return_value = 8
         mock_cpu_pct.return_value = 45.5

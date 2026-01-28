@@ -144,9 +144,7 @@ class BGGRanksService:
             logger.error(f"Error searching games by name '{name}': {e}")
             return []
 
-    def get_top_games(
-        self, limit: int = 100, exclude_expansions: bool = True
-    ) -> List[Dict[str, Any]]:
+    def get_top_games(self, limit: int = 100, exclude_expansions: bool = True) -> List[Dict[str, Any]]:
         """
         獲取 BGG Top N 遊戲
 
@@ -175,9 +173,7 @@ class BGGRanksService:
             logger.error(f"Error getting top {limit} games: {e}")
             return []
 
-    def get_by_category_rank(
-        self, category: str, limit: int = 50
-    ) -> List[Dict[str, Any]]:
+    def get_by_category_rank(self, category: str, limit: int = 50) -> List[Dict[str, Any]]:
         """
         根據分類排名獲取遊戲
 
@@ -242,15 +238,11 @@ class BGGRanksService:
             stats["total_games"] = cursor.fetchone()["count"]
 
             # 有排名的遊戲數
-            cursor.execute(
-                "SELECT COUNT(*) as count FROM bgg_ranks WHERE rank IS NOT NULL"
-            )
+            cursor.execute("SELECT COUNT(*) as count FROM bgg_ranks WHERE rank IS NOT NULL")
             stats["ranked_games"] = cursor.fetchone()["count"]
 
             # 擴充數量
-            cursor.execute(
-                "SELECT COUNT(*) as count FROM bgg_ranks WHERE is_expansion = 1"
-            )
+            cursor.execute("SELECT COUNT(*) as count FROM bgg_ranks WHERE is_expansion = 1")
             stats["expansions"] = cursor.fetchone()["count"]
 
             # 最近更新時間

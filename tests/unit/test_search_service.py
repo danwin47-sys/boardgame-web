@@ -89,9 +89,7 @@ class TestSearchServiceSearchGames:
 
     def test_search_games_no_results(self):
         """測試無結果"""
-        self.mock_client.load_games.return_value = [
-            {FIELD_NAME: "卡坦島", FIELD_STATUS: "可用"}
-        ]
+        self.mock_client.load_games.return_value = [{FIELD_NAME: "卡坦島", FIELD_STATUS: "可用"}]
 
         results = self.service.search_games("不存在的遊戲")
 
@@ -152,12 +150,8 @@ class TestSearchServiceGlobalSearch:
 
     def test_global_search_success(self):
         """測試全站搜尋成功"""
-        self.mock_client.load_games.return_value = [
-            {FIELD_NAME: "卡坦島", FIELD_STATUS: "可用"}
-        ]
-        self.mock_client.load_members.return_value = [
-            {"id": "A001", "name": "卡卡"}  # 使用包含"卡"的名字
-        ]
+        self.mock_client.load_games.return_value = [{FIELD_NAME: "卡坦島", FIELD_STATUS: "可用"}]
+        self.mock_client.load_members.return_value = [{"id": "A001", "name": "卡卡"}]  # 使用包含"卡"的名字
 
         results = self.service.global_search("卡")
 

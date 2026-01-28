@@ -44,9 +44,7 @@ class TestEmailNotifierSendNotification:
         notifier = EmailNotifier()
 
         # 沒有設置 username/password 應該返回 False
-        result = notifier.send_notification(
-            "test@test.com", "Test Subject", "Test Content"
-        )
+        result = notifier.send_notification("test@test.com", "Test Subject", "Test Content")
 
         # 沒有憑證應該失敗
         assert result is False
@@ -67,9 +65,7 @@ class TestEmailNotifierSendNotification:
             password="password",
         )
 
-        result = notifier.send_notification(
-            "recipient@test.com", "Test Subject", "Test Content"
-        )
+        result = notifier.send_notification("recipient@test.com", "Test Subject", "Test Content")
 
         assert result is True
 
@@ -87,9 +83,7 @@ class TestEmailNotifierSendNotification:
             password="password",
         )
 
-        result = notifier.send_notification(
-            "recipient@test.com", "Test Subject", "Test Content"
-        )
+        result = notifier.send_notification("recipient@test.com", "Test Subject", "Test Content")
 
         assert result is False
 
@@ -103,9 +97,7 @@ class TestEmailNotifierTemplates:
 
         notifier = EmailNotifier()
 
-        result = notifier.send_import_success(
-            "test@test.com", total_records=1000, errors=5, import_time=10.5
-        )
+        result = notifier.send_import_success("test@test.com", total_records=1000, errors=5, import_time=10.5)
 
         # 沒有憑證應該失敗
         assert result is False
@@ -116,9 +108,7 @@ class TestEmailNotifierTemplates:
 
         notifier = EmailNotifier()
 
-        result = notifier.send_import_failure(
-            "test@test.com", error_message="Test error"
-        )
+        result = notifier.send_import_failure("test@test.com", error_message="Test error")
 
         assert result is False
 
@@ -128,9 +118,7 @@ class TestEmailNotifierTemplates:
 
         notifier = EmailNotifier()
 
-        result = notifier.send_download_success(
-            "test@test.com", filepath="/path/to/file", file_size=1024
-        )
+        result = notifier.send_download_success("test@test.com", filepath="/path/to/file", file_size=1024)
 
         assert result is False
 
@@ -141,9 +129,7 @@ class TestEmailNotifierTemplates:
 
         notifier = EmailNotifier(username="u", password="p")
 
-        with patch.object(
-            notifier, "send_notification", return_value=True
-        ) as mock_send:
+        with patch.object(notifier, "send_notification", return_value=True) as mock_send:
             db_stats = {"total_games": 500, "expansions": 50}
             notifier.send_import_success("to@ex.com", 10, 0, 1.2, db_stats)
 
@@ -177,8 +163,6 @@ class TestEmailNotifierMain:
         from core.email_notifier import main
 
         # 確保有憑證
-        with patch.dict(
-            "os.environ", {"EMAIL_USERNAME": "user", "EMAIL_PASSWORD": "pwd"}
-        ):
+        with patch.dict("os.environ", {"EMAIL_USERNAME": "user", "EMAIL_PASSWORD": "pwd"}):
             main()
             assert mock_send.called

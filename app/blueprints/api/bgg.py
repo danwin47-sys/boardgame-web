@@ -170,9 +170,7 @@ def get_our_hot_games() -> ResponseTuple:
         our_hot_games = bgg.get_our_hot_games(mgr.client, limit=limit)
 
         return (
-            jsonify(
-                {"success": True, "games": our_hot_games, "total": len(our_hot_games)}
-            ),
+            jsonify({"success": True, "games": our_hot_games, "total": len(our_hot_games)}),
             200,
         )
     except Exception as e:
@@ -309,9 +307,7 @@ def add_to_collection() -> ResponseTuple:
         if not game_id:
             return error_response("缺少 game_id", "MISSING_GAME_ID", 400)
 
-        logger.debug(
-            f"Adding BGG game to collection: {game_id}, custodian: {custodian}, force: {force}"
-        )
+        logger.debug(f"Adding BGG game to collection: {game_id}, custodian: {custodian}, force: {force}")
 
         # 取得 Manager
         mgr = get_manager()
@@ -323,9 +319,7 @@ def add_to_collection() -> ResponseTuple:
                 existing_bgg_id = existing_game.get("bgg_id")
                 # 檢查 BGG ID 是否相符
                 if existing_bgg_id and str(existing_bgg_id) == str(game_id):
-                    logger.warning(
-                        f"遊戲已存在：{existing_game.get('name')} (BGG ID: {game_id})"
-                    )
+                    logger.warning(f"遊戲已存在：{existing_game.get('name')} (BGG ID: {game_id})")
                     return (
                         jsonify(
                             {
@@ -369,9 +363,7 @@ def add_to_collection() -> ResponseTuple:
             msg = f'已成功將「{game["name"]}」加入館藏'
             if force:
                 msg += "（強制加入）"
-            logger.info(
-                f"成功將 BGG 遊戲加入館藏：{game['name']} (ID: {game_id}){' [FORCED]' if force else ''}"
-            )
+            logger.info(f"成功將 BGG 遊戲加入館藏：{game['name']} (ID: {game_id}){' [FORCED]' if force else ''}")
             return jsonify({"success": True, "message": msg, "game": game_data}), 200
         else:
             return jsonify({"success": False, "error": "加入遊戲到 Google Sheets 失敗"}), 500
@@ -408,17 +400,13 @@ def search_for_linking(game_name: str) -> ResponseTuple:
     """
     try:
         decoded_game_name = unquote(game_name)
-        logger.debug(
-            f"search_for_linking - Original: {game_name}, Decoded: {decoded_game_name}"
-        )
+        logger.debug(f"search_for_linking - Original: {game_name}, Decoded: {decoded_game_name}")
 
         bgg = get_bgg_service()
         results = bgg.search_games(decoded_game_name)
 
         return (
-            jsonify(
-                {"success": True, "game_name": decoded_game_name, "results": results}
-            ),
+            jsonify({"success": True, "game_name": decoded_game_name, "results": results}),
             200,
         )
     except Exception as e:
@@ -475,9 +463,7 @@ def link_game(game_name: str) -> ResponseTuple:
         image_url = game_details.get("image") if game_details else None
         players_display = game_details.get("players_display") if game_details else None
 
-        success = mgr.client.update_game_bgg_id(
-            decoded_game_name, bgg_id, thumbnail_url, image_url, players_display
-        )
+        success = mgr.client.update_game_bgg_id(decoded_game_name, bgg_id, thumbnail_url, image_url, players_display)
 
         if success:
             return (
@@ -525,9 +511,7 @@ def unlink_game(game_name: str) -> ResponseTuple:
     """
     try:
         decoded_game_name = unquote(game_name)
-        logger.debug(
-            f"unlink_game - Original: {game_name}, Decoded: {decoded_game_name}"
-        )
+        logger.debug(f"unlink_game - Original: {game_name}, Decoded: {decoded_game_name}")
 
         # 使用共用 manager
         mgr = get_manager()
@@ -536,16 +520,12 @@ def unlink_game(game_name: str) -> ResponseTuple:
 
         if success:
             return (
-                jsonify(
-                    {"success": True, "message": f"已取消「{decoded_game_name}」與 BGG 的連結"}
-                ),
+                jsonify({"success": True, "message": f"已取消「{decoded_game_name}」與 BGG 的連結"}),
                 200,
             )
         else:
             return (
-                jsonify(
-                    {"success": False, "error": f"找不到桌遊「{decoded_game_name}」，請確認名稱是否正確"}
-                ),
+                jsonify({"success": False, "error": f"找不到桌遊「{decoded_game_name}」，請確認名稱是否正確"}),
                 404,
             )
     except Exception as e:

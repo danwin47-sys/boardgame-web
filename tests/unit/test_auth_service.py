@@ -86,9 +86,7 @@ class TestAuthService:
         session["oauth_state"] = "correct_state"
         session["oauth_nonce"] = "test_nonce"
 
-        success, profile, error = auth_service.handle_callback(
-            "test_code", "wrong_state"
-        )
+        success, profile, error = auth_service.handle_callback("test_code", "wrong_state")
 
         assert success is False
         assert profile is None
@@ -107,9 +105,7 @@ class TestAuthService:
         mock_response.json.return_value = {"access_token": "test_token"}
         mock_post.return_value = mock_response
 
-        success, profile, error = auth_service.handle_callback(
-            "test_code", "test_state"
-        )
+        success, profile, error = auth_service.handle_callback("test_code", "test_state")
 
         assert success is False
         assert profile is None
@@ -117,9 +113,7 @@ class TestAuthService:
 
     @patch("core.auth_service.requests.post")
     @patch("core.auth_service.jwt.decode")
-    def test_handle_callback_success(
-        self, mock_jwt_decode, mock_post, auth_service, app_context
-    ):
+    def test_handle_callback_success(self, mock_jwt_decode, mock_post, auth_service, app_context):
         """測試 callback 處理 - 成功"""
         from flask import session
 
@@ -139,9 +133,7 @@ class TestAuthService:
             "nonce": "test_nonce",
         }
 
-        success, profile, error = auth_service.handle_callback(
-            "test_code", "test_state"
-        )
+        success, profile, error = auth_service.handle_callback("test_code", "test_state")
 
         assert success is True
         assert profile is not None
@@ -152,9 +144,7 @@ class TestAuthService:
 
     @patch("core.auth_service.requests.post")
     @patch("core.auth_service.jwt.decode")
-    def test_handle_callback_invalid_nonce(
-        self, mock_jwt_decode, mock_post, auth_service, app_context
-    ):
+    def test_handle_callback_invalid_nonce(self, mock_jwt_decode, mock_post, auth_service, app_context):
         """測試 callback 處理 - nonce 不匹配"""
         from flask import session
 
@@ -173,9 +163,7 @@ class TestAuthService:
             "nonce": "wrong_nonce",
         }
 
-        success, profile, error = auth_service.handle_callback(
-            "test_code", "test_state"
-        )
+        success, profile, error = auth_service.handle_callback("test_code", "test_state")
 
         assert success is False
         assert profile is None
@@ -192,9 +180,7 @@ class TestAuthService:
         # Mock API 拋出異常
         mock_post.side_effect = Exception("API Error")
 
-        success, profile, error = auth_service.handle_callback(
-            "test_code", "test_state"
-        )
+        success, profile, error = auth_service.handle_callback("test_code", "test_state")
 
         assert success is False
         assert profile is None
@@ -238,9 +224,7 @@ class TestAuthService:
 
         assert success is True
         assert message == "綁定成功！"
-        mock_sheets_client.bind_user_to_line_id.assert_called_once_with(
-            "A001", "U123456"
-        )
+        mock_sheets_client.bind_user_to_line_id.assert_called_once_with("A001", "U123456")
 
     def test_bind_student_id_not_found(self, auth_service, mock_sheets_client):
         """測試綁定工號 - 工號不存在"""

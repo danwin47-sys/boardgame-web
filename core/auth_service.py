@@ -44,9 +44,7 @@ class AuthService:
         )
         return login_url
 
-    def handle_callback(
-        self, code: str, state: str
-    ) -> Tuple[bool, Optional[Dict[str, Any]], Optional[str]]:
+    def handle_callback(self, code: str, state: str) -> Tuple[bool, Optional[Dict[str, Any]], Optional[str]]:
         """
         處理 LINE Login 回調
 
@@ -56,9 +54,7 @@ class AuthService:
         # 1. 驗證 State (防止 CSRF)
         stored_state = session.get("oauth_state")
         if state != stored_state:
-            current_app.logger.warning(
-                f"[AUTH] State mismatch: received '{state}' vs stored '{stored_state}'"
-            )
+            current_app.logger.warning(f"[AUTH] State mismatch: received '{state}' vs stored '{stored_state}'")
             return False, None, "Invalid state parameter"
 
         # 2. 用 Code 換取 Token

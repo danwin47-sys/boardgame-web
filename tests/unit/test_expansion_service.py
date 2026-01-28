@@ -5,12 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from core.constants import (
-    GAME_STATUS_AVAILABLE,
-    GAME_STATUS_BORROWED,
-    STORAGE_MODE_INDEPENDENT,
-    STORAGE_MODE_MERGED,
-)
+from core.constants import GAME_STATUS_AVAILABLE, GAME_STATUS_BORROWED, STORAGE_MODE_INDEPENDENT, STORAGE_MODE_MERGED
 from core.expansion_service import ExpansionService
 
 
@@ -287,9 +282,7 @@ class TestExpansionServiceAutoLinkExpansions:
             {"name": "Seafarers", "is_expansion": "0"},
         ]
 
-        linked = self.service.auto_link_expansions(
-            "Catan", ["Seafarers (Catan Expansion)"], games
-        )
+        linked = self.service.auto_link_expansions("Catan", ["Seafarers (Catan Expansion)"], games)
 
         assert isinstance(linked, list)
 
@@ -299,8 +292,6 @@ class TestExpansionServiceAutoLinkExpansions:
             {"name": "Catan", "is_expansion": "0"},
         ]
 
-        linked = self.service.auto_link_expansions(
-            "Catan", ["Completely Different Game"], games
-        )
+        linked = self.service.auto_link_expansions("Catan", ["Completely Different Game"], games)
 
         assert linked == []

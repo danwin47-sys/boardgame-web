@@ -41,9 +41,7 @@ class BGGService:
 
         if not demo_mode:
             # 使用新的 BGGApiClient，支援 Bearer Token
-            self.client = BGGApiClient(
-                api_token=bgg_token, timeout=bgg_timeout, retries=bgg_retries
-            )
+            self.client = BGGApiClient(api_token=bgg_token, timeout=bgg_timeout, retries=bgg_retries)
             logger.info("BGG Service initialized (Live mode with Bearer Token)")
         else:
             self.client = None
@@ -106,9 +104,7 @@ class BGGService:
 
             # 提供更詳細的錯誤訊息
             if "non-XML reply" in error_msg:
-                logger.warning(
-                    "BGG API returned non-XML response - server may be overloaded or under maintenance"
-                )
+                logger.warning("BGG API returned non-XML response - server may be overloaded or under maintenance")
             elif "timeout" in error_msg.lower():
                 logger.warning("BGG API timeout - server is responding slowly")
 
@@ -141,9 +137,7 @@ class BGGService:
             # 處理玩家人數
             min_players = game.get("min_players")
             max_players = game.get("max_players")
-            players = (
-                f"{min_players}-{max_players}" if min_players and max_players else "N/A"
-            )
+            players = f"{min_players}-{max_players}" if min_players and max_players else "N/A"
             if min_players == max_players and min_players:
                 players = str(min_players)
 
@@ -727,10 +721,7 @@ class BGGService:
         # 使用並發執行，最多 5 個並發請求
         with ThreadPoolExecutor(max_workers=5) as executor:
             # 提交所有任務
-            future_to_id = {
-                executor.submit(self.get_game_details, game_id): game_id
-                for game_id in game_ids
-            }
+            future_to_id = {executor.submit(self.get_game_details, game_id): game_id for game_id in game_ids}
 
             # 收集結果
             for future in as_completed(future_to_id):

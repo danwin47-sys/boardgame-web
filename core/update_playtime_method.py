@@ -7,9 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def update_game_playtime(
-    self, game_name: str, min_playtime: int, max_playtime: int
-) -> bool:
+def update_game_playtime(self, game_name: str, min_playtime: int, max_playtime: int) -> bool:
     """更新遊戲的遊玩時間到 Google Sheets
 
     Args:

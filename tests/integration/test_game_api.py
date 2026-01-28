@@ -21,9 +21,7 @@ class TestGameAPI:
 
     def test_borrow_game_missing_data(self, client):
         """測試借桌遊時缺少資料"""
-        response = client.post(
-            "/api/borrow", data=json.dumps({}), content_type="application/json"
-        )
+        response = client.post("/api/borrow", data=json.dumps({}), content_type="application/json")
 
         assert response.status_code == 400
         data = json.loads(response.data)
@@ -44,9 +42,7 @@ class TestGameAPI:
 
     def test_return_game_missing_name(self, client):
         """測試歸還桌遊時缺少名稱"""
-        response = client.post(
-            "/api/return", data=json.dumps({}), content_type="application/json"
-        )
+        response = client.post("/api/return", data=json.dumps({}), content_type="application/json")
 
         assert response.status_code == 400
         data = json.loads(response.data)

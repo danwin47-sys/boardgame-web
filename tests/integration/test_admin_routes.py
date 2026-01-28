@@ -96,9 +96,7 @@ class TestBatchBorrow:
 
     def test_batch_borrow_empty_list(self, client):
         """測試空遊戲列表"""
-        response = client.post(
-            "/api/batch-borrow", json={"game_names": [], "member_id": "A001"}
-        )
+        response = client.post("/api/batch-borrow", json={"game_names": [], "member_id": "A001"})
 
         assert response.status_code == 400
         data = response.get_json()
@@ -110,9 +108,7 @@ class TestBatchReturn:
 
     def test_batch_return_success(self, client):
         """測試批次歸還成功"""
-        response = client.post(
-            "/api/batch-return", json={"game_names": ["卡坦島", "璀璨寶石"]}
-        )
+        response = client.post("/api/batch-return", json={"game_names": ["卡坦島", "璀璨寶石"]})
 
         # 根據實際資料狀態，可能成功或部分成功
         assert response.status_code in [200, 400]
@@ -137,9 +133,7 @@ class TestBatchReturn:
 
     def test_batch_return_nonexistent_games(self, client):
         """測試歸還不存在的遊戲"""
-        response = client.post(
-            "/api/batch-return", json={"game_names": ["不存在的遊戲xyz123"]}
-        )
+        response = client.post("/api/batch-return", json={"game_names": ["不存在的遊戲xyz123"]})
 
         # 應該返回失敗或部分失敗
         assert response.status_code in [200, 400]
@@ -154,9 +148,7 @@ class TestAdminErrorHandling:
 
     def test_invalid_json(self, client):
         """測試無效 JSON"""
-        response = client.post(
-            "/api/admin/verify", data="invalid json", content_type="application/json"
-        )
+        response = client.post("/api/admin/verify", data="invalid json", content_type="application/json")
 
         assert response.status_code in [400, 500]
 

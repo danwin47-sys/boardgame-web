@@ -52,9 +52,7 @@ class TestGamesAPIBorrowGame:
         mock_get_mgr.return_value = mock_mgr
 
         borrow_data = {"name": "Catan", "member_id": "001"}
-        response = client.post(
-            "/api/borrow", data=json.dumps(borrow_data), content_type="application/json"
-        )
+        response = client.post("/api/borrow", data=json.dumps(borrow_data), content_type="application/json")
 
         assert response.status_code == 200
         data = json.loads(response.data)
@@ -64,9 +62,7 @@ class TestGamesAPIBorrowGame:
     @patch("app.blueprints.api.games.get_manager")
     def test_borrow_game_missing_data(self, mock_get_mgr, client):
         """測試借出遊戲 - 缺少資料"""
-        response = client.post(
-            "/api/borrow", data=json.dumps({}), content_type="application/json"
-        )
+        response = client.post("/api/borrow", data=json.dumps({}), content_type="application/json")
 
         assert response.status_code == 400
         data = json.loads(response.data)
@@ -80,9 +76,7 @@ class TestGamesAPIBorrowGame:
         mock_get_mgr.return_value = mock_mgr
 
         borrow_data = {"name": "Catan", "member_id": "999"}
-        response = client.post(
-            "/api/borrow", data=json.dumps(borrow_data), content_type="application/json"
-        )
+        response = client.post("/api/borrow", data=json.dumps(borrow_data), content_type="application/json")
 
         assert response.status_code == 404
         data = json.loads(response.data)
@@ -97,9 +91,7 @@ class TestGamesAPIBorrowGame:
         mock_get_mgr.return_value = mock_mgr
 
         borrow_data = {"name": "Catan", "member_id": "001"}
-        response = client.post(
-            "/api/borrow", data=json.dumps(borrow_data), content_type="application/json"
-        )
+        response = client.post("/api/borrow", data=json.dumps(borrow_data), content_type="application/json")
 
         assert response.status_code == 400
         data = json.loads(response.data)
@@ -117,9 +109,7 @@ class TestGamesAPIReturnGame:
         mock_get_mgr.return_value = mock_mgr
 
         return_data = {"name": "Catan"}
-        response = client.post(
-            "/api/return", data=json.dumps(return_data), content_type="application/json"
-        )
+        response = client.post("/api/return", data=json.dumps(return_data), content_type="application/json")
 
         assert response.status_code == 200
         data = json.loads(response.data)
@@ -128,9 +118,7 @@ class TestGamesAPIReturnGame:
     @patch("app.blueprints.api.games.get_manager")
     def test_return_game_missing_name(self, mock_get_mgr, client):
         """測試歸還遊戲 - 缺少名稱"""
-        response = client.post(
-            "/api/return", data=json.dumps({}), content_type="application/json"
-        )
+        response = client.post("/api/return", data=json.dumps({}), content_type="application/json")
 
         assert response.status_code == 400
         data = json.loads(response.data)
@@ -144,9 +132,7 @@ class TestGamesAPIReturnGame:
         mock_get_mgr.return_value = mock_mgr
 
         return_data = {"name": "Catan"}
-        response = client.post(
-            "/api/return", data=json.dumps(return_data), content_type="application/json"
-        )
+        response = client.post("/api/return", data=json.dumps(return_data), content_type="application/json")
 
         assert response.status_code == 400
         data = json.loads(response.data)
@@ -204,9 +190,7 @@ class TestGamesAPIExpansions:
 
     @patch("core.expansion_service.ExpansionService")
     @patch("app.blueprints.api.games.get_manager")
-    def test_validate_borrow_success(
-        self, mock_get_mgr, mock_exp_service_class, client
-    ):
+    def test_validate_borrow_success(self, mock_get_mgr, mock_exp_service_class, client):
         """測試驗證借出 - 成功"""
         mock_mgr = MagicMock()
         mock_mgr.load_data.return_value = []

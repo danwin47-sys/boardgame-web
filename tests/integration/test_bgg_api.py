@@ -27,9 +27,7 @@ class TestBGGSearch:
     def test_search_success(self, mock_service_fn, client):
         """測試搜尋成功"""
         mock_service = MagicMock()
-        mock_service.search_games.return_value = [
-            {"id": 13, "name": "Catan", "year": 1995}
-        ]
+        mock_service.search_games.return_value = [{"id": 13, "name": "Catan", "year": 1995}]
         mock_service_fn.return_value = mock_service
 
         response = client.get("/api/bgg/search?q=Catan")
@@ -46,9 +44,7 @@ class TestBGGHotGames:
     def test_get_hot_games(self, mock_service_fn, client):
         """測試取得熱門遊戲"""
         mock_service = MagicMock()
-        mock_service.get_hot_games.return_value = [
-            {"id": 13, "name": "Catan", "rank": 1}
-        ]
+        mock_service.get_hot_games.return_value = [{"id": 13, "name": "Catan", "rank": 1}]
         mock_service_fn.return_value = mock_service
 
         response = client.get("/api/bgg/hot")
@@ -74,9 +70,7 @@ class TestBGGRecommendations:
 
     @patch("app.blueprints.api.bgg.get_bgg_service")
     @patch("app.blueprints.api.bgg.get_manager")
-    def test_get_recommendations_no_category(
-        self, mock_manager, mock_service_fn, client
-    ):
+    def test_get_recommendations_no_category(self, mock_manager, mock_service_fn, client):
         """測試沒有分類參數"""
         response = client.get("/api/bgg/recommendations")
 

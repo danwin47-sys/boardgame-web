@@ -7,12 +7,7 @@ import pytest
 from flask import Flask
 
 from core.decorators import handle_exceptions, validate_fields, validate_json
-from core.exceptions import (
-    BoardGameException,
-    GameAlreadyBorrowedException,
-    GameNotFoundException,
-    MemberNotFoundException,
-)
+from core.exceptions import BoardGameException, GameAlreadyBorrowedException, GameNotFoundException, MemberNotFoundException
 
 
 @pytest.fixture
@@ -76,9 +71,7 @@ class TestValidateFields:
             return {"success": True}
 
         with app.test_client() as client:
-            response = client.post(
-                "/test", json={"name": "test", "email": "test@test.com"}
-            )
+            response = client.post("/test", json={"name": "test", "email": "test@test.com"})
             assert response.status_code == 200
 
     def test_missing_field(self, app):

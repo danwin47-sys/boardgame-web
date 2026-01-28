@@ -43,9 +43,7 @@ class TestSheetsClientInit:
         assert client.gc == mock_gc
         assert client.sh == mock_sh
         mock_gspread.service_account_from_dict.assert_called_once()
-        mock_gc.open_by_url.assert_called_with(
-            "https://docs.google.com/spreadsheets/d/test-sheet-id"
-        )
+        mock_gc.open_by_url.assert_called_with("https://docs.google.com/spreadsheets/d/test-sheet-id")
 
     @patch("core.sheets_client.gspread")
     @patch("core.sheets_client.os.environ.get")
@@ -124,9 +122,7 @@ class TestSheetsClientInit:
     @patch("core.sheets_client.os.environ.get")
     @patch("os.path.exists", return_value=True)
     @patch("dotenv.load_dotenv")
-    def test_connect_local_missing_url(
-        self, mock_load, mock_exists, mock_env, mock_gspread
-    ):
+    def test_connect_local_missing_url(self, mock_load, mock_exists, mock_env, mock_gspread):
         """測試本地檔案模式下 SHEET_URL 缺失"""
         mock_env.return_value = None  # 所有 env 都回傳 None
 
@@ -359,9 +355,7 @@ class TestSheetsClientWriteData:
         result = self.client.add_new_game(game_data)
 
         assert result is True
-        self.client.games_ws.append_row.assert_called_with(
-            ["New Game", GAME_STATUS_AVAILABLE, "2-4"]
-        )
+        self.client.games_ws.append_row.assert_called_with(["New Game", GAME_STATUS_AVAILABLE, "2-4"])
         # 確保快取失效
         assert self.client._games_cache is None
 
@@ -614,9 +608,7 @@ class TestSheetsClientGameUpdates:
             "storage_mode",
         ]
 
-        result = self.client.update_game_expansion_info(
-            "Catan Expansion", True, "Catan", "merged"
-        )
+        result = self.client.update_game_expansion_info("Catan Expansion", True, "Catan", "merged")
 
         assert result is True
         self.mock_games_ws.batch_update.assert_called_once()
@@ -654,9 +646,7 @@ class TestSheetsClientErrorPaths:
         self.mock_ws = MagicMock()
 
         # 阻斷連線邏輯，避免真正去連 Google
-        with patch(
-            "core.sheets_client.gspread.service_account", return_value=self.mock_gc
-        ), patch(
+        with patch("core.sheets_client.gspread.service_account", return_value=self.mock_gc), patch(
             "core.sheets_client.gspread.service_account_from_dict",
             return_value=self.mock_gc,
         ):

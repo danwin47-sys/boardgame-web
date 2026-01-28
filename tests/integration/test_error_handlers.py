@@ -5,12 +5,7 @@ import pytest
 from flask import Flask
 
 from app.middleware.error_handlers import register_error_handlers
-from core.exceptions import (
-    GameAlreadyBorrowedException,
-    GameNotFoundException,
-    MemberNotFoundException,
-    ValidationError,
-)
+from core.exceptions import GameAlreadyBorrowedException, GameNotFoundException, MemberNotFoundException, ValidationError
 
 
 @pytest.fixture

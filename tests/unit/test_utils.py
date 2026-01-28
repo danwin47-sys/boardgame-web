@@ -5,12 +5,7 @@ from datetime import datetime
 
 import pytest
 
-from core.utils import (
-    append_history,
-    create_history_entry,
-    format_datetime,
-    get_current_timestamp,
-)
+from core.utils import append_history, create_history_entry, format_datetime, get_current_timestamp
 
 
 class TestUtils:

@@ -145,9 +145,7 @@ class SearchService:
 
                 # 檢查姓名或 ID
                 if fuzzy:
-                    if self._fuzzy_match(query, member_name) or self._fuzzy_match(
-                        query, member_id
-                    ):
+                    if self._fuzzy_match(query, member_name) or self._fuzzy_match(query, member_id):
                         # 計算相似度（取姓名和 ID 中較高的）
                         name_similarity = self._calculate_similarity(query, member_name)
                         id_similarity = self._calculate_similarity(query, member_id)
@@ -158,10 +156,7 @@ class SearchService:
                         results.append(member_copy)
                 else:
                     query_lower = query.lower()
-                    if (
-                        query_lower in member_name.lower()
-                        or query_lower in member_id.lower()
-                    ):
+                    if query_lower in member_name.lower() or query_lower in member_id.lower():
                         results.append(member)
 
             # 按相似度排序

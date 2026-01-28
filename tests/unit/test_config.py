@@ -5,13 +5,7 @@ import os
 
 import pytest
 
-from app.config import (
-    BaseConfig,
-    DevelopmentConfig,
-    ProductionConfig,
-    TestingConfig,
-    config,
-)
+from app.config import BaseConfig, DevelopmentConfig, ProductionConfig, TestingConfig, config
 
 
 class TestConfig:

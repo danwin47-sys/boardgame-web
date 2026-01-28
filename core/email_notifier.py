@@ -40,9 +40,7 @@ class EmailNotifier:
         if not self.username or not self.password:
             logger.warning("Email credentials not configured")
 
-    def send_notification(
-        self, to_email: str, subject: str, content: str, is_html: bool = False
-    ):
+    def send_notification(self, to_email: str, subject: str, content: str, is_html: bool = False):
         """
         發送郵件通知
 
@@ -191,9 +189,7 @@ def main():
     parser = argparse.ArgumentParser(description="Send test email notification")
     parser.add_argument("to_email", help="Recipient email address")
     parser.add_argument("--subject", default="Test Email", help="Email subject")
-    parser.add_argument(
-        "--message", default="This is a test email", help="Email message"
-    )
+    parser.add_argument("--message", default="This is a test email", help="Email message")
 
     args = parser.parse_args()
 

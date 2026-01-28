@@ -100,9 +100,7 @@ class CodeAnalyzer:
                 "error": str(e),
             }
 
-    def analyze_directory(
-        self, directory: str, exclude_dirs: Set[str] = None
-    ) -> List[Dict[str, Any]]:
+    def analyze_directory(self, directory: str, exclude_dirs: Set[str] = None) -> List[Dict[str, Any]]:
         """
         分析目錄中的所有 Python 檔案
 
@@ -185,9 +183,7 @@ class CodeAnalyzer:
         imports = analysis_result.get("imports", [])
         if imports:
             # 只顯示專案內部的導入
-            internal_imports = [
-                imp for imp in imports if imp.startswith(("core", "app"))
-            ]
+            internal_imports = [imp for imp in imports if imp.startswith(("core", "app"))]
             if internal_imports:
                 md.append("#### 內部依賴\n")
                 for imp in sorted(set(internal_imports))[:10]:

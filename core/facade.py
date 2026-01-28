@@ -63,9 +63,7 @@ class BoardGameManager:
         """借出桌遊"""
         return self.game_service.borrow_game(name, user_name, user_id)
 
-    def batch_borrow_games(
-        self, game_names: List[str], member_id: str
-    ) -> Dict[str, Any]:
+    def batch_borrow_games(self, game_names: List[str], member_id: str) -> Dict[str, Any]:
         """批量借出桌遊"""
         return self.game_service.batch_borrow_games(game_names, member_id)
 
@@ -89,6 +87,4 @@ class BoardGameManager:
         storage_mode: str,
     ) -> Dict[str, Any]:
         """更新桌遊擴充資訊"""
-        return self.game_service.update_game_expansion_info(
-            game_name, is_expansion, parent_game, storage_mode
-        )
+        return self.game_service.update_game_expansion_info(game_name, is_expansion, parent_game, storage_mode)

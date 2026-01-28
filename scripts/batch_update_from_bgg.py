@@ -66,9 +66,7 @@ def main():
 
     # 確認是否繼續
     estimated_time = len(games_with_bgg) * 3 / 60  # 分鐘
-    response = input(
-        f"確定要更新這 {len(games_with_bgg)} 個遊戲嗎？(預計耗時 {estimated_time:.0f} 分鐘) (y/N): "
-    )
+    response = input(f"確定要更新這 {len(games_with_bgg)} 個遊戲嗎？(預計耗時 {estimated_time:.0f} 分鐘) (y/N): ")
     if response.lower() != "y":
         print("已取消。")
         return
@@ -78,9 +76,7 @@ def main():
     print()
 
     # 建立 BGG ID 到遊戲名稱的映射（用於查找主遊戲的中文名稱）
-    bgg_id_to_name = {
-        str(g.get("bgg_id")): g.get("name") for g in all_games if g.get("bgg_id")
-    }
+    bgg_id_to_name = {str(g.get("bgg_id")): g.get("name") for g in all_games if g.get("bgg_id")}
 
     updated_count = 0
     skipped_count = 0
@@ -124,10 +120,7 @@ def main():
 
             if is_expansion:
                 # 如果是擴充
-                if (
-                    current_is_expansion not in ("TRUE", "1")
-                    or current_parent != new_parent
-                ):
+                if current_is_expansion not in ("TRUE", "1") or current_parent != new_parent:
                     needs_update = True
             else:
                 # 如果是主遊戲
@@ -143,9 +136,7 @@ def main():
 
             # 更新到 Google Sheets
             print(f"      → 更新中...")
-            print(
-                f"         is_expansion: {current_is_expansion} → {'TRUE' if new_is_expansion else 'FALSE'}"
-            )
+            print(f"         is_expansion: {current_is_expansion} → {'TRUE' if new_is_expansion else 'FALSE'}")
             if is_expansion:
                 print(f"         parent_game: '{current_parent}' → '{new_parent}'")
 
@@ -153,9 +144,7 @@ def main():
                 game_name=game_name,
                 is_expansion=new_is_expansion,
                 parent_game=new_parent,
-                storage_mode=game.get("storage_mode", "independent")
-                if is_expansion
-                else "",
+                storage_mode=game.get("storage_mode", "independent") if is_expansion else "",
             )
 
             if success:
@@ -197,11 +186,7 @@ def main():
     updated_games = mgr.load_data()
 
     # 統計擴充數量
-    expansion_count = sum(
-        1
-        for g in updated_games
-        if str(g.get("is_expansion", "")).strip().upper() in ("TRUE", "1")
-    )
+    expansion_count = sum(1 for g in updated_games if str(g.get("is_expansion", "")).strip().upper() in ("TRUE", "1"))
     main_game_count = len(updated_games) - expansion_count
 
     print(f"      總遊戲數: {len(updated_games)}")

@@ -83,9 +83,7 @@ def verify_indexes():
         cursor = conn.cursor()
 
         # 列出所有索引
-        cursor.execute(
-            "SELECT name, tbl_name FROM sqlite_master WHERE type='index' AND tbl_name='bgg_ranks'"
-        )
+        cursor.execute("SELECT name, tbl_name FROM sqlite_master WHERE type='index' AND tbl_name='bgg_ranks'")
         indexes = cursor.fetchall()
 
         logger.info("\n📋 當前索引列表:")

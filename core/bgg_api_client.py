@@ -43,17 +43,11 @@ class BGGApiClient:
         else:
             # 即使沒有 token 也設定 User-Agent
             self.session.headers.update(
-                {
-                    "User-Agent": "boardgame-web/1.0 (BGG API integration; https://github.com/danwin47-sys/boardgame-web)"
-                }
+                {"User-Agent": "boardgame-web/1.0 (BGG API integration; https://github.com/danwin47-sys/boardgame-web)"}
             )
-            logger.warning(
-                "BGG API Client initialized WITHOUT Bearer Token - API calls may fail"
-            )
+            logger.warning("BGG API Client initialized WITHOUT Bearer Token - API calls may fail")
 
-    def _make_request(
-        self, endpoint: str, params: Optional[Dict[str, Any]] = None
-    ) -> Optional[ET.Element]:
+    def _make_request(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Optional[ET.Element]:
         """
         發送 API 請求並解析 XML 回應
 
@@ -69,16 +63,12 @@ class BGGApiClient:
 
         for attempt in range(self.retries + 1):
             try:
-                logger.debug(
-                    f"BGG API Request: {url}, params: {params}, attempt: {attempt + 1}"
-                )
+                logger.debug(f"BGG API Request: {url}, params: {params}, attempt: {attempt + 1}")
                 response = self.session.get(url, params=params, timeout=self.timeout)
 
                 # 檢查 HTTP 狀態碼
                 if response.status_code == 401:
-                    logger.error(
-                        "BGG API returned 401 Unauthorized - check your Bearer Token"
-                    )
+                    logger.error("BGG API returned 401 Unauthorized - check your Bearer Token")
                     return None
                 elif response.status_code == 429:
                     logger.warning("BGG API rate limit exceeded - waiting before retry")
@@ -98,9 +88,7 @@ class BGGApiClient:
                     return None
 
             except requests.exceptions.Timeout:
-                logger.warning(
-                    f"BGG API timeout (attempt {attempt + 1}/{self.retries + 1})"
-                )
+                logger.warning(f"BGG API timeout (attempt {attempt + 1}/{self.retries + 1})")
                 if attempt < self.retries:
                     time.sleep(1)
                     continue
@@ -139,9 +127,7 @@ class BGGApiClient:
                 year_elem = item.find("yearpublished")
 
                 if game_id and name_elem is not None:
-                    year_value = (
-                        year_elem.get("value") if year_elem is not None else None
-                    )
+                    year_value = year_elem.get("value") if year_elem is not None else None
                     year = int(year_value) if year_value else None
 
                     games.append(
@@ -192,11 +178,7 @@ class BGGApiClient:
                     break
             if not name:
                 fallback_name_elem = item.find("name")
-                name = (
-                    fallback_name_elem.get("value", "")
-                    if fallback_name_elem is not None
-                    else ""
-                )
+                name = fallback_name_elem.get("value", "") if fallback_name_elem is not None else ""
 
             # 年份
             year_elem = item.find("yearpublished")
@@ -216,34 +198,24 @@ class BGGApiClient:
 
             # 玩家人數
             minplayers_elem = item.find("minplayers")
-            minplayers_value = (
-                minplayers_elem.get("value") if minplayers_elem is not None else None
-            )
+            minplayers_value = minplayers_elem.get("value") if minplayers_elem is not None else None
             min_players = int(minplayers_value) if minplayers_value else None
 
             maxplayers_elem = item.find("maxplayers")
-            maxplayers_value = (
-                maxplayers_elem.get("value") if maxplayers_elem is not None else None
-            )
+            maxplayers_value = maxplayers_elem.get("value") if maxplayers_elem is not None else None
             max_players = int(maxplayers_value) if maxplayers_value else None
 
             # 遊戲時間
             playingtime_elem = item.find("playingtime")
-            playingtime_value = (
-                playingtime_elem.get("value") if playingtime_elem is not None else None
-            )
+            playingtime_value = playingtime_elem.get("value") if playingtime_elem is not None else None
             playing_time = int(playingtime_value) if playingtime_value else None
 
             minplaytime_elem = item.find("minplaytime")
-            minplaytime_value = (
-                minplaytime_elem.get("value") if minplaytime_elem is not None else None
-            )
+            minplaytime_value = minplaytime_elem.get("value") if minplaytime_elem is not None else None
             min_time = int(minplaytime_value) if minplaytime_value else None
 
             maxplaytime_elem = item.find("maxplaytime")
-            maxplaytime_value = (
-                maxplaytime_elem.get("value") if maxplaytime_elem is not None else None
-            )
+            maxplaytime_value = maxplaytime_elem.get("value") if maxplaytime_elem is not None else None
             max_time = int(maxplaytime_value) if maxplaytime_value else None
 
             # 年齡
@@ -260,21 +232,13 @@ class BGGApiClient:
 
             if stats is not None:
                 avg_elem = stats.find("average")
-                rating_average = (
-                    float(avg_elem.get("value", 0)) if avg_elem is not None else 0.0
-                )
+                rating_average = float(avg_elem.get("value", 0)) if avg_elem is not None else 0.0
 
                 bayesavg_elem = stats.find("bayesaverage")
-                rating_bayes_average = (
-                    float(bayesavg_elem.get("value", 0))
-                    if bayesavg_elem is not None
-                    else 0.0
-                )
+                rating_bayes_average = float(bayesavg_elem.get("value", 0)) if bayesavg_elem is not None else 0.0
 
                 users_elem = stats.find("usersrated")
-                rating_users = (
-                    int(users_elem.get("value", 0)) if users_elem is not None else 0
-                )
+                rating_users = int(users_elem.get("value", 0)) if users_elem is not None else 0
 
                 # 排名
                 for rank_elem in stats.findall("ranks/rank"):
@@ -288,26 +252,11 @@ class BGGApiClient:
                         break
 
             # 類別、機制、設計師、美術、出版商
-            categories = [
-                link.get("value", "")
-                for link in item.findall("link[@type='boardgamecategory']")
-            ]
-            mechanics = [
-                link.get("value", "")
-                for link in item.findall("link[@type='boardgamemechanic']")
-            ]
-            designers = [
-                link.get("value", "")
-                for link in item.findall("link[@type='boardgamedesigner']")
-            ]
-            artists = [
-                link.get("value", "")
-                for link in item.findall("link[@type='boardgameartist']")
-            ]
-            publishers = [
-                link.get("value", "")
-                for link in item.findall("link[@type='boardgamepublisher']")
-            ]
+            categories = [link.get("value", "") for link in item.findall("link[@type='boardgamecategory']")]
+            mechanics = [link.get("value", "") for link in item.findall("link[@type='boardgamemechanic']")]
+            designers = [link.get("value", "") for link in item.findall("link[@type='boardgamedesigner']")]
+            artists = [link.get("value", "") for link in item.findall("link[@type='boardgameartist']")]
+            publishers = [link.get("value", "") for link in item.findall("link[@type='boardgamepublisher']")]
 
             # 判斷是否為擴充（更可靠的多重檢查）
             game_type = item.get("type", "boardgame")
@@ -332,9 +281,7 @@ class BGGApiClient:
 
             # 顯示格式
             # 顯示格式
-            players_display = (
-                f"{min_players}-{max_players}" if min_players and max_players else "N/A"
-            )
+            players_display = f"{min_players}-{max_players}" if min_players and max_players else "N/A"
             if min_players == max_players and min_players:
                 players_display = str(min_players)
 
@@ -405,11 +352,7 @@ class BGGApiClient:
                 year = int(year_value) if year_value else None
 
                 thumbnail_elem = item.find("thumbnail")
-                thumbnail = (
-                    thumbnail_elem.get("value", "")
-                    if thumbnail_elem is not None
-                    else ""
-                )
+                thumbnail = thumbnail_elem.get("value", "") if thumbnail_elem is not None else ""
 
                 items.append(
                     {

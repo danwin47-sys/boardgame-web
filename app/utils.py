@@ -104,9 +104,7 @@ def error_response(
     return response, status_code
 
 
-def success_response(
-    data: Any = None, message: Optional[str] = None, status_code: int = 200
-) -> Tuple[Dict[str, Any], int]:
+def success_response(data: Any = None, message: Optional[str] = None, status_code: int = 200) -> Tuple[Dict[str, Any], int]:
     """
     創建標準化的成功回應
 

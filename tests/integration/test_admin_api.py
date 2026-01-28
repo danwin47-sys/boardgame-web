@@ -38,9 +38,7 @@ class TestAdminAPI:
 
     def test_batch_borrow_missing_data(self, client):
         """測試批次借出缺少資料"""
-        response = client.post(
-            "/api/batch-borrow", data=json.dumps({}), content_type="application/json"
-        )
+        response = client.post("/api/batch-borrow", data=json.dumps({}), content_type="application/json")
 
         assert response.status_code == 400
         data = json.loads(response.data)
@@ -48,9 +46,7 @@ class TestAdminAPI:
 
     def test_batch_return_missing_data(self, client):
         """測試批次歸還缺少資料"""
-        response = client.post(
-            "/api/batch-return", data=json.dumps({}), content_type="application/json"
-        )
+        response = client.post("/api/batch-return", data=json.dumps({}), content_type="application/json")
 
         assert response.status_code == 400
         data = json.loads(response.data)

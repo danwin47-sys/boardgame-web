@@ -117,9 +117,7 @@ def admin_verify() -> Tuple[Response, int]:
         # 1. 自動管理員權限檢查 (透過 LINE Login + 職稱)
         if hasattr(current_user, "is_authenticated") and current_user.is_authenticated:
             if getattr(current_user, "is_admin", False):
-                logger.info(
-                    f"管理員自動驗證成功 (User: {current_user.name}, Title: {getattr(current_user, 'title', '')})"
-                )
+                logger.info(f"管理員自動驗證成功 (User: {current_user.name}, Title: {getattr(current_user, 'title', '')})")
                 return jsonify({"success": True, "method": "auto"}), 200
 
         if password == admin_password:
@@ -177,9 +175,7 @@ def batch_borrow() -> Tuple[Response, int]:
             return jsonify({"success": False, "error": "缺少必要欄位"}), 400
 
         mgr = get_manager()
-        success, msg, success_list, fail_list = mgr.batch_borrow_games(
-            game_names, member_id
-        )
+        success, msg, success_list, fail_list = mgr.batch_borrow_games(game_names, member_id)
 
         logger.info(f"批次借出：成功 {len(success_list)} 個，失敗 {len(fail_list)} 個")
 
@@ -289,9 +285,7 @@ def update_game_details() -> Tuple[Response, int]:
         storage_mode = data.get("storage_mode", "")
 
         mgr = get_manager()
-        success = mgr.update_game_expansion_info(
-            name, is_expansion, parent_game, storage_mode
-        )
+        success = mgr.update_game_expansion_info(name, is_expansion, parent_game, storage_mode)
 
         if success:
             logger.info(f"成功更新遊戲 '{name}' 的詳細資料")

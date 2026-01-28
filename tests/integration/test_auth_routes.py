@@ -22,17 +22,13 @@ class TestAuthRoutes:
 
     def test_login_redirect_when_not_authenticated(self, client):
         """測試未登入時訪問 /login 會重定向到 LINE"""
-        with patch(
-            "app.blueprints.auth.routes.auth_service.generate_login_url"
-        ) as mock_gen:
+        with patch("app.blueprints.auth.routes.auth_service.generate_login_url") as mock_gen:
             mock_gen.return_value = "https://access.line.me/oauth2/v2.1/authorize?..."
 
             response = client.get("/auth/login")
 
             assert response.status_code == 302  # Redirect
-            assert "line.me" in response.location or response.location.startswith(
-                "https://access.line.me"
-            )
+            assert "line.me" in response.location or response.location.startswith("https://access.line.me")
 
     def test_login_redirect_when_already_authenticated(self, client):
         """測試已登入時訪問 /login 會重定向到首頁"""
@@ -79,18 +75,14 @@ class TestAuthRoutes:
         # Mock 用戶存在
         mock_check.return_value = {"id": "A001", "name": "測試用戶", "line_user_id": "U123"}
 
-        response = client.get(
-            "/auth/line/callback?code=test&state=test", follow_redirects=False
-        )
+        response = client.get("/auth/line/callback?code=test&state=test", follow_redirects=False)
 
         assert response.status_code == 302
         assert response.location == "/"  # Redirect to home
 
     @patch("app.blueprints.auth.routes.auth_service.check_user_exists")
     @patch("app.blueprints.auth.routes.auth_service.handle_callback")
-    def test_callback_user_not_exists_redirect_bind(
-        self, mock_handle, mock_check, client
-    ):
+    def test_callback_user_not_exists_redirect_bind(self, mock_handle, mock_check, client):
         """測試 callback - 用戶不存在，重定向到綁定頁面"""
         # Mock callback 成功
         mock_handle.return_value = (True, {"line_user_id": "U123", "name": "測試"}, None)
@@ -98,9 +90,7 @@ class TestAuthRoutes:
         # Mock 用戶不存在
         mock_check.return_value = None
 
-        response = client.get(
-            "/auth/line/callback?code=test&state=test", follow_redirects=False
-        )
+        response = client.get("/auth/line/callback?code=test&state=test", follow_redirects=False)
 
         assert response.status_code == 302
         assert "/auth/bind" in response.location
@@ -120,9 +110,7 @@ class TestAuthRoutes:
         response = client.get("/auth/bind")
 
         assert response.status_code == 200
-        assert (
-            b"bind" in response.data.lower() or b"student_id" in response.data.lower()
-        )
+        assert b"bind" in response.data.lower() or b"student_id" in response.data.lower()
 
     @patch("app.blueprints.auth.routes.auth_service.bind_student_id")
     def test_bind_post_failed(self, mock_bind, client):
@@ -147,9 +135,7 @@ class TestAuthRoutes:
         mock_bind.return_value = (True, "綁定成功！")
         mock_check.return_value = {"id": "A001", "name": "測試用戶", "line_user_id": "U123"}
 
-        response = client.post(
-            "/auth/bind", data={"student_id": "A001"}, follow_redirects=False
-        )
+        response = client.post("/auth/bind", data={"student_id": "A001"}, follow_redirects=False)
 
         assert response.status_code == 302
         assert response.location == "/"

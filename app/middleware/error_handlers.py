@@ -25,9 +25,7 @@ def register_error_handlers(app):
 
         自動使用異常的 http_status_code 和 to_dict() 方法回應。
         """
-        logger.warning(
-            f"{error.error_code}: {error} " f"[{request.method} {request.path}]"
-        )
+        logger.warning(f"{error.error_code}: {error} " f"[{request.method} {request.path}]")
         return jsonify(error.to_dict()), error.http_status_code
 
     @app.errorhandler(404)
@@ -38,9 +36,7 @@ def register_error_handlers(app):
         # API 請求返回 JSON
         if request.path.startswith("/api/"):
             return (
-                jsonify(
-                    {"success": False, "error_code": "NOT_FOUND", "message": "找不到請求的資源"}
-                ),
+                jsonify({"success": False, "error_code": "NOT_FOUND", "message": "找不到請求的資源"}),
                 404,
             )
 
@@ -86,9 +82,7 @@ def register_error_handlers(app):
         logger.error(f"500 錯誤: {error}", exc_info=True)
 
         return (
-            jsonify(
-                {"success": False, "error_code": "INTERNAL_ERROR", "message": "伺服器內部錯誤"}
-            ),
+            jsonify({"success": False, "error_code": "INTERNAL_ERROR", "message": "伺服器內部錯誤"}),
             500,
         )
 
@@ -98,9 +92,7 @@ def register_error_handlers(app):
         logger.warning(f"400 錯誤: {error}")
 
         return (
-            jsonify(
-                {"success": False, "error_code": "BAD_REQUEST", "message": "無效的請求"}
-            ),
+            jsonify({"success": False, "error_code": "BAD_REQUEST", "message": "無效的請求"}),
             400,
         )
 

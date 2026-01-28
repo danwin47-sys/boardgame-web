@@ -35,9 +35,7 @@ def get_redis_stats():
 
         if not redis_cache.is_available():
             return (
-                jsonify(
-                    {"success": False, "error": "Redis 未連線", "fallback": "memory_cache"}
-                ),
+                jsonify({"success": False, "error": "Redis 未連線", "fallback": "memory_cache"}),
                 503,
             )
 
@@ -107,9 +105,7 @@ def get_cache_stats():
 
             # 獲取快取鍵列表（限制 100 個）
             keys = redis_cache.client.keys("*")[:100]
-            stats["sample_keys"] = [
-                k.decode("utf-8") if isinstance(k, bytes) else k for k in keys
-            ]
+            stats["sample_keys"] = [k.decode("utf-8") if isinstance(k, bytes) else k for k in keys]
         else:
             stats["message"] = "使用記憶體快取（Redis 未連線）"
 
@@ -194,6 +190,4 @@ def health_check():
 
     except Exception as e:
         logger.error(f"健康檢查失敗: {e}")
-        return error_response(
-            str(e), "HEALTH_CHECK_ERROR", 500, details={"status": "unhealthy"}
-        )
+        return error_response(str(e), "HEALTH_CHECK_ERROR", 500, details={"status": "unhealthy"})

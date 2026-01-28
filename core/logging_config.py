@@ -15,9 +15,7 @@ from typing import Optional
 # 日誌格式常數
 CONSOLE_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 CONSOLE_FORMAT_SIMPLE = "%(levelname)s - %(message)s"
-FILE_FORMAT = (
-    "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
-)
+FILE_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
 
 
 def setup_logging(

@@ -12,9 +12,7 @@ class TestBoardGameManager:
     @patch("core.facade.SheetsClient")
     @patch("core.facade.MemberService")
     @patch("core.facade.GameService")
-    def test_initialization(
-        self, mock_game_service, mock_member_service, mock_sheets_client
-    ):
+    def test_initialization(self, mock_game_service, mock_member_service, mock_sheets_client):
         """測試初始化"""
         from core.facade import BoardGameManager
 
@@ -28,9 +26,7 @@ class TestBoardGameManager:
     @patch("core.facade.SheetsClient")
     @patch("core.facade.MemberService")
     @patch("core.facade.GameService")
-    def test_valid_property(
-        self, mock_game_service, mock_member_service, mock_sheets_client
-    ):
+    def test_valid_property(self, mock_game_service, mock_member_service, mock_sheets_client):
         """測試 valid 屬性"""
         from core.facade import BoardGameManager
 
@@ -45,9 +41,7 @@ class TestBoardGameManager:
     @patch("core.facade.SheetsClient")
     @patch("core.facade.MemberService")
     @patch("core.facade.GameService")
-    def test_get_current_timestamp(
-        self, mock_game_service, mock_member_service, mock_sheets_client
-    ):
+    def test_get_current_timestamp(self, mock_game_service, mock_member_service, mock_sheets_client):
         """測試 get_current_timestamp"""
         from core.facade import BoardGameManager
 
@@ -60,9 +54,7 @@ class TestBoardGameManager:
     @patch("core.facade.SheetsClient")
     @patch("core.facade.MemberService")
     @patch("core.facade.GameService")
-    def test_load_data_delegation(
-        self, mock_game_service, mock_member_service, mock_sheets_client
-    ):
+    def test_load_data_delegation(self, mock_game_service, mock_member_service, mock_sheets_client):
         """測試 load_data 委派到 client (非 DEMO_MODE)"""
         import os
 
@@ -82,9 +74,7 @@ class TestBoardGameManager:
     @patch("core.facade.SheetsClient")
     @patch("core.facade.MemberService")
     @patch("core.facade.GameService")
-    def test_load_data_demo_mode(
-        self, mock_game_service, mock_member_service, mock_sheets_client
-    ):
+    def test_load_data_demo_mode(self, mock_game_service, mock_member_service, mock_sheets_client):
         """測試 DEMO_MODE 下載入預設資料"""
         import os
 
@@ -103,9 +93,7 @@ class TestBoardGameManager:
     @patch("core.facade.SheetsClient")
     @patch("core.facade.MemberService")
     @patch("core.facade.GameService")
-    def test_load_members_delegation(
-        self, mock_game_service, mock_member_service, mock_sheets_client
-    ):
+    def test_load_members_delegation(self, mock_game_service, mock_member_service, mock_sheets_client):
         """測試 load_members 委派到 client"""
         import os
 
@@ -125,9 +113,7 @@ class TestBoardGameManager:
     @patch("core.facade.SheetsClient")
     @patch("core.facade.MemberService")
     @patch("core.facade.GameService")
-    def test_find_member_by_id_delegation(
-        self, mock_game_service, mock_member_service, mock_sheets_client
-    ):
+    def test_find_member_by_id_delegation(self, mock_game_service, mock_member_service, mock_sheets_client):
         """測試 find_member_by_id 委派到 member_service"""
         from core.facade import BoardGameManager
 
@@ -143,9 +129,7 @@ class TestBoardGameManager:
     @patch("core.facade.SheetsClient")
     @patch("core.facade.MemberService")
     @patch("core.facade.GameService")
-    def test_borrow_game_delegation(
-        self, mock_game_service, mock_member_service, mock_sheets_client
-    ):
+    def test_borrow_game_delegation(self, mock_game_service, mock_member_service, mock_sheets_client):
         """測試 borrow_game 委派到 game_service"""
         from core.facade import BoardGameManager
 
@@ -161,9 +145,7 @@ class TestBoardGameManager:
     @patch("core.facade.SheetsClient")
     @patch("core.facade.MemberService")
     @patch("core.facade.GameService")
-    def test_return_game_delegation(
-        self, mock_game_service, mock_member_service, mock_sheets_client
-    ):
+    def test_return_game_delegation(self, mock_game_service, mock_member_service, mock_sheets_client):
         """測試 return_game 委派到 game_service"""
         from core.facade import BoardGameManager
 

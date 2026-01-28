@@ -23,10 +23,7 @@ class TestStaticFilesRoutes:
         """測試成功載入 JavaScript 檔案"""
         response = client.get("/js/script.js")
         assert response.status_code == 200
-        assert (
-            "javascript" in response.content_type
-            or "text/plain" in response.content_type
-        )
+        assert "javascript" in response.content_type or "text/plain" in response.content_type
 
     def test_serve_images_success(self, client):
         """測試成功載入圖片檔案"""

@@ -38,9 +38,7 @@ def register_blueprints(app):
     app.register_blueprint(search_bp)
     app.register_blueprint(monitoring_bp)
     app.register_blueprint(metrics_bp)
-    logger.info(
-        "已註冊 API blueprints (games, bgg, members, gallery, docs, search, monitoring, metrics)"
-    )
+    logger.info("已註冊 API blueprints (games, bgg, members, gallery, docs, search, monitoring, metrics)")
 
     # 啟用指標收集中介軟體
     from .api.metrics import setup_metrics_middleware

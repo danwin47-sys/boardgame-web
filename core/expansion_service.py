@@ -29,9 +29,7 @@ class ExpansionService:
         """
         self.client = sheets_client
 
-    def get_expansions(
-        self, parent_game_name: str, all_games: List[Dict]
-    ) -> List[Dict]:
+    def get_expansions(self, parent_game_name: str, all_games: List[Dict]) -> List[Dict]:
         """
         取得主遊戲的所有擴充
 
@@ -48,17 +46,12 @@ class ExpansionService:
             parent = str(game.get(FIELD_PARENT_GAME, "")).strip()
 
             # 檢查是否為此主遊戲的擴充
-            if (
-                is_expansion in ("1", "TRUE", "True", "true")
-                and parent == parent_game_name
-            ):
+            if is_expansion in ("1", "TRUE", "True", "true") and parent == parent_game_name:
                 expansions.append(game)
 
         return expansions
 
-    def get_parent_game(
-        self, expansion_name: str, all_games: List[Dict]
-    ) -> Optional[Dict]:
+    def get_parent_game(self, expansion_name: str, all_games: List[Dict]) -> Optional[Dict]:
         """
         取得擴充的主遊戲
 
@@ -133,9 +126,7 @@ class ExpansionService:
             expansions = self.get_expansions(game_name, all_games)
             return {"parent": target_game, "expansions": expansions}
 
-    def get_merged_expansions(
-        self, parent_game_name: str, all_games: List[Dict]
-    ) -> List[Dict]:
+    def get_merged_expansions(self, parent_game_name: str, all_games: List[Dict]) -> List[Dict]:
         """
         取得主遊戲的所有「合併收納」擴充
 
@@ -156,9 +147,7 @@ class ExpansionService:
 
         return merged_expansions
 
-    def validate_borrow(
-        self, game_name: str, all_games: List[Dict]
-    ) -> Tuple[bool, str, Optional[Dict]]:
+    def validate_borrow(self, game_name: str, all_games: List[Dict]) -> Tuple[bool, str, Optional[Dict]]:
         """
         驗證借出操作（檢查擴充依賴）
 
@@ -227,9 +216,7 @@ class ExpansionService:
             else:
                 return (True, "", None)
 
-    def auto_link_expansions(
-        self, parent_game_name: str, expansion_names: List[str], all_games: List[Dict]
-    ) -> List[str]:
+    def auto_link_expansions(self, parent_game_name: str, expansion_names: List[str], all_games: List[Dict]) -> List[str]:
         """
         自動連結主遊戲與擴充（根據名稱模糊匹配）
 

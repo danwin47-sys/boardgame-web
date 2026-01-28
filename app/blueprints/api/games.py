@@ -68,9 +68,7 @@ def borrow_game() -> ResponseTuple:
         member_id = data.get("member_id")
 
         if not name or not member_id:
-            return error_response(
-                "缺少必要欄位: name, member_id", "MISSING_REQUIRED_FIELDS", 400
-            )
+            return error_response("缺少必要欄位: name, member_id", "MISSING_REQUIRED_FIELDS", 400)
 
         mgr = get_manager()
         member = mgr.find_member_by_id(member_id)
@@ -232,9 +230,7 @@ def validate_game_borrow(game_name):
         expansion_service = ExpansionService(mgr.client)
         all_games = mgr.load_data()
 
-        can_borrow, message, info = expansion_service.validate_borrow(
-            game_name, all_games
-        )
+        can_borrow, message, info = expansion_service.validate_borrow(game_name, all_games)
 
         return jsonify(
             {

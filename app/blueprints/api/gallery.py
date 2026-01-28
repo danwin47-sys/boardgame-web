@@ -264,12 +264,8 @@ def get_gallery_games() -> Tuple[Response, int]:
                             try:
                                 game_name = game.get("name", "")
                                 if game_name:
-                                    mgr.update_game_playtime(
-                                        game_name, int(bgg_min_time), int(bgg_max_time)
-                                    )
-                                    logger.info(
-                                        f"已將 BGG 遊戲時間寫回 Sheets: {game_name} ({bgg_min_time}-{bgg_max_time}分鐘)"
-                                    )
+                                    mgr.update_game_playtime(game_name, int(bgg_min_time), int(bgg_max_time))
+                                    logger.info(f"已將 BGG 遊戲時間寫回 Sheets: {game_name} ({bgg_min_time}-{bgg_max_time}分鐘)")
                             except Exception as write_error:
                                 logger.warning(f"無法將遊戲時間寫回 Sheets: {write_error}")
                 except Exception as e:

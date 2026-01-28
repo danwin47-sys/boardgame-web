@@ -8,12 +8,7 @@ import gspread
 from flask import g
 from gspread.utils import rowcol_to_a1
 
-from .constants import (
-    GAMES_CACHE_TTL,
-    MEMBERS_CACHE_TTL,
-    WORKSHEET_GAMES,
-    WORKSHEET_MEMBERS,
-)
+from .constants import GAMES_CACHE_TTL, MEMBERS_CACHE_TTL, WORKSHEET_GAMES, WORKSHEET_MEMBERS
 from .exceptions import SheetConnectionError
 
 logger = logging.getLogger(__name__)
@@ -178,9 +173,7 @@ class SheetsClient:
 
         current_time = time.time()
         # 檢查快取是否有效
-        if self._members_cache and (
-            current_time - self._members_cache_time < MEMBERS_CACHE_TTL
-        ):
+        if self._members_cache and (current_time - self._members_cache_time < MEMBERS_CACHE_TTL):
             return self._members_cache
 
         try:
@@ -426,9 +419,7 @@ class SheetsClient:
 
                     # 更新玩家數（如果提供）
                     if players_display is not None:
-                        col_idx_players = (
-                            headers.index("players") if "players" in headers else None
-                        )
+                        col_idx_players = headers.index("players") if "players" in headers else None
                         if col_idx_players is not None:
                             updates.append(
                                 {
@@ -456,9 +447,7 @@ class SheetsClient:
             logger.error(f"更新 BGG 資料失敗: {e}")
             return False
 
-    def update_game_playtime(
-        self, game_name: str, min_playtime: int, max_playtime: int
-    ) -> bool:
+    def update_game_playtime(self, game_name: str, min_playtime: int, max_playtime: int) -> bool:
         """更新遊戲的遊玩時間到 Google Sheets
 
         Args:
@@ -512,9 +501,7 @@ class SheetsClient:
                     # 使快取失效
                     self.invalidate_games_cache()
 
-                    logger.info(
-                        f"已更新 '{game_name}' 的遊玩時間: {min_playtime}-{max_playtime}分鐘"
-                    )
+                    logger.info(f"已更新 '{game_name}' 的遊玩時間: {min_playtime}-{max_playtime}分鐘")
                     return True
 
             logger.warning(f"找不到遊戲: {game_name}")
@@ -565,11 +552,7 @@ class SheetsClient:
                             return col_idx
                         return headers.index(header_name)
 
-                    from .constants import (
-                        FIELD_IS_EXPANSION,
-                        FIELD_PARENT_GAME,
-                        FIELD_STORAGE_MODE,
-                    )
+                    from .constants import FIELD_IS_EXPANSION, FIELD_PARENT_GAME, FIELD_STORAGE_MODE
 
                     is_exp_idx = get_or_create_col(FIELD_IS_EXPANSION)
                     parent_idx = get_or_create_col(FIELD_PARENT_GAME)

@@ -72,9 +72,7 @@ def favicon() -> Response:
     Returns:
         Response: favicon.svg 文件響應
     """
-    return send_from_directory(
-        "../static/images", "favicon.svg", mimetype="image/svg+xml"
-    )
+    return send_from_directory("../static/images", "favicon.svg", mimetype="image/svg+xml")
 
 
 @main_bp.route("/css/<path:filename>")
@@ -183,9 +181,7 @@ def sys_info() -> Response:
             info["load_error"] = str(e)
 
         # Check credentials file
-        base_dir = os.path.dirname(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        )
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         json_path = os.path.join(base_dir, "boardgame-bot-5f6751855184.json")
         info["creds_path"] = json_path
         info["creds_exists"] = os.path.exists(json_path)

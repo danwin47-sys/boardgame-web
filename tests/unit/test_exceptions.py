@@ -97,10 +97,7 @@ class TestExceptionAttributes:
         """測試 error_code 屬性"""
         assert GameNotFoundException("test").error_code == "GAME_NOT_FOUND"
         assert MemberNotFoundException("test").error_code == "MEMBER_NOT_FOUND"
-        assert (
-            GameAlreadyBorrowedException("game", "user").error_code
-            == "GAME_ALREADY_BORROWED"
-        )
+        assert GameAlreadyBorrowedException("game", "user").error_code == "GAME_ALREADY_BORROWED"
         assert GameNotBorrowedException("test").error_code == "GAME_NOT_BORROWED"
         assert SheetConnectionError().error_code == "SHEET_CONNECTION_ERROR"
         assert InvalidDataError("test").error_code == "INVALID_DATA"

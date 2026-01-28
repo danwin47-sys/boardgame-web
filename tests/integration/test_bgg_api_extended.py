@@ -13,9 +13,7 @@ class TestBGGOurHotGames:
 
     @patch("app.blueprints.api.bgg.get_bgg_service")
     @patch("app.blueprints.api.bgg.get_manager")
-    def test_get_our_hot_games_success(
-        self, mock_get_manager, mock_get_bgg_service, client
-    ):
+    def test_get_our_hot_games_success(self, mock_get_manager, mock_get_bgg_service, client):
         """測試成功獲取館藏熱門遊戲"""
         # Mock Manager
         mock_manager = MagicMock()
@@ -39,9 +37,7 @@ class TestBGGOurHotGames:
 
     @patch("app.blueprints.api.bgg.get_bgg_service")
     @patch("app.blueprints.api.bgg.get_manager")
-    def test_get_our_hot_games_error(
-        self, mock_get_manager, mock_get_bgg_service, client
-    ):
+    def test_get_our_hot_games_error(self, mock_get_manager, mock_get_bgg_service, client):
         """測試獲取館藏熱門遊戲失敗"""
         mock_get_manager.side_effect = Exception("Database error")
 
@@ -57,9 +53,7 @@ class TestBGGRecommendationsExtended:
 
     @patch("app.blueprints.api.bgg.get_bgg_service")
     @patch("app.blueprints.api.bgg.get_manager")
-    def test_get_recommendations_success(
-        self, mock_get_manager, mock_get_bgg_service, client
-    ):
+    def test_get_recommendations_success(self, mock_get_manager, mock_get_bgg_service, client):
         """測試成功獲取推薦"""
         # Mock Manager
         mock_manager = MagicMock()
@@ -86,9 +80,7 @@ class TestBGGRecommendationsExtended:
 
     @patch("app.blueprints.api.bgg.get_bgg_service")
     @patch("app.blueprints.api.bgg.get_manager")
-    def test_get_recommendations_empty(
-        self, mock_get_manager, mock_get_bgg_service, client
-    ):
+    def test_get_recommendations_empty(self, mock_get_manager, mock_get_bgg_service, client):
         """測試沒有推薦資料"""
         mock_manager = MagicMock()
         mock_manager.client.load_bgg_recommendations.return_value = []
@@ -107,9 +99,7 @@ class TestBGGCollection:
 
     @patch("app.blueprints.api.bgg.get_bgg_service")
     @patch("app.blueprints.api.bgg.get_manager")
-    def test_add_to_collection_success(
-        self, mock_get_manager, mock_get_bgg_service, client
-    ):
+    def test_add_to_collection_success(self, mock_get_manager, mock_get_bgg_service, client):
         """測試成功加入館藏"""
         # Mock Manager
         mock_manager = MagicMock()
@@ -136,9 +126,7 @@ class TestBGGCollection:
 
     @patch("app.blueprints.api.bgg.get_bgg_service")
     @patch("app.blueprints.api.bgg.get_manager")
-    def test_add_to_collection_duplicate(
-        self, mock_get_manager, mock_get_bgg_service, client
-    ):
+    def test_add_to_collection_duplicate(self, mock_get_manager, mock_get_bgg_service, client):
         """測試重複加入"""
         # Mock Manager
         mock_manager = MagicMock()
@@ -154,9 +142,7 @@ class TestBGGCollection:
 
     @patch("app.blueprints.api.bgg.get_bgg_service")
     @patch("app.blueprints.api.bgg.get_manager")
-    def test_add_to_collection_force(
-        self, mock_get_manager, mock_get_bgg_service, client
-    ):
+    def test_add_to_collection_force(self, mock_get_manager, mock_get_bgg_service, client):
         """測試強制加入重複遊戲"""
         # Mock Manager
         mock_manager = MagicMock()
@@ -169,9 +155,7 @@ class TestBGGCollection:
         mock_bgg_service.get_game_details.return_value = {"name": "Existing Game"}
         mock_get_bgg_service.return_value = mock_bgg_service
 
-        response = client.post(
-            "/api/bgg/collection", json={"game_id": 123, "force": True}
-        )
+        response = client.post("/api/bgg/collection", json={"game_id": 123, "force": True})
 
         assert response.status_code == 200
         data = response.get_json()

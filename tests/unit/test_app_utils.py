@@ -48,9 +48,7 @@ class TestAppUtils:
         with app.test_request_context("/"):
             g.request_id = "debug-id"
 
-            response, status = error_response(
-                message="Bad request", error_code="BAD_REQ", status_code=400
-            )
+            response, status = error_response(message="Bad request", error_code="BAD_REQ", status_code=400)
 
             assert status == 400
             assert response["request_id"] == "debug-id"

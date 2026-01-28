@@ -52,9 +52,7 @@ def get_metrics_summary():
         with _metrics_lock:
             total_requests = sum(_metrics["requests"].values())
             total_errors = sum(_metrics["errors"].values())
-            error_rate = (
-                (total_errors / total_requests * 100) if total_requests > 0 else 0
-            )
+            error_rate = (total_errors / total_requests * 100) if total_requests > 0 else 0
 
             # 計算整體平均回應時間
             all_times = []
@@ -86,11 +84,7 @@ def get_endpoint_metrics():
 
             for endpoint, stats in _metrics["endpoints"].items():
                 if stats["count"] > 0:
-                    error_rate = (
-                        (stats["errors"] / stats["count"] * 100)
-                        if stats["count"] > 0
-                        else 0
-                    )
+                    error_rate = (stats["errors"] / stats["count"] * 100) if stats["count"] > 0 else 0
 
                     endpoints_data.append(
                         {
@@ -142,9 +136,7 @@ def get_response_times():
                 "sample_size": count,
             }
 
-        return jsonify(
-            {"success": True, "stats": stats, "timestamp": datetime.now().isoformat()}
-        )
+        return jsonify({"success": True, "stats": stats, "timestamp": datetime.now().isoformat()})
     except Exception as e:
         logger.error(f"獲取回應時間失敗: {e}")
         return jsonify({"success": False, "error": str(e)}), 500

@@ -19,9 +19,7 @@ def test_server():
     import sys
 
     # 啟動伺服器
-    process = subprocess.Popen(
-        [sys.executable, "serve.py"], env=env, preexec_fn=os.setsid
-    )
+    process = subprocess.Popen([sys.executable, "serve.py"], env=env, preexec_fn=os.setsid)
 
     # 健康檢查：等待伺服器回應 200 OK (CI 環境可能較慢，設定 30 秒超时)
     import requests

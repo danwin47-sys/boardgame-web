@@ -239,9 +239,7 @@ class RedisCache:
             return {"available": False, "error": str(e)}
 
 
-def redis_cache_decorator(
-    key_prefix: str, ttl: int = 300, redis_client: Optional[RedisCache] = None
-):
+def redis_cache_decorator(key_prefix: str, ttl: int = 300, redis_client: Optional[RedisCache] = None):
     """
     Redis 快取裝飾器
 

@@ -1,13 +1,4 @@
-from flask import (
-    Blueprint,
-    current_app,
-    flash,
-    redirect,
-    render_template,
-    request,
-    session,
-    url_for,
-)
+from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
 from core.auth_service import AuthService
@@ -75,9 +66,7 @@ def bind():
     if request.method == "POST":
         student_id = request.form.get("student_id")
 
-        success, message = auth_service.bind_student_id(
-            profile.get("line_user_id"), student_id
-        )
+        success, message = auth_service.bind_student_id(profile.get("line_user_id"), student_id)
 
         if success:
             # 綁定成功，重新獲取使用者資料並登入

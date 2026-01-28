@@ -211,16 +211,12 @@ class TestBGGServiceGetOurHotGames:
     def test_get_our_hot_games_no_matches(self, mock_client):
         """測試館藏熱門遊戲（無匹配）"""
         mock_api = MagicMock()
-        mock_api.hot_items.return_value = [
-            {"id": 999, "name": "Unknown Game", "rank": 1}
-        ]
+        mock_api.hot_items.return_value = [{"id": 999, "name": "Unknown Game", "rank": 1}]
         mock_client.return_value = mock_api
 
         # Mock sheets_client
         mock_sheets = MagicMock()
-        mock_sheets.load_games.return_value = [
-            {"name": "Other Game", "bgg_id": "123", "status": "可用"}
-        ]
+        mock_sheets.load_games.return_value = [{"name": "Other Game", "bgg_id": "123", "status": "可用"}]
 
         app = Flask(__name__)
         app.config["DEMO_MODE"] = False

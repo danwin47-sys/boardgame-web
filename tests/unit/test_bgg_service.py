@@ -389,9 +389,7 @@ class TestBGGServiceOurHotGames:
         """測試 Sheets 無資料時"""
         app = Flask(__name__)
         app.config["DEMO_MODE"] = False
-        mock_client.return_value.hot_items.return_value = [
-            {"id": 1, "name": "G", "rank": 1}
-        ]
+        mock_client.return_value.hot_items.return_value = [{"id": 1, "name": "G", "rank": 1}]
         mock_sheets = MagicMock()
         mock_sheets.load_games.return_value = []
 
@@ -406,9 +404,7 @@ class TestBGGServiceOurHotGames:
         """測試 Sheet 中有非法 ID"""
         app = Flask(__name__)
         app.config["DEMO_MODE"] = False
-        mock_client.return_value.hot_items.return_value = [
-            {"id": 1, "name": "G", "rank": 1}
-        ]
+        mock_client.return_value.hot_items.return_value = [{"id": 1, "name": "G", "rank": 1}]
         mock_sheets = MagicMock()
         mock_sheets.load_games.return_value = [{"name": "G2", "bgg_id": "invalid"}]
 

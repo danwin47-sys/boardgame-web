@@ -230,9 +230,7 @@ class TestGameServiceBatchBorrow:
         }
 
         service = GameService(mock_client, mock_member_service)
-        success, msg, s_list, f_list = service.batch_borrow_games(
-            ["卡坦島", "璀璨寶石"], "A001"
-        )
+        success, msg, s_list, f_list = service.batch_borrow_games(["卡坦島", "璀璨寶石"], "A001")
 
         assert success is True
         assert len(s_list) == 2
@@ -282,9 +280,7 @@ class TestGameServiceBatchBorrow:
         }
 
         service = GameService(mock_client, mock_member_service)
-        success, msg, s_list, f_list = service.batch_borrow_games(
-            ["卡坦島", "璀璨寶石"], "A001"
-        )
+        success, msg, s_list, f_list = service.batch_borrow_games(["卡坦島", "璀璨寶石"], "A001")
 
         assert success is True
         assert len(s_list) == 1
